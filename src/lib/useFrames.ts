@@ -12,15 +12,22 @@ export function useFrames() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [catRes, ownRes] = await Promise.all([
-      supabase.from('avatar_frames').select('*').order('price', { ascending: true }),
-      profile?.id
-        ? supabase.from('user_frames').select('*').eq('user_id', profile.id)
-        : Promise.resolve({ data: null, error: null }),
-    ]);
-    if (!catRes.error && catRes.data) setCatalog(catRes.data as AvatarFrame[]);
-    if (!ownRes.error && ownRes.data) setOwned(ownRes.data as UserFrame[]);
-    setLoading(false);
+    try {
+      const [catRes, ownRes] = await Promise.all([
+        supabase.from('avatar_frames').select('*').order('price', { ascending: true }),
+        profile?.id
+          ? supabase.from('user_frames').select('*').eq('user_id', profile.id)
+          : Promise.resolve({ data: null, error: null }),
+      ]);
+      if (catRes.error) console.error('[frames] catalog:', catRes.error.message);
+      if (ownRes.error) console.error('[frames] owned:', ownRes.error.message);
+      if (!catRes.error && catRes.data) setCatalog(catRes.data as AvatarFrame[]);
+      if (!ownRes.error && ownRes.data) setOwned(ownRes.data as UserFrame[]);
+    } catch (err) {
+      console.error('[frames] fatal:', err);
+    } finally {
+      setLoading(false);
+    }
   }, [profile?.id]);
 
   useEffect(() => {

@@ -15,7 +15,8 @@ export function Layout({ children }: { children: ReactNode }) {
   const [config, setConfig] = useState<AppConfig | null>(null);
 
   useEffect(() => {
-    supabase.from('app_config').select('*').eq('id', 1).maybeSingle().then(({ data }) => {
+    supabase.from('app_config').select('*').eq('id', 1).maybeSingle().then(({ data, error }) => {
+      if (error) console.error('[layout] app_config:', error.message);
       if (data) setConfig(data as AppConfig);
     });
   }, []);

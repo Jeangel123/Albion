@@ -10,16 +10,22 @@ export function useReputation() {
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
-    if (!profile?.id) return;
+    if (!profile?.id) { setLoading(false); return; }
     setLoading(true);
-    const { data, error } = await supabase
-      .from('reputation_log')
-      .select('*')
-      .eq('user_id', profile.id)
-      .order('created_at', { ascending: false })
-      .limit(50);
-    if (!error && data) setLog(data as ReputationLog[]);
-    setLoading(false);
+    try {
+      const { data, error } = await supabase
+        .from('reputation_log')
+        .select('*')
+        .eq('user_id', profile.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) console.error('[reputation] load:', error.message);
+      if (!error && data) setLog(data as ReputationLog[]);
+    } catch (err) {
+      console.error('[reputation] fatal:', err);
+    } finally {
+      setLoading(false);
+    }
   }, [profile?.id]);
 
   useEffect(() => {

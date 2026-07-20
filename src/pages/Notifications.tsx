@@ -22,15 +22,18 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     if (!profile) return;
+    let active = true;
     (async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('notifications')
         .select('*, actor:profiles(id, username, display_name, avatar_url)')
         .eq('user_id', profile.id)
         .order('created_at', { ascending: false })
         .limit(50);
-      setNotifs(data as NotifWithActor[] ?? []);
+      if (error) console.error('[notifications] load:', error.message);
+      if (active) setNotifs(data as NotifWithActor[] ?? []);
     })();
+    return () => { active = false; };
   }, [profile]);
 
   async function markAll() {

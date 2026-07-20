@@ -104,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Live-sync own profile when it changes elsewhere (avatar, banner, bio, etc.)
   useRealtime<Profile>({
     table: 'profiles',
-    filter: `id=eq.${session?.user.id ?? ''}`,
+    filter: session?.user.id ? `id=eq.${session.user.id}` : undefined,
     onEvent: ({ eventType, new: row }) => {
       if (eventType === 'DELETE') setProfile(null);
       else if (row) setProfile((prev) => (prev && prev.id === row.id ? { ...prev, ...row } : prev));

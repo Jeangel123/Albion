@@ -11,20 +11,27 @@ export function useWallet() {
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
-    if (!profile?.id) return;
+    if (!profile?.id) { setLoading(false); return; }
     setLoading(true);
-    const [wRes, tRes] = await Promise.all([
-      supabase.from('wallets').select('*').eq('user_id', profile.id).maybeSingle(),
-      supabase
-        .from('transactions')
-        .select('*')
-        .eq('user_id', profile.id)
-        .order('created_at', { ascending: false })
-        .limit(50),
-    ]);
-    if (!wRes.error && wRes.data) setWallet(wRes.data as Wallet);
-    if (!tRes.error && tRes.data) setTransactions(tRes.data as Transaction[]);
-    setLoading(false);
+    try {
+      const [wRes, tRes] = await Promise.all([
+        supabase.from('wallets').select('*').eq('user_id', profile.id).maybeSingle(),
+        supabase
+          .from('transactions')
+          .select('*')
+          .eq('user_id', profile.id)
+          .order('created_at', { ascending: false })
+          .limit(50),
+      ]);
+      if (wRes.error) console.error('[wallet] load:', wRes.error.message);
+      if (tRes.error) console.error('[wallet] transactions:', tRes.error.message);
+      if (!wRes.error && wRes.data) setWallet(wRes.data as Wallet);
+      if (!tRes.error && tRes.data) setTransactions(tRes.data as Transaction[]);
+    } catch (err) {
+      console.error('[wallet] fatal:', err);
+    } finally {
+      setLoading(false);
+    }
   }, [profile?.id]);
 
   useEffect(() => {

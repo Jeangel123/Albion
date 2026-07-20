@@ -20,7 +20,8 @@ export function AlliancesPage() {
   const [createOpen, setCreateOpen] = useState(false);
 
   async function load() {
-    const { data } = await supabase.from('alliances').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('alliances').select('*').order('created_at', { ascending: false });
+    if (error) console.error('[alliances] load:', error.message);
     setAlliances(data ?? []);
   }
   useEffect(() => { load(); }, []);

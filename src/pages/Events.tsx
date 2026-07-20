@@ -17,12 +17,14 @@ export default function EventsPage() {
   const [attendees, setAttendees] = useState<Record<string, number>>({});
 
   async function load() {
-    const { data } = await supabase.from('events').select('*').gte('start_time', new Date(Date.now() - 86400000).toISOString()).order('start_time', { ascending: true });
+    const { data, error } = await supabase.from('events').select('*').gte('start_time', new Date(Date.now() - 86400000).toISOString()).order('start_time', { ascending: true });
+    if (error) console.error('[events] load:', error.message);
     setEvents(data ?? []);
     if (data) {
       const counts: Record<string, number> = {};
       await Promise.all(data.map(async (ev) => {
-        const { count } = await supabase.from('event_attendees').select('id', { count: 'exact', head: true }).eq('event_id', ev.id);
+        const { count, error: cErr } = await supabase.from('event_attendees').select('id', { count: 'exact', head: true }).eq('event_id', ev.id);
+        if (cErr) console.error('[events] count:', cErr.message);
         counts[ev.id] = count ?? 0;
       }));
       setAttendees(counts);
