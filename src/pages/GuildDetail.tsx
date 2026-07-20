@@ -105,11 +105,11 @@ export default function GuildDetailPage() {
   return (
     <div>
       <Banner src={guild.banner_url} className="h-48 sm:h-64" />
-      <div className="container-app -mt-16">
+      <div className="container-app -mt-16 sm:-mt-20">
         <Link to="/gremios" className="mb-3 inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-gold-600"><ArrowLeft className="h-4 w-4" /> Gremios</Link>
         <div className="card p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-            <div className="h-24 w-24 overflow-hidden rounded-2xl border-4 border-white bg-ink-200 shadow-lg dark:border-ink-900 dark:bg-ink-800">
+            <div className="-mt-20 sm:-mt-24 h-28 w-28 sm:h-32 sm:w-32 shrink-0 overflow-hidden rounded-2xl border-4 border-white bg-ink-200 shadow-xl ring-1 ring-black/5 dark:border-ink-900 dark:bg-ink-800">
               {guild.avatar_url ? <img src={guild.avatar_url} alt={guild.name} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center font-display text-4xl font-bold text-gold-500">{guild.name[0]}</div>}
             </div>
             <div className="flex-1">

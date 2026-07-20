@@ -79,7 +79,12 @@ export default function CommunityChatPage() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     const content = input.trim();
-    if (!content || !profile || !community || sending) return;
+    if (!content || sending) return;
+    if (!profile) {
+      push({ type: 'error', message: 'Debes iniciar sesión para enviar mensajes.' });
+      return;
+    }
+    if (!community) return;
     setSending(true);
     const { error } = await supabase.from('messages').insert({
       room_id: community.id,
