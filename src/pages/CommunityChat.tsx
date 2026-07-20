@@ -8,10 +8,11 @@ import { useRealtime, upsertById, removeById } from '../lib/useRealtime';
 import { useCommunities } from '../lib/useCommunities';
 import { AvatarWithFrame } from '../components/AvatarWithFrame';
 import { RankBadge } from '../components/RankBadge';
+import { FounderName, isFounderRole } from '../components/FounderStyle';
 import { Spinner, EmptyState } from '../components/ui';
 import type { Community, Profile, Message, MedievalRank, FrameRarity } from '../lib/types';
 
-type MessageWithSender = Message & { sender: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> & { frame?: { rarity: FrameRarity; icon: string | null } | null } };
+type MessageWithSender = Message & { sender: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank' | 'role'> & { frame?: { rarity: FrameRarity; icon: string | null } | null } };
 
 export default function CommunityChatPage() {
   const { slug } = useParams();
@@ -34,7 +35,7 @@ export default function CommunityChatPage() {
       setCommunity(c as Community);
       const { data: msg } = await supabase
         .from('messages')
-        .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
+        .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank, role, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
         .eq('room_id', c.id)
         .eq('topic', 'community_chat')
         .order('created_at', { ascending: true })
@@ -50,7 +51,7 @@ export default function CommunityChatPage() {
     } else if (row?.id) {
       supabase
         .from('messages')
-        .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
+        .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank, role, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
         .eq('id', row.id)
         .maybeSingle()
         .then(({ data }) => { if (data) setMessages((list) => upsertById(list, data as MessageWithSender)); });
@@ -115,17 +116,22 @@ export default function CommunityChatPage() {
           ) : (
             messages.map((m) => {
               const own = m.sender_id === profile?.id;
+              const founder = isFounderRole(m.sender?.role);
               return (
                 <div key={m.id} className={`flex gap-2 ${own ? 'flex-row-reverse' : ''}`}>
                   <AvatarWithFrame src={m.sender?.avatar_url} alt={m.sender?.username ?? ''} size="sm" to={`/perfil/${m.sender?.username}`} frameRarity={(m.sender as any)?.frame?.rarity ?? null} frameIcon={(m.sender as any)?.frame?.icon ?? null} />
                   <div className={`max-w-[75%] ${own ? 'text-right' : ''}`}>
                     <div className={`mb-0.5 flex items-center gap-1.5 ${own ? 'justify-end' : ''}`}>
-                      <p className="text-xs text-ink-500">
-                        {own ? 'Tú' : m.sender?.display_name || m.sender?.username}
-                      </p>
+                      {founder ? (
+                        <FounderName name={own ? 'Tú' : m.sender?.display_name || m.sender?.username || 'Savier'} />
+                      ) : (
+                        <p className="text-xs text-ink-500">
+                          {own ? 'Tú' : m.sender?.display_name || m.sender?.username}
+                        </p>
+                      )}
                       {m.sender?.medieval_rank && <RankBadge rank={m.sender.medieval_rank as MedievalRank} size="xs" showEmoji={false} />}
                     </div>
-                    <div className={`inline-block rounded-2xl px-3 py-2 text-sm ${own ? 'bg-gold-500 text-ink-950' : 'bg-ink-100 text-ink-800 dark:bg-ink-800 dark:text-ink-100'}`}>
+                    <div className={`inline-block rounded-2xl px-3 py-2 text-sm ${founder ? 'founder-bubble text-sky-100' : own ? 'bg-gold-500 text-ink-950' : 'bg-ink-100 text-ink-800 dark:bg-ink-800 dark:text-ink-100'}`}>
                       {m.content}
                     </div>
                     <p className="mt-0.5 text-xs text-ink-400">
