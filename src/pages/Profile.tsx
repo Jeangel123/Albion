@@ -71,72 +71,56 @@ export default function ProfilePage() {
   }, []);
   useRealtime<Post>({ table: 'posts', filter: profile?.id ? `author_id=eq.${profile.id}` : undefined, onEvent: handlePostEvent });
 
-  // Load profile data only when the username changes (NOT on every auth change).
-  // The follow-status check is split into its own effect so that auth loading
-  // doesn't reset `loading` and re-run the whole fetch.
   useEffect(() => {
     if (!username) return;
     let active = true;
     setLoading(true);
     (async () => {
-      try {
-        const { data: p, error } = await supabase.from('profiles').select('*').eq('username', username).maybeSingle();
+      const { data: p } = await supabase.from('profiles').select('*').eq('username', username).maybeSingle();
+      if (!active) return;
+      if (!p) { setLoading(false); return; }
+      setProfile(p as Profile);
+      const [postData, guildData, fol, folg] = await Promise.all([
+        supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank)').eq('author_id', p.id).order('created_at', { ascending: false }),
+        p.guild_id ? supabase.from('guilds').select('*').eq('id', p.guild_id).maybeSingle() : Promise.resolve({ data: null }),
+        supabase.from('follows').select('id', { count: 'exact', head: true }).eq('following_id', p.id),
+        supabase.from('follows').select('id', { count: 'exact', head: true }).eq('follower_id', p.id),
+      ]);
+      if (!active) return;
+      setPosts((postData.data ?? []) as PostWithAuthor[]);
+      setGuild((guildData.data ?? null) as Guild | null);
+      setFollowers(fol.count ?? 0);
+      setFollowing(folg.count ?? 0);
+      if (me && me.id !== p.id) {
+        const { data: f } = await supabase.from('follows').select('id').eq('follower_id', me.id).eq('following_id', p.id).maybeSingle();
         if (!active) return;
-        if (error) { console.error('[profile] load error:', error.message); setLoading(false); return; }
-        if (!p) { setLoading(false); return; }
-        setProfile(p as Profile);
-        const [postData, guildData, fol, folg] = await Promise.all([
-          supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank)').eq('author_id', p.id).order('created_at', { ascending: false }),
-          p.guild_id ? supabase.from('guilds').select('*').eq('id', p.guild_id).maybeSingle() : Promise.resolve({ data: null }),
-          supabase.from('follows').select('id', { count: 'exact', head: true }).eq('following_id', p.id),
-          supabase.from('follows').select('id', { count: 'exact', head: true }).eq('follower_id', p.id),
-        ]);
-        if (!active) return;
-        setPosts((postData.data ?? []) as PostWithAuthor[]);
-        setGuild((guildData.data ?? null) as Guild | null);
-        setFollowers(fol.count ?? 0);
-        setFollowing(folg.count ?? 0);
-        const { data: uf } = await supabase
-          .from('user_frames')
-          .select('frame:avatar_frames(rarity, icon)')
-          .eq('user_id', p.id)
-          .eq('is_equipped', true)
-          .maybeSingle();
-        if (!active) return;
-        if (uf?.frame) setFrame(uf.frame as any);
-        const [achData, commCount] = await Promise.all([
-          getUserAchievements(p.id),
-          supabase.from('community_members').select('id', { count: 'exact', head: true }).eq('user_id', p.id),
-        ]);
-        if (!active) return;
-        setAchievements(achData);
-        const ageMs = Date.now() - new Date(p.created_at).getTime();
-        setStats({
-          posts: postData.data?.length ?? 0,
-          communities: commCount.count ?? 0,
-          reputation: p.reputation_points ?? 0,
-          ageDays: Math.floor(ageMs / 86400000),
-        });
-      } catch (err) {
-        console.error('[profile] unexpected error:', err);
-      } finally {
-        if (active) setLoading(false);
+        setIsFollowing(!!f);
       }
+      const { data: uf } = await supabase
+        .from('user_frames')
+        .select('frame:avatar_frames(rarity, icon)')
+        .eq('user_id', p.id)
+        .eq('is_equipped', true)
+        .maybeSingle();
+      if (!active) return;
+      if (uf?.frame) setFrame(uf.frame as any);
+      const [achData, commCount] = await Promise.all([
+        getUserAchievements(p.id),
+        supabase.from('community_members').select('id', { count: 'exact', head: true }).eq('user_id', p.id),
+      ]);
+      if (!active) return;
+      setAchievements(achData);
+      const ageMs = Date.now() - new Date(p.created_at).getTime();
+      setStats({
+        posts: postData.data?.length ?? 0,
+        communities: commCount.count ?? 0,
+        reputation: p.reputation_points ?? 0,
+        ageDays: Math.floor(ageMs / 86400000),
+      });
+      setLoading(false);
     })();
     return () => { active = false; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [username]);
-
-  // Separately check follow status when both the current user and viewed profile are known.
-  useEffect(() => {
-    if (!me || !profile || me.id === profile.id) { setIsFollowing(false); return; }
-    let active = true;
-    (async () => {
-      const { data: f } = await supabase.from('follows').select('id').eq('follower_id', me.id).eq('following_id', profile.id).maybeSingle();
-      if (active) setIsFollowing(!!f);
-    })();
-    return () => { active = false; };
-  }, [me?.id, profile?.id]);
+  }, [username, me?.id]);
 
   async function toggleFollow() {
     if (!me) return navigate('/login');
