@@ -114,6 +114,7 @@ export default function CommunityDetailPage() {
     if (error) {
       console.error('[messages insert]', { roomId: community.id, senderId: profile.id, error });
       push({ type: 'error', message: `No se pudo enviar: ${error.message}` });
+      return;
     }
   }
 
@@ -222,18 +223,21 @@ export default function CommunityDetailPage() {
   );
 }
 
-function ChatPanel({ messages, onSend, currentUserId }: { messages: MessageWithSender[]; onSend: (content: string) => void; currentUserId: string }) {
+function ChatPanel({ messages, onSend, currentUserId }: { messages: MessageWithSender[]; onSend: (content: string) => Promise<void>; currentUserId: string }) {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     const content = input.trim();
     if (!content || sending) return;
     setSending(true);
-    onSend(content);
-    setInput('');
-    setSending(false);
+    try {
+      await onSend(content);
+      setInput('');
+    } finally {
+      setSending(false);
+    }
   }
 
   return (
