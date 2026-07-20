@@ -108,6 +108,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
         return;
       }
+      if (event === 'SIGNED_IN') {
+        // signIn/signUp already set the session + profile + loading directly
+        // from the API response. Don't toggle loading here — that would unmount
+        // the Navbar via AppGate and cause a flash back to logged-out UI.
+        if (sess && !profile) {
+          (async () => {
+            await loadProfile(sess.user.id);
+          })();
+        }
+        return;
+      }
       if (sess) {
         setLoading(true);
         (async () => {
