@@ -13,6 +13,7 @@ export type Profile = {
   youtube: string | null;
   twitch: string | null;
   is_verified: boolean;
+  is_featured: boolean;
   is_suspended: boolean;
   role: 'user' | 'admin' | 'supreme_admin' | 'moderator' | 'founder';
   reputation_points: number;

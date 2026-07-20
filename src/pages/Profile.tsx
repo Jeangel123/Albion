@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MessageSquare, UserPlus, UserCheck, Share2, BadgeCheck, Twitch, Youtube, Facebook, Instagram, Link as LinkIcon, Shield, Trophy, Users as UsersIcon, Star, Clock } from 'lucide-react';
+import { Calendar, MessageSquare, UserPlus, UserCheck, Share2, Twitch, Youtube, Facebook, Instagram, Link as LinkIcon, Shield, Trophy, Users as UsersIcon, Star, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { useToast } from '../components/Toast';
@@ -8,6 +8,7 @@ import { useRealtime, upsertById, removeById } from '../lib/useRealtime';
 import { Banner } from '../components/Banner';
 import { PostCard } from '../components/PostCard';
 import { RankBadge, RankProgress, RoleBadge } from '../components/RankBadge';
+import { UserBadges } from '../components/Badges';
 import { AvatarWithFrame } from '../components/AvatarWithFrame';
 import { Spinner, EmptyState } from '../components/ui';
 import { formatDate } from '../lib/format';
@@ -210,10 +211,10 @@ export default function ProfilePage() {
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-white">{profile.display_name || profile.username}</h1>
-              {profile.is_verified && <BadgeCheck className="h-5 w-5 text-gold-500" />}
               <RankBadge rank={profile.medieval_rank} />
               <RoleBadge role={profile.role} />
             </div>
+            <UserBadges profile={profile} className="mt-2" />
             <p className="text-sm font-medium text-gold-600 dark:text-gold-400">{getRankTitle(profile.medieval_rank)}</p>
             <p className="text-sm text-ink-500">@{profile.username}</p>
             <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-500">

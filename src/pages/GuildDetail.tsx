@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
-  Users, MapPin, Globe, Clock, ListChecks, MessageCircle, BadgeCheck, Images, Video as VideoIcon, ArrowLeft, Settings, ExternalLink,
+  Users, MapPin, Globe, Clock, ListChecks, MessageCircle, Images, Video as VideoIcon, ArrowLeft, Settings, ExternalLink,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
@@ -16,6 +16,7 @@ import { Modal } from '../components/Modal';
 import { slugify } from '../lib/format';
 import { ImageUpload } from '../components/ImageUpload';
 import { ChatPanel } from '../components/ChatPanel';
+import { GuildBadges } from '../components/Badges';
 import { ACTIVITIES, type Guild, type Post, type Profile, type GuildMember } from '../lib/types';
 
 type PostWithAuthor = Post & { author: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> };
@@ -116,8 +117,8 @@ export default function GuildDetailPage() {
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-white">{guild.name}</h1>
-                {guild.is_verified && <BadgeCheck className="h-5 w-5 text-gold-500" />}
               </div>
+              <GuildBadges guild={guild} className="mt-1.5" />
               <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-500 dark:text-ink-400">
                 <span className="inline-flex items-center gap-1"><Users className="h-4 w-4" /> {guild.member_count} miembros</span>
                 {guild.home_city && <span className="inline-flex items-center gap-1"><MapPin className="h-4 w-4" /> {guild.home_city}</span>}
