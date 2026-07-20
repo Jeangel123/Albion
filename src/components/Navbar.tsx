@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  Search, Bell, Home, Users, Shield, Calendar, Trophy, MessageSquare, Menu, X, Sun, Moon, Plus, Settings, LogOut, User as UserIcon,
+  Search, Bell, Home, Users, Shield, Calendar, Trophy, MessageSquare, Menu, X, Sun, Moon, Plus, Settings, LogOut, User as UserIcon, Castle,
 } from 'lucide-react';
 import { useTheme } from '../lib/theme';
 import { useAuth } from '../lib/auth';
@@ -11,6 +11,7 @@ import { Avatar } from './Avatar';
 const NAV = [
   { to: '/', label: 'Inicio', icon: Home },
   { to: '/gremios', label: 'Gremios', icon: Users },
+  { to: '/comunidades', label: 'Comunidades', icon: Castle },
   { to: '/alianzas', label: 'Alianzas', icon: Shield },
   { to: '/eventos', label: 'Eventos', icon: Calendar },
   { to: '/ranking', label: 'Ranking', icon: Trophy },

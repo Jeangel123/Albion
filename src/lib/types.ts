@@ -96,6 +96,22 @@ export type Comment = {
   created_at: string;
 };
 
+export type Message = {
+  id: string;
+  room_id: string;
+  topic: string;
+  sender_id: string;
+  extension: string;
+  content: string | null;
+  media_url: string | null;
+  payload: Record<string, unknown> | null;
+  created_at: string;
+  event: string | null;
+  private: boolean | null;
+  updated_at: string;
+  inserted_at: string;
+};
+
 export type ReactionType = 'like' | 'love' | 'haha' | 'wow' | 'sad' | 'angry';
 
 export type AlbionEvent = {

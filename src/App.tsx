@@ -17,6 +17,10 @@ import PostDetailPage from './pages/PostDetail';
 import SettingsPage from './pages/Settings';
 import AdminPage from './pages/Admin';
 import RulesPage from './pages/Rules';
+import CommunitiesPage from './pages/Communities';
+import CommunityDetailPage from './pages/CommunityDetail';
+import CommunityChatPage from './pages/CommunityChat';
+import CreateCommunityPage from './pages/CreateCommunity';
 import type { ReactNode } from 'react';
 
 function Protected({ children }: { children: ReactNode }) {
@@ -56,6 +60,10 @@ export default function App() {
                       <Route path="/ajustes" element={<Protected><SettingsPage /></Protected>} />
                       <Route path="/admin" element={<Protected><AdminPage /></Protected>} />
                       <Route path="/reglas" element={<RulesPage />} />
+                      <Route path="/comunidades" element={<CommunitiesPage />} />
+                      <Route path="/comunidad/crear" element={<Protected><CreateCommunityPage /></Protected>} />
+                      <Route path="/comunidad/:slug" element={<CommunityDetailPage />} />
+                      <Route path="/comunidad/:slug/chat" element={<Protected><CommunityChatPage /></Protected>} />
                       <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                   </Layout>
