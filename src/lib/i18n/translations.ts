@@ -48,6 +48,7 @@ export type TranslationKey =
   | 'toast.profileUpdated' | 'toast.suggestionCreated' | 'toast.voteAdded' | 'toast.voteRemoved'
   | 'toast.frameBought' | 'toast.frameClaimed' | 'toast.frameEquipped' | 'toast.frameUnequipped'
   | 'toast.insufficientBalance' | 'toast.alreadyOwned' | 'toast.error' | 'toast.success'
+  | 'nav.help' | 'nav.privacy' | 'nav.terms' | 'nav.contact'
   | 'footer.tagline' | 'footer.rights';
 
 type Translations = Record<TranslationKey, string>;
@@ -220,6 +221,10 @@ export const es: Translations = {
   'toast.alreadyOwned': 'Ya posees este marco',
   'toast.error': 'Error',
   'toast.success': 'Éxito',
+  'nav.help': 'Ayuda',
+  'nav.privacy': 'Privacidad',
+  'nav.terms': 'Términos',
+  'nav.contact': 'Contacto',
   'footer.tagline': 'La red social de Albion Online',
   'footer.rights': 'Todos los derechos reservados',
 };
@@ -392,6 +397,10 @@ export const en: Translations = {
   'toast.alreadyOwned': 'You already own this frame',
   'toast.error': 'Error',
   'toast.success': 'Success',
+  'nav.help': 'Help',
+  'nav.privacy': 'Privacy',
+  'nav.terms': 'Terms',
+  'nav.contact': 'Contact',
   'footer.tagline': 'The Albion Online social network',
   'footer.rights': 'All rights reserved',
 };
@@ -564,6 +573,10 @@ export const pt: Translations = {
   'toast.alreadyOwned': 'Você já possui esta moldura',
   'toast.error': 'Erro',
   'toast.success': 'Sucesso',
+  'nav.help': 'Ajuda',
+  'nav.privacy': 'Privacidade',
+  'nav.terms': 'Termos',
+  'nav.contact': 'Contato',
   'footer.tagline': 'A rede social de Albion Online',
   'footer.rights': 'Todos os direitos reservados',
 };

@@ -20,6 +20,10 @@ export function Footer() {
             <Link to="/ranking" className="hover:text-gold-600 dark:hover:text-gold-400">{t('nav.rankings')}</Link>
             <Link to="/buscar" className="hover:text-gold-600 dark:hover:text-gold-400">{t('nav.search')}</Link>
             <Link to="/reglas" className="hover:text-gold-600 dark:hover:text-gold-400">{t('nav.rules')}</Link>
+            <Link to="/ayuda" className="hover:text-gold-600 dark:hover:text-gold-400">{t('nav.help')}</Link>
+            <Link to="/privacidad" className="hover:text-gold-600 dark:hover:text-gold-400">{t('nav.privacy')}</Link>
+            <Link to="/terminos" className="hover:text-gold-600 dark:hover:text-gold-400">{t('nav.terms')}</Link>
+            <Link to="/contacto" className="hover:text-gold-600 dark:hover:text-gold-400">{t('nav.contact')}</Link>
           </nav>
           <div className="flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400">
             <Heart className="h-4 w-4 fill-gold-500 text-gold-500" />

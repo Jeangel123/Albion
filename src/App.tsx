@@ -1,37 +1,55 @@
+import { lazy, Suspense, type ReactNode } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './lib/auth';
 import { ThemeProvider } from './lib/theme';
 import { I18nProvider } from './lib/i18n';
 import { ToastProvider } from './components/Toast';
 import { Layout } from './components/Layout';
-import LoginPage, { SignupPage, RecoverPage } from './pages/Auth';
-import HomePage from './pages/Home';
-import GuildsPage from './pages/Guilds';
-import GuildDetailPage, { CreateGuildPage } from './pages/GuildDetail';
-import ProfilePage from './pages/Profile';
-import { AlliancesPage, AllianceDetailPage } from './pages/Alliances';
-import EventsPage from './pages/Events';
-import SearchPage from './pages/Search';
-import RankingsPage from './pages/Rankings';
-import NotificationsPage from './pages/Notifications';
-import PostDetailPage from './pages/PostDetail';
-import SettingsPage from './pages/Settings';
-import AdminPage from './pages/Admin';
-import ModerationQueuePage from './pages/ModerationQueue';
-import RulesPage from './pages/Rules';
-import CommunitiesPage from './pages/Communities';
-import CommunityDetailPage from './pages/CommunityDetail';
-import CommunityChatPage from './pages/CommunityChat';
-import CreateCommunityPage from './pages/CreateCommunity';
-import FrameShopPage from './pages/FrameShop';
-import WalletPage from './pages/Wallet';
-import CouncilPage from './pages/Council';
-import type { ReactNode } from 'react';
+import { PageLoader } from './components/PageLoader';
+import { isStaff } from './lib/permissions';
+
+const LoginPage = lazy(() => import('./pages/Auth'));
+const SignupPage = lazy(() => import('./pages/Auth').then((m) => ({ default: m.SignupPage })));
+const RecoverPage = lazy(() => import('./pages/Auth').then((m) => ({ default: m.RecoverPage })));
+const HomePage = lazy(() => import('./pages/Home'));
+const GuildsPage = lazy(() => import('./pages/Guilds'));
+const GuildDetailPage = lazy(() => import('./pages/GuildDetail'));
+const ProfilePage = lazy(() => import('./pages/Profile'));
+const AlliancesPage = lazy(() => import('./pages/Alliances').then((m) => ({ default: m.AlliancesPage })));
+const AllianceDetailPage = lazy(() => import('./pages/Alliances').then((m) => ({ default: m.AllianceDetailPage })));
+const EventsPage = lazy(() => import('./pages/Events'));
+const SearchPage = lazy(() => import('./pages/Search'));
+const RankingsPage = lazy(() => import('./pages/Rankings'));
+const NotificationsPage = lazy(() => import('./pages/Notifications'));
+const PostDetailPage = lazy(() => import('./pages/PostDetail'));
+const SettingsPage = lazy(() => import('./pages/Settings'));
+const AdminPage = lazy(() => import('./pages/Admin'));
+const ModerationQueuePage = lazy(() => import('./pages/ModerationQueue'));
+const RulesPage = lazy(() => import('./pages/Rules'));
+const CommunitiesPage = lazy(() => import('./pages/Communities'));
+const CommunityDetailPage = lazy(() => import('./pages/CommunityDetail'));
+const CommunityChatPage = lazy(() => import('./pages/CommunityChat'));
+const CreateCommunityPage = lazy(() => import('./pages/CreateCommunity'));
+const FrameShopPage = lazy(() => import('./pages/FrameShop'));
+const WalletPage = lazy(() => import('./pages/Wallet'));
+const CouncilPage = lazy(() => import('./pages/Council'));
+const HelpPage = lazy(() => import('./pages/Help'));
+const PrivacyPage = lazy(() => import('./pages/Privacy'));
+const TermsPage = lazy(() => import('./pages/Terms'));
+const ContactPage = lazy(() => import('./pages/Contact'));
 
 function Protected({ children }: { children: ReactNode }) {
   const { session, loading } = useAuth();
-  if (loading) return null;
+  if (loading) return <PageLoader />;
   if (!session) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
+
+function StaffRoute({ children }: { children: ReactNode }) {
+  const { session, profile, loading } = useAuth();
+  if (loading) return <PageLoader />;
+  if (!session) return <Navigate to="/login" replace />;
+  if (!isStaff(profile?.role)) return <Navigate to="/" replace />;
   return <>{children}</>;
 }
 
@@ -41,46 +59,54 @@ export default function App() {
       <AuthProvider>
         <I18nProvider>
           <ToastProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/registro" element={<SignupPage />} />
-              <Route path="/recuperar" element={<RecoverPage />} />
-              <Route
-                path="/*"
-                element={
-                  <Layout>
-                    <Routes>
-                      <Route path="/" element={<HomePage />} />
-                      <Route path="/gremios" element={<GuildsPage />} />
-                      <Route path="/gremio/crear" element={<Protected><CreateGuildPage /></Protected>} />
-                      <Route path="/gremio/:slug" element={<GuildDetailPage />} />
-                      <Route path="/alianzas" element={<AlliancesPage />} />
-                      <Route path="/alianza/:slug" element={<AllianceDetailPage />} />
-                      <Route path="/eventos" element={<EventsPage />} />
-                      <Route path="/buscar" element={<SearchPage />} />
-                      <Route path="/ranking" element={<RankingsPage />} />
-                      <Route path="/perfil/:username" element={<ProfilePage />} />
-                      <Route path="/publicacion/:id" element={<PostDetailPage />} />
-                      <Route path="/notificaciones" element={<Protected><NotificationsPage /></Protected>} />
-                      <Route path="/ajustes" element={<Protected><SettingsPage /></Protected>} />
-                      <Route path="/admin" element={<Protected><AdminPage /></Protected>} />
-                      <Route path="/moderacion" element={<Protected><ModerationQueuePage /></Protected>} />
-                      <Route path="/reglas" element={<RulesPage />} />
-                      <Route path="/comunidades" element={<CommunitiesPage />} />
-                      <Route path="/comunidad/crear" element={<Protected><CreateCommunityPage /></Protected>} />
-                      <Route path="/comunidad/:slug" element={<CommunityDetailPage />} />
-                      <Route path="/comunidad/:slug/chat" element={<Protected><CommunityChatPage /></Protected>} />
-                      <Route path="/tienda" element={<FrameShopPage />} />
-                      <Route path="/monedero" element={<Protected><WalletPage /></Protected>} />
-                      <Route path="/consejo" element={<CouncilPage />} />
-                      <Route path="*" element={<Navigate to="/" replace />} />
-                    </Routes>
-                  </Layout>
-                }
-              />
-            </Routes>
-          </BrowserRouter>
+            <BrowserRouter>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/registro" element={<SignupPage />} />
+                  <Route path="/recuperar" element={<RecoverPage />} />
+                  <Route
+                    path="/*"
+                    element={
+                      <Layout>
+                        <Suspense fallback={<PageLoader />}>
+                          <Routes>
+                            <Route path="/" element={<HomePage />} />
+                            <Route path="/gremios" element={<GuildsPage />} />
+                            <Route path="/gremio/crear" element={<Protected><GuildDetailPage /></Protected>} />
+                            <Route path="/gremio/:slug" element={<GuildDetailPage />} />
+                            <Route path="/alianzas" element={<AlliancesPage />} />
+                            <Route path="/alianza/:slug" element={<AllianceDetailPage />} />
+                            <Route path="/eventos" element={<EventsPage />} />
+                            <Route path="/buscar" element={<SearchPage />} />
+                            <Route path="/ranking" element={<RankingsPage />} />
+                            <Route path="/perfil/:username" element={<ProfilePage />} />
+                            <Route path="/publicacion/:id" element={<PostDetailPage />} />
+                            <Route path="/notificaciones" element={<Protected><NotificationsPage /></Protected>} />
+                            <Route path="/ajustes" element={<Protected><SettingsPage /></Protected>} />
+                            <Route path="/admin" element={<StaffRoute><AdminPage /></StaffRoute>} />
+                            <Route path="/moderacion" element={<StaffRoute><ModerationQueuePage /></StaffRoute>} />
+                            <Route path="/reglas" element={<RulesPage />} />
+                            <Route path="/comunidades" element={<CommunitiesPage />} />
+                            <Route path="/comunidad/crear" element={<Protected><CreateCommunityPage /></Protected>} />
+                            <Route path="/comunidad/:slug" element={<CommunityDetailPage />} />
+                            <Route path="/comunidad/:slug/chat" element={<Protected><CommunityChatPage /></Protected>} />
+                            <Route path="/tienda" element={<FrameShopPage />} />
+                            <Route path="/monedero" element={<Protected><WalletPage /></Protected>} />
+                            <Route path="/consejo" element={<CouncilPage />} />
+                            <Route path="/ayuda" element={<HelpPage />} />
+                            <Route path="/privacidad" element={<PrivacyPage />} />
+                            <Route path="/terminos" element={<TermsPage />} />
+                            <Route path="/contacto" element={<ContactPage />} />
+                            <Route path="*" element={<Navigate to="/" replace />} />
+                          </Routes>
+                        </Suspense>
+                      </Layout>
+                    }
+                  />
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
           </ToastProvider>
         </I18nProvider>
       </AuthProvider>
