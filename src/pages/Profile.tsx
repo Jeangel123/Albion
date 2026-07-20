@@ -5,7 +5,6 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { useToast } from '../components/Toast';
 import { Banner } from '../components/Banner';
-import { Avatar } from '../components/Avatar';
 import { PostCard } from '../components/PostCard';
 import { Spinner, EmptyState } from '../components/ui';
 import { formatDate } from '../lib/format';
@@ -88,24 +87,22 @@ export default function ProfilePage() {
 
   return (
     <div>
-      <Banner src={profile.banner_url} className="h-48 sm:h-64" />
-      <div className="container-app -mt-16">
-        <div className="card p-5">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-            <Avatar src={profile.avatar_url} alt={profile.username} size="xl" ring />
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-white">{profile.display_name || profile.username}</h1>
-                {profile.is_verified && <BadgeCheck className="h-5 w-5 text-gold-500" />}
-              </div>
-              <p className="text-sm text-ink-500">@{profile.username}</p>
-              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-500">
-                <span><strong className="text-ink-800 dark:text-ink-100">{followers}</strong> seguidores</span>
-                <span><strong className="text-ink-800 dark:text-ink-100">{following}</strong> siguiendo</span>
-                <span className="inline-flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {formatDate(profile.created_at)}</span>
-              </div>
+      {/* Portada: banner como fondo + avatar superpuesto */}
+      <div className="relative">
+        <Banner src={profile.banner_url} className="h-44 sm:h-60" />
+        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/40 to-transparent" />
+        <div className="container-app absolute inset-x-0 bottom-0 translate-y-1/2">
+          <div className="flex items-end justify-between gap-4">
+            <div className="h-28 w-28 overflow-hidden rounded-full border-4 border-white bg-ink-200 shadow-2xl dark:border-ink-900 dark:bg-ink-800 sm:h-32 sm:w-32">
+              {profile.avatar_url ? (
+                <img src={profile.avatar_url} alt={profile.username} className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-4xl font-display font-bold text-gold-500">
+                  {profile.username[0]?.toUpperCase()}
+                </div>
+              )}
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 pb-1">
               {isOwn ? (
                 <Link to="/ajustes" className="btn-outline">Editar perfil</Link>
               ) : (
@@ -114,6 +111,23 @@ export default function ProfilePage() {
                 </button>
               )}
               <button onClick={share} className="btn-ghost"><Share2 className="h-4 w-4" /></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container-app mt-20">
+        <div className="card p-5">
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-white">{profile.display_name || profile.username}</h1>
+              {profile.is_verified && <BadgeCheck className="h-5 w-5 text-gold-500" />}
+            </div>
+            <p className="text-sm text-ink-500">@{profile.username}</p>
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-500">
+              <span><strong className="text-ink-800 dark:text-ink-100">{followers}</strong> seguidores</span>
+              <span><strong className="text-ink-800 dark:text-ink-100">{following}</strong> siguiendo</span>
+              <span className="inline-flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {formatDate(profile.created_at)}</span>
             </div>
           </div>
 
