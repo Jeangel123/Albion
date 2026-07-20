@@ -48,7 +48,9 @@ export type TranslationKey =
   | 'toast.profileUpdated' | 'toast.suggestionCreated' | 'toast.voteAdded' | 'toast.voteRemoved'
   | 'toast.frameBought' | 'toast.frameClaimed' | 'toast.frameEquipped' | 'toast.frameUnequipped'
   | 'toast.insufficientBalance' | 'toast.alreadyOwned' | 'toast.error' | 'toast.success'
-  | 'nav.help' | 'nav.privacy' | 'nav.terms' | 'nav.contact'
+  | 'nav.chat' | 'nav.help' | 'nav.privacy' | 'nav.terms' | 'nav.contact'
+  | 'chat.global.title' | 'chat.global.subtitle' | 'chat.global.participants'
+  | 'chat.global.online' | 'chat.global.empty' | 'chat.global.loading'
   | 'footer.tagline' | 'footer.rights';
 
 type Translations = Record<TranslationKey, string>;
@@ -221,6 +223,13 @@ export const es: Translations = {
   'toast.alreadyOwned': 'Ya posees este marco',
   'toast.error': 'Error',
   'toast.success': 'Éxito',
+  'nav.chat': 'Chat Global',
+  'chat.global.title': 'Chat Global',
+  'chat.global.subtitle': 'Comunidad general. Sé respetuoso y sigue las reglas de la plataforma.',
+  'chat.global.participants': 'Participantes',
+  'chat.global.online': 'En línea',
+  'chat.global.empty': 'No hay mensajes aún. ¡Sé el primero en escribir!',
+  'chat.global.loading': 'Cargando mensajes...',
   'nav.help': 'Ayuda',
   'nav.privacy': 'Privacidad',
   'nav.terms': 'Términos',
@@ -397,6 +406,13 @@ export const en: Translations = {
   'toast.alreadyOwned': 'You already own this frame',
   'toast.error': 'Error',
   'toast.success': 'Success',
+  'nav.chat': 'Global Chat',
+  'chat.global.title': 'Global Chat',
+  'chat.global.subtitle': 'General community. Be respectful and follow the platform rules.',
+  'chat.global.participants': 'Participants',
+  'chat.global.online': 'Online',
+  'chat.global.empty': 'No messages yet. Be the first to write!',
+  'chat.global.loading': 'Loading messages...',
   'nav.help': 'Help',
   'nav.privacy': 'Privacy',
   'nav.terms': 'Terms',
@@ -573,6 +589,13 @@ export const pt: Translations = {
   'toast.alreadyOwned': 'Você já possui esta moldura',
   'toast.error': 'Erro',
   'toast.success': 'Sucesso',
+  'nav.chat': 'Chat Global',
+  'chat.global.title': 'Chat Global',
+  'chat.global.subtitle': 'Comunidade geral. Seja respeitoso e siga as regras da plataforma.',
+  'chat.global.participants': 'Participantes',
+  'chat.global.online': 'Online',
+  'chat.global.empty': 'Não há mensagens ainda. Seja o primeiro a escrever!',
+  'chat.global.loading': 'Carregando mensagens...',
   'nav.help': 'Ajuda',
   'nav.privacy': 'Privacidade',
   'nav.terms': 'Termos',

@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
-  Search, Bell, Home, Users, Shield, Calendar, Trophy, MessageSquare, Menu, X, Sun, Moon, Plus, Settings, LogOut, User as UserIcon, Castle, ShoppingBag, Wallet as WalletIcon, Lightbulb,
+  Search, Bell, Home, Users, Shield, Calendar, Trophy, MessageSquare, Menu, X, Sun, Moon, Plus, Settings, LogOut, User as UserIcon, Castle, ShoppingBag, Wallet as WalletIcon, Lightbulb, Globe,
 } from 'lucide-react';
 import { useTheme } from '../lib/theme';
 import { useAuth } from '../lib/auth';
@@ -17,6 +17,7 @@ const NAV = [
   { to: '/eventos', labelKey: 'nav.events', icon: Calendar },
   { to: '/ranking', labelKey: 'nav.rankings', icon: Trophy },
   { to: '/consejo', labelKey: 'nav.council', icon: Lightbulb },
+  { to: '/mensajes', labelKey: 'nav.chat', icon: Globe, authOnly: true },
   { to: '/buscar', labelKey: 'nav.search', icon: Search },
 ];
 
@@ -42,7 +43,7 @@ export function Navbar() {
       <div className="container-app flex h-16 items-center gap-3">
         <Logo />
         <nav className="ml-4 hidden items-center gap-1 lg:flex">
-          {NAV.map((n) => {
+          {NAV.filter((n) => !n.authOnly || session).map((n) => {
             const active = location.pathname === n.to || (n.to !== '/' && location.pathname.startsWith(n.to));
             return (
               <Link
@@ -74,7 +75,7 @@ export function Navbar() {
               <Link to="/notificaciones" className="relative rounded-lg p-2 text-ink-600 hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800">
                 <Bell className="h-5 w-5" />
               </Link>
-              <Link to="/mensajes" className="hidden rounded-lg p-2 text-ink-600 hover:bg-ink-100 sm:block dark:text-ink-300 dark:hover:bg-ink-800">
+              <Link to="/mensajes" className="rounded-lg p-2 text-ink-600 hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800">
                 <MessageSquare className="h-5 w-5" />
               </Link>
               <div className="relative">
@@ -133,7 +134,7 @@ export function Navbar() {
                 />
               </div>
             </form>
-            {NAV.map((n) => {
+            {NAV.filter((n) => !n.authOnly || session).map((n) => {
               const active = location.pathname === n.to || (n.to !== '/' && location.pathname.startsWith(n.to));
               return (
                 <Link
