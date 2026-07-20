@@ -106,6 +106,7 @@ export type Message = {
   content: string | null;
   media_url: string | null;
   created_at: string;
+  guild_id?: string | null;
 };
 
 export type ReactionType = 'like' | 'love' | 'haha' | 'wow' | 'sad' | 'angry';
