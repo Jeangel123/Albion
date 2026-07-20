@@ -24,23 +24,34 @@ export default function HomePage() {
 
   useEffect(() => {
     (async () => {
-      const [{ data: postData }, { data: guildData }, { data: newsData }, { data: eventData }] = await Promise.all([
-        supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank)').order('created_at', { ascending: false }).limit(10),
-        supabase.from('guilds').select('*').eq('is_featured', true).limit(4),
-        supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank)').eq('is_news', true).order('created_at', { ascending: false }).limit(3),
-        supabase.from('events').select('*').gte('start_time', new Date().toISOString()).order('start_time', { ascending: true }).limit(5),
-      ]);
-      setPosts(postData as PostWithAuthor[] ?? []);
-      setGuilds(guildData ?? []);
-      setNews(newsData as PostWithAuthor[] ?? []);
-      setEvents(eventData ?? []);
+      try {
+        const [postsRes, guildsRes, newsRes, eventsRes] = await Promise.all([
+          supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank)').order('created_at', { ascending: false }).limit(10),
+          supabase.from('guilds').select('*').eq('is_featured', true).limit(4),
+          supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank)').eq('is_news', true).order('created_at', { ascending: false }).limit(3),
+          supabase.from('events').select('*').gte('start_time', new Date().toISOString()).order('start_time', { ascending: true }).limit(5),
+        ]);
+        if (postsRes.error) console.error('[home] posts:', postsRes.error.message);
+        if (guildsRes.error) console.error('[home] guilds:', guildsRes.error.message);
+        if (newsRes.error) console.error('[home] news:', newsRes.error.message);
+        if (eventsRes.error) console.error('[home] events:', eventsRes.error.message);
+        setPosts(postsRes.data as PostWithAuthor[] ?? []);
+        setGuilds(guildsRes.data ?? []);
+        setNews(newsRes.data as PostWithAuthor[] ?? []);
+        setEvents(eventsRes.data ?? []);
 
-      const [{ data: imgData }, { data: vidData }] = await Promise.all([
-        supabase.from('posts').select('media_urls').eq('type', 'image').order('created_at', { ascending: false }).limit(8),
-        supabase.from('posts').select('media_urls').eq('type', 'video').order('created_at', { ascending: false }).limit(6),
-      ]);
-      setImages((imgData ?? []).flatMap((p: any) => p.media_urls ?? []));
-      setVideos((vidData ?? []).flatMap((p: any) => p.media_urls ?? []));
+        const [imgRes, vidRes] = await Promise.all([
+          supabase.from('posts').select('media_urls').eq('type', 'image').order('created_at', { ascending: false }).limit(8),
+          supabase.from('posts').select('media_urls').eq('type', 'video').order('created_at', { ascending: false }).limit(6),
+        ]);
+        if (imgRes.error) console.error('[home] images:', imgRes.error.message);
+        if (vidRes.error) console.error('[home] videos:', vidRes.error.message);
+        setImages((imgRes.data ?? []).flatMap((p: any) => p.media_urls ?? []));
+        setVideos((vidRes.data ?? []).flatMap((p: any) => p.media_urls ?? []));
+      } catch (err) {
+        console.error('[home] fatal:', err);
+        setPosts([]); setGuilds([]); setNews([]); setEvents([]);
+      }
     })();
   }, []);
 

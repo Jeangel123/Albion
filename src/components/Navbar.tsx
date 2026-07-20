@@ -22,7 +22,7 @@ const NAV = [
 
 export function Navbar() {
   const { theme, toggle } = useTheme();
-  const { profile, signOut } = useAuth();
+  const { profile, session, signOut } = useAuth();
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -69,7 +69,7 @@ export function Navbar() {
           <button onClick={toggle} className="rounded-lg p-2 text-ink-600 hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800" aria-label="Tema">
             {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </button>
-          {profile ? (
+          {session ? (
             <>
               <Link to="/notificaciones" className="relative rounded-lg p-2 text-ink-600 hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800">
                 <Bell className="h-5 w-5" />
@@ -79,23 +79,23 @@ export function Navbar() {
               </Link>
               <div className="relative">
                 <button onClick={() => setMenuOpen((p) => !p)} className="rounded-full">
-                  <Avatar src={profile.avatar_url} alt={profile.username} size="sm" />
+                  <Avatar src={profile?.avatar_url} alt={profile?.username ?? ''} size="sm" />
                 </button>
                 {menuOpen && (
                   <>
                     <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
                     <div className="absolute right-0 z-20 mt-2 w-56 card p-1.5 animate-slide-up">
                       <div className="border-b border-ink-100 px-3 py-2.5 dark:border-ink-800">
-                        <p className="truncate text-sm font-semibold">{profile.display_name || profile.username}</p>
-                        <p className="truncate text-xs text-ink-500">@{profile.username}</p>
+                        <p className="truncate text-sm font-semibold">{profile?.display_name || profile?.username || 'Usuario'}</p>
+                        <p className="truncate text-xs text-ink-500">@{profile?.username ?? ''}</p>
                       </div>
-                      <MenuItem to={`/perfil/${profile.username}`} icon={UserIcon} label={t('nav.profile')} onClick={() => setMenuOpen(false)} />
+                      {profile && <MenuItem to={`/perfil/${profile.username}`} icon={UserIcon} label={t('nav.profile')} onClick={() => setMenuOpen(false)} />}
                       <MenuItem to="/crear-publicacion" icon={Plus} label={t('nav.post')} onClick={() => setMenuOpen(false)} />
                       <MenuItem to="/tienda" icon={ShoppingBag} label={t('nav.shop')} onClick={() => setMenuOpen(false)} />
                       <MenuItem to="/monedero" icon={WalletIcon} label={t('nav.wallet')} onClick={() => setMenuOpen(false)} />
                       <MenuItem to="/consejo" icon={Lightbulb} label={t('council.title')} onClick={() => setMenuOpen(false)} />
                       <MenuItem to="/ajustes" icon={Settings} label={t('nav.settings')} onClick={() => setMenuOpen(false)} />
-                      {(profile.role === 'admin' || profile.role === 'supreme_admin' || profile.role === 'moderator') && (
+                      {(profile?.role === 'admin' || profile?.role === 'supreme_admin' || profile?.role === 'moderator') && (
                         <MenuItem to="/admin" icon={Shield} label={t('nav.admin')} onClick={() => setMenuOpen(false)} />
                       )}
                       <button
@@ -146,7 +146,7 @@ export function Navbar() {
                 </Link>
               );
             })}
-            {!profile && (
+            {!session && (
               <div className="flex gap-2 pt-2">
                 <Link to="/login" onClick={() => setOpen(false)} className="btn-outline flex-1">{t('nav.login')}</Link>
                 <Link to="/registro" onClick={() => setOpen(false)} className="btn-primary flex-1">{t('nav.register')}</Link>

@@ -41,7 +41,11 @@ export function useRealtime<T extends Row = Row>(opts: {
       });
     });
 
-    channel.subscribe();
+    channel.subscribe((status: string, err?: Error) => {
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        console.error(`[realtime] ${channelName} subscribe error:`, status, err?.message ?? '');
+      }
+    });
 
     return () => {
       supabase.removeChannel(channel);

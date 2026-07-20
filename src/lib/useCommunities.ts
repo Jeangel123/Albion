@@ -12,15 +12,22 @@ export function useCommunities() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [cRes, mRes] = await Promise.all([
-      supabase.from('communities').select('*').order('member_count', { ascending: false }),
-      profile?.id
-        ? supabase.from('community_members').select('*').eq('user_id', profile.id)
-        : Promise.resolve({ data: null, error: null }),
-    ]);
-    if (!cRes.error && cRes.data) setCommunities(cRes.data as Community[]);
-    if (!mRes.error && mRes.data) setMemberships(mRes.data as CommunityMember[]);
-    setLoading(false);
+    try {
+      const [cRes, mRes] = await Promise.all([
+        supabase.from('communities').select('*').order('member_count', { ascending: false }),
+        profile?.id
+          ? supabase.from('community_members').select('*').eq('user_id', profile.id)
+          : Promise.resolve({ data: null, error: null }),
+      ]);
+      if (cRes.error) console.error('[communities] load:', cRes.error.message);
+      if (mRes.error) console.error('[communities] memberships:', mRes.error.message);
+      if (cRes.data) setCommunities(cRes.data as Community[]);
+      if (mRes.data) setMemberships(mRes.data as CommunityMember[]);
+    } catch (err) {
+      console.error('[communities] fatal:', err);
+    } finally {
+      setLoading(false);
+    }
   }, [profile?.id]);
 
   useEffect(() => {

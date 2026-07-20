@@ -37,25 +37,33 @@ export default function CommunityDetailPage() {
   useEffect(() => {
     if (!slug) return;
     (async () => {
-      const { data: c } = await supabase.from('communities').select('*').eq('slug', slug).maybeSingle();
-      if (!c) { setLoading(false); return; }
-      setCommunity(c as Community);
-      const [m, msg] = await Promise.all([
-        supabase
-          .from('community_members')
-          .select('*, user:profiles(id, username, display_name, avatar_url, medieval_rank, role, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
-          .eq('community_id', c.id)
-          .order('joined_at', { ascending: false }),
-        supabase
-          .from('messages')
-          .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank, role, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
-          .eq('room_id', c.id)
-          .order('created_at', { ascending: true })
-          .limit(200),
-      ]);
-      setMembers((m.data ?? []) as unknown as MemberWithUser[]);
-      setMessages((msg.data ?? []) as unknown as MessageWithSender[]);
-      setLoading(false);
+      try {
+        const { data: c, error: cErr } = await supabase.from('communities').select('*').eq('slug', slug).maybeSingle();
+        if (cErr) console.error('[community] load:', cErr.message);
+        if (!c) { setLoading(false); return; }
+        setCommunity(c as Community);
+        const [m, msg] = await Promise.all([
+          supabase
+            .from('community_members')
+            .select('*, user:profiles(id, username, display_name, avatar_url, medieval_rank, role, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
+            .eq('community_id', c.id)
+            .order('joined_at', { ascending: false }),
+          supabase
+            .from('messages')
+            .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank, role, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
+            .eq('room_id', c.id)
+            .order('created_at', { ascending: true })
+            .limit(200),
+        ]);
+        if (m.error) console.error('[community] members:', m.error.message);
+        if (msg.error) console.error('[community] messages:', msg.error.message);
+        setMembers((m.data ?? []) as unknown as MemberWithUser[]);
+        setMessages((msg.data ?? []) as unknown as MessageWithSender[]);
+      } catch (err) {
+        console.error('[community] fatal:', err);
+      } finally {
+        setLoading(false);
+      }
     })();
   }, [slug]);
 
