@@ -38,6 +38,7 @@ const RulesPage = lazy(() => import('./pages/Rules'));
 const CommunitiesPage = lazy(() => import('./pages/Communities'));
 const CommunityDetailPage = lazy(() => import('./pages/CommunityDetail'));
 const CommunityChatPage = lazy(() => import('./pages/CommunityChat'));
+const GlobalChatPage = lazy(() => import('./pages/GlobalChat'));
 const CreateCommunityPage = lazy(() => import('./pages/CreateCommunity'));
 const FrameShopPage = lazy(() => import('./pages/FrameShop'));
 const WalletPage = lazy(() => import('./pages/Wallet'));
@@ -104,6 +105,7 @@ export default function App() {
                             <Route path="/comunidad/crear" element={<Protected><CreateCommunityPage /></Protected>} />
                             <Route path="/comunidad/:slug" element={<CommunityDetailPage />} />
                             <Route path="/comunidad/:slug/chat" element={<Protected><CommunityChatPage /></Protected>} />
+                            <Route path="/mensajes" element={<Protected><GlobalChatPage /></Protected>} />
                             <Route path="/tienda" element={<FrameShopPage />} />
                             <Route path="/monedero" element={<Protected><WalletPage /></Protected>} />
                             <Route path="/consejo" element={<CouncilPage />} />
