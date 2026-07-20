@@ -157,9 +157,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           options: { data: { username, display_name: username } },
         });
         if (error) {
-          console.error('[auth] signUp error:', error.message);
+          // Supabase masks trigger/database errors as "Database error" for
+          // security. Log the full error object (including status, code, name)
+          // so the real cause is visible in the browser console.
+          console.error('[auth] signUp error:', JSON.stringify(error, null, 2));
+          // Try to extract a more specific message. Supabase sometimes includes
+          // the real error in error.message, sometimes in a nested structure.
+          let msg = error.message || 'Error desconocido al crear la cuenta';
+          if (msg.toLowerCase().includes('database error')) {
+            msg = 'Error de base de datos al crear la cuenta. ' +
+              'Esto puede deberse a un nombre de usuario duplicado o un problema temporal. ' +
+              'Inténtalo de nuevo o contacta soporte. ' +
+              '(Código: ' + (error.code || 'unknown') + ')';
+          }
           setLoading(false);
-          return { error: error.message };
+          return { error: msg };
         }
         // The handle_new_user() trigger creates the profile row from user
         // metadata (username + display_name). No client-side insert/update is
