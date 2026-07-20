@@ -14,7 +14,7 @@ export type Profile = {
   twitch: string | null;
   is_verified: boolean;
   is_suspended: boolean;
-  role: 'user' | 'admin' | 'supreme_admin' | 'moderator';
+  role: 'user' | 'admin' | 'supreme_admin' | 'moderator' | 'founder';
   reputation_points: number;
   medieval_rank: MedievalRank;
   equipped_frame_id: string | null;
@@ -144,9 +144,35 @@ export type AppConfig = {
   id: number;
   maintenance_mode: boolean;
   maintenance_message: string | null;
+  maintenance_return_date: string | null;
   announcement: string | null;
   announcement_active: boolean;
   community_rules: string | null;
+  platform_name: string | null;
+  platform_description: string | null;
+  platform_logo: string | null;
+  platform_banner: string | null;
+  support_email: string | null;
+  discord_url: string | null;
+  available_languages: string | null;
+  currency_name: string | null;
+  rep_create_post: number | null;
+  rep_create_community: number | null;
+  rep_send_message: number | null;
+  rep_receive_reaction: number | null;
+};
+
+export type GlobalAnnouncement = {
+  id: string;
+  title: string;
+  content: string;
+  is_pinned: boolean;
+  is_active: boolean;
+  scheduled_at: string | null;
+  expires_at: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type MedievalRank =
