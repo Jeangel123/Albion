@@ -6,12 +6,12 @@ import { useAuth } from '../lib/auth';
 import { useToast } from '../components/Toast';
 import { useRealtime, upsertById, removeById } from '../lib/useRealtime';
 import { useCommunities } from '../lib/useCommunities';
-import { Avatar } from '../components/Avatar';
+import { AvatarWithFrame } from '../components/AvatarWithFrame';
 import { RankBadge } from '../components/RankBadge';
 import { Spinner, EmptyState } from '../components/ui';
-import type { Community, Profile, Message, MedievalRank } from '../lib/types';
+import type { Community, Profile, Message, MedievalRank, FrameRarity } from '../lib/types';
 
-type MessageWithSender = Message & { sender: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> };
+type MessageWithSender = Message & { sender: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> & { frame?: { rarity: FrameRarity; icon: string | null } | null } };
 
 export default function CommunityChatPage() {
   const { slug } = useParams();
@@ -34,7 +34,7 @@ export default function CommunityChatPage() {
       setCommunity(c as Community);
       const { data: msg } = await supabase
         .from('messages')
-        .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank)')
+        .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
         .eq('room_id', c.id)
         .eq('topic', 'community_chat')
         .order('created_at', { ascending: true })
@@ -50,7 +50,7 @@ export default function CommunityChatPage() {
     } else if (row?.id) {
       supabase
         .from('messages')
-        .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank)')
+        .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
         .eq('id', row.id)
         .maybeSingle()
         .then(({ data }) => { if (data) setMessages((list) => upsertById(list, data as MessageWithSender)); });
@@ -117,7 +117,7 @@ export default function CommunityChatPage() {
               const own = m.sender_id === profile?.id;
               return (
                 <div key={m.id} className={`flex gap-2 ${own ? 'flex-row-reverse' : ''}`}>
-                  <Avatar src={m.sender?.avatar_url} alt={m.sender?.username ?? ''} size="sm" to={`/perfil/${m.sender?.username}`} />
+                  <AvatarWithFrame src={m.sender?.avatar_url} alt={m.sender?.username ?? ''} size="sm" to={`/perfil/${m.sender?.username}`} frameRarity={(m.sender as any)?.frame?.rarity ?? null} frameIcon={(m.sender as any)?.frame?.icon ?? null} />
                   <div className={`max-w-[75%] ${own ? 'text-right' : ''}`}>
                     <div className={`mb-0.5 flex items-center gap-1.5 ${own ? 'justify-end' : ''}`}>
                       <p className="text-xs text-ink-500">

@@ -22,6 +22,8 @@ import CommunitiesPage from './pages/Communities';
 import CommunityDetailPage from './pages/CommunityDetail';
 import CommunityChatPage from './pages/CommunityChat';
 import CreateCommunityPage from './pages/CreateCommunity';
+import FrameShopPage from './pages/FrameShop';
+import WalletPage from './pages/Wallet';
 import type { ReactNode } from 'react';
 
 function Protected({ children }: { children: ReactNode }) {
@@ -66,6 +68,8 @@ export default function App() {
                       <Route path="/comunidad/crear" element={<Protected><CreateCommunityPage /></Protected>} />
                       <Route path="/comunidad/:slug" element={<CommunityDetailPage />} />
                       <Route path="/comunidad/:slug/chat" element={<Protected><CommunityChatPage /></Protected>} />
+                      <Route path="/tienda" element={<FrameShopPage />} />
+                      <Route path="/monedero" element={<Protected><WalletPage /></Protected>} />
                       <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                   </Layout>

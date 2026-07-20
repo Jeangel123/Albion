@@ -9,7 +9,7 @@ import { useToast } from '../components/Toast';
 import { useRealtime, upsertById, removeById } from '../lib/useRealtime';
 import { useCommunities } from '../lib/useCommunities';
 import { Banner } from '../components/Banner';
-import { Avatar } from '../components/Avatar';
+import { AvatarWithFrame } from '../components/AvatarWithFrame';
 import { Spinner, EmptyState } from '../components/ui';
 import { Modal } from '../components/Modal';
 import { ImageUpload } from '../components/ImageUpload';
@@ -41,7 +41,7 @@ export default function CommunityDetailPage() {
       const [m, msg] = await Promise.all([
         supabase
           .from('community_members')
-          .select('*, user:profiles(id, username, display_name, avatar_url, medieval_rank)')
+          .select('*, user:profiles(id, username, display_name, avatar_url, medieval_rank, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
           .eq('community_id', c.id)
           .order('joined_at', { ascending: false }),
         supabase
@@ -182,7 +182,7 @@ export default function CommunityDetailPage() {
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {members.map((m) => (
                 <Link key={m.id} to={`/perfil/${m.user.username}`} className="card flex items-center gap-3 p-3 card-hover">
-                  <Avatar src={m.user.avatar_url} alt={m.user.username} size="md" />
+                  <AvatarWithFrame src={m.user.avatar_url} alt={m.user.username} size="md" frameRarity={(m.user as any)?.frame?.rarity ?? null} frameIcon={(m.user as any)?.frame?.icon ?? null} />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold">{m.user.display_name || m.user.username}</p>
                     <p className="text-xs text-ink-500 capitalize">{m.role === 'owner' ? 'Líder' : m.role === 'admin' ? 'Admin' : 'Miembro'}</p>
@@ -248,7 +248,7 @@ function ChatPanel({ messages, onSend, currentUserId }: { messages: MessageWithS
             const own = m.sender_id === currentUserId;
             return (
               <div key={m.id} className={`flex gap-2 ${own ? 'flex-row-reverse' : ''}`}>
-                <Avatar src={m.sender?.avatar_url} alt={m.sender?.username ?? ''} size="sm" />
+                <AvatarWithFrame src={m.sender?.avatar_url} alt={m.sender?.username ?? ''} size="sm" />
                 <div className={`max-w-[75%] ${own ? 'text-right' : ''}`}>
                   <p className="mb-0.5 text-xs text-ink-500">
                     {own ? 'Tú' : m.sender?.display_name || m.sender?.username}

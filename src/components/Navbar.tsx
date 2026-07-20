@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  Search, Bell, Home, Users, Shield, Calendar, Trophy, MessageSquare, Menu, X, Sun, Moon, Plus, Settings, LogOut, User as UserIcon, Castle,
+  Search, Bell, Home, Users, Shield, Calendar, Trophy, MessageSquare, Menu, X, Sun, Moon, Plus, Settings, LogOut, User as UserIcon, Castle, ShoppingBag, Wallet as WalletIcon,
 } from 'lucide-react';
 import { useTheme } from '../lib/theme';
 import { useAuth } from '../lib/auth';
@@ -85,8 +85,10 @@ export function Navbar() {
                       </div>
                       <MenuItem to={`/perfil/${profile.username}`} icon={UserIcon} label="Mi perfil" onClick={() => setMenuOpen(false)} />
                       <MenuItem to="/crear-publicacion" icon={Plus} label="Publicar" onClick={() => setMenuOpen(false)} />
+                      <MenuItem to="/tienda" icon={ShoppingBag} label="Tienda de marcos" onClick={() => setMenuOpen(false)} />
+                      <MenuItem to="/monedero" icon={WalletIcon} label="Monedero" onClick={() => setMenuOpen(false)} />
                       <MenuItem to="/ajustes" icon={Settings} label="Ajustes" onClick={() => setMenuOpen(false)} />
-                      {profile.role === 'admin' && (
+                      {(profile.role === 'admin' || profile.role === 'supreme_admin' || profile.role === 'moderator') && (
                         <MenuItem to="/admin" icon={Shield} label="Panel admin" onClick={() => setMenuOpen(false)} />
                       )}
                       <button

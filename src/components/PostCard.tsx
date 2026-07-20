@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Flag, Link as LinkIcon, Trash2,
@@ -9,7 +9,8 @@ import { useToast } from './Toast';
 import { Avatar } from './Avatar';
 import { Modal } from './Modal';
 import { timeAgo } from '../lib/format';
-import { REACTIONS, type Post, type Profile, type MedievalRank } from '../lib/types';
+import { AvatarWithFrame } from './AvatarWithFrame';
+import { REACTIONS, type Post, type Profile, type MedievalRank, type FrameRarity } from '../lib/types';
 import { RankBadge } from './RankBadge';
 
 type PostWithAuthor = Post & { author?: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> };
@@ -26,6 +27,20 @@ export function PostCard({ post, author, onDeleted }: { post: PostWithAuthor; au
   const [likeCount, setLikeCount] = useState(post.like_count);
   const [shareCount, setShareCount] = useState(post.share_count);
   const [showComments, setShowComments] = useState(false);
+  const [authorFrame, setAuthorFrame] = useState<{ rarity: FrameRarity; icon: string | null } | null>(null);
+
+  useEffect(() => {
+    if (!author?.id) return;
+    let active = true;
+    supabase
+      .from('user_frames')
+      .select('frame:avatar_frames(rarity, icon)')
+      .eq('user_id', author.id)
+      .eq('is_equipped', true)
+      .maybeSingle()
+      .then(({ data }) => { if (active && data?.frame) setAuthorFrame(data.frame as any); });
+    return () => { active = false; };
+  }, [author?.id]);
 
   const authorName = author?.display_name || author?.username || 'Usuario';
   const authorHandle = author?.username || '';
@@ -110,7 +125,7 @@ export function PostCard({ post, author, onDeleted }: { post: PostWithAuthor; au
   return (
     <article className="card p-4 sm:p-5 animate-fade-in">
       <div className="flex items-start gap-3">
-        <Avatar src={author?.avatar_url} alt={authorName} size="md" to={authorHandle ? `/perfil/${authorHandle}` : undefined} />
+        <AvatarWithFrame src={author?.avatar_url} alt={authorName} size="md" to={authorHandle ? `/perfil/${authorHandle}` : undefined} frameRarity={authorFrame?.rarity ?? null} frameIcon={authorFrame?.icon ?? null} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <Link to={authorHandle ? `/perfil/${authorHandle}` : '#'} className="truncate font-semibold text-ink-900 hover:text-gold-600 dark:text-white dark:hover:text-gold-400">

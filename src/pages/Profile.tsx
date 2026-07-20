@@ -8,6 +8,7 @@ import { useRealtime, upsertById, removeById } from '../lib/useRealtime';
 import { Banner } from '../components/Banner';
 import { PostCard } from '../components/PostCard';
 import { RankBadge, RankProgress, RoleBadge } from '../components/RankBadge';
+import { AvatarWithFrame } from '../components/AvatarWithFrame';
 import { Spinner, EmptyState } from '../components/ui';
 import { formatDate } from '../lib/format';
 import type { Profile, Post, Guild } from '../lib/types';
@@ -28,6 +29,7 @@ export default function ProfilePage() {
   const [following, setFollowing] = useState(0);
   const [tab, setTab] = useState<'publicaciones' | 'guardados'>('publicaciones');
   const [savedPosts, setSavedPosts] = useState<PostWithAuthor[]>([]);
+  const [frame, setFrame] = useState<{ rarity: string; icon: string | null } | null>(null);
 
   const isOwn = me?.id === profile?.id;
 
@@ -83,6 +85,13 @@ export default function ProfilePage() {
         const { data: f } = await supabase.from('follows').select('id').eq('follower_id', me.id).eq('following_id', p.id).maybeSingle();
         setIsFollowing(!!f);
       }
+      const { data: uf } = await supabase
+        .from('user_frames')
+        .select('frame:avatar_frames(rarity, icon)')
+        .eq('user_id', p.id)
+        .eq('is_equipped', true)
+        .maybeSingle();
+      if (uf?.frame) setFrame(uf.frame as any);
       setLoading(false);
     })();
   }, [username, me]);
@@ -127,14 +136,14 @@ export default function ProfilePage() {
         <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/40 to-transparent" />
         <div className="container-app absolute inset-x-0 bottom-0 translate-y-1/2">
           <div className="flex items-end justify-between gap-4">
-            <div className="h-28 w-28 overflow-hidden rounded-full border-4 border-white bg-ink-200 shadow-2xl dark:border-ink-900 dark:bg-ink-800 sm:h-32 sm:w-32">
-              {profile.avatar_url ? (
-                <img src={profile.avatar_url} alt={profile.username} className="h-full w-full object-cover" />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-4xl font-display font-bold text-gold-500">
-                  {profile.username[0]?.toUpperCase()}
-                </div>
-              )}
+            <div className="h-28 w-28 sm:h-32 sm:w-32">
+              <AvatarWithFrame
+                src={profile.avatar_url}
+                alt={profile.username}
+                size="xl"
+                frameRarity={frame?.rarity as any}
+                frameIcon={frame?.icon}
+              />
             </div>
             <div className="flex flex-wrap gap-2 pb-1">
               {isOwn ? (
