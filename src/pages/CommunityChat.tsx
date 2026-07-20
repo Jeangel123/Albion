@@ -7,10 +7,11 @@ import { useToast } from '../components/Toast';
 import { useRealtime, upsertById, removeById } from '../lib/useRealtime';
 import { useCommunities } from '../lib/useCommunities';
 import { Avatar } from '../components/Avatar';
+import { RankBadge } from '../components/RankBadge';
 import { Spinner, EmptyState } from '../components/ui';
-import type { Community, Profile, Message } from '../lib/types';
+import type { Community, Profile, Message, MedievalRank } from '../lib/types';
 
-type MessageWithSender = Message & { sender: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url'> };
+type MessageWithSender = Message & { sender: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> };
 
 export default function CommunityChatPage() {
   const { slug } = useParams();
@@ -33,7 +34,7 @@ export default function CommunityChatPage() {
       setCommunity(c as Community);
       const { data: msg } = await supabase
         .from('messages')
-        .select('*, sender:profiles(id, username, display_name, avatar_url)')
+        .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank)')
         .eq('room_id', c.id)
         .eq('topic', 'community_chat')
         .order('created_at', { ascending: true })
@@ -49,7 +50,7 @@ export default function CommunityChatPage() {
     } else if (row?.id) {
       supabase
         .from('messages')
-        .select('*, sender:profiles(id, username, display_name, avatar_url)')
+        .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank)')
         .eq('id', row.id)
         .maybeSingle()
         .then(({ data }) => { if (data) setMessages((list) => upsertById(list, data as MessageWithSender)); });
@@ -118,9 +119,12 @@ export default function CommunityChatPage() {
                 <div key={m.id} className={`flex gap-2 ${own ? 'flex-row-reverse' : ''}`}>
                   <Avatar src={m.sender?.avatar_url} alt={m.sender?.username ?? ''} size="sm" to={`/perfil/${m.sender?.username}`} />
                   <div className={`max-w-[75%] ${own ? 'text-right' : ''}`}>
-                    <p className="mb-0.5 text-xs text-ink-500">
-                      {own ? 'Tú' : m.sender?.display_name || m.sender?.username}
-                    </p>
+                    <div className={`mb-0.5 flex items-center gap-1.5 ${own ? 'justify-end' : ''}`}>
+                      <p className="text-xs text-ink-500">
+                        {own ? 'Tú' : m.sender?.display_name || m.sender?.username}
+                      </p>
+                      {m.sender?.medieval_rank && <RankBadge rank={m.sender.medieval_rank as MedievalRank} size="xs" showEmoji={false} />}
+                    </div>
                     <div className={`inline-block rounded-2xl px-3 py-2 text-sm ${own ? 'bg-gold-500 text-ink-950' : 'bg-ink-100 text-ink-800 dark:bg-ink-800 dark:text-ink-100'}`}>
                       {m.content}
                     </div>

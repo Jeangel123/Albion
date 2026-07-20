@@ -6,7 +6,7 @@ import { PostCard } from '../components/PostCard';
 import { Spinner, EmptyState } from '../components/ui';
 import type { Post, Profile } from '../lib/types';
 
-type PostWithAuthor = Post & { author: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url'> };
+type PostWithAuthor = Post & { author: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> };
 
 export default function PostDetailPage() {
   const { id } = useParams();
@@ -16,7 +16,7 @@ export default function PostDetailPage() {
   useEffect(() => {
     if (!id) return;
     (async () => {
-      const { data } = await supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url)').eq('id', id).maybeSingle();
+      const { data } = await supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank)').eq('id', id).maybeSingle();
       setPost(data as PostWithAuthor | null);
       setLoading(false);
     })();

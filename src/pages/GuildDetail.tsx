@@ -17,7 +17,7 @@ import { slugify } from '../lib/format';
 import { ImageUpload } from '../components/ImageUpload';
 import { ACTIVITIES, type Guild, type Post, type Profile, type GuildMember } from '../lib/types';
 
-type PostWithAuthor = Post & { author: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url'> };
+type PostWithAuthor = Post & { author: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> };
 
 export default function GuildDetailPage() {
   const { slug } = useParams();
@@ -43,7 +43,7 @@ export default function GuildDetailPage() {
       setGuild(g as Guild);
       const [m, p, gal, vid] = await Promise.all([
         supabase.from('guild_members').select('*, user:profiles(*)').eq('guild_id', g.id),
-        supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url)').eq('guild_id', g.id).order('created_at', { ascending: false }),
+        supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank)').eq('guild_id', g.id).order('created_at', { ascending: false }),
         supabase.from('guild_gallery').select('*').eq('guild_id', g.id).order('created_at', { ascending: false }),
         supabase.from('guild_videos').select('*').eq('guild_id', g.id).order('created_at', { ascending: false }),
       ]);
@@ -74,7 +74,7 @@ export default function GuildDetailPage() {
     if (eventType === 'DELETE' && oldRow?.id) {
       setPosts((list) => removeById(list, oldRow.id));
     } else if (row?.id) {
-      supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url)').eq('id', row.id).maybeSingle()
+      supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank)').eq('id', row.id).maybeSingle()
         .then(({ data }) => { if (data) setPosts((list) => upsertById(list, data as PostWithAuthor)); });
     }
   }, []);

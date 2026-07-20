@@ -12,7 +12,7 @@ import { ImageUpload } from '../components/ImageUpload';
 import { slugify, formatDateTime } from '../lib/format';
 import type { Alliance, Guild, Post, Profile, AlbionEvent } from '../lib/types';
 
-type PostWithAuthor = Post & { author: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url'> };
+type PostWithAuthor = Post & { author: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> };
 
 export function AlliancesPage() {
   const { profile } = useAuth();
@@ -86,7 +86,7 @@ export function AllianceDetailPage() {
       setAlliance(a as Alliance);
       const [g, p, e] = await Promise.all([
         supabase.from('alliance_members').select('guild:guilds(*)').eq('alliance_id', a.id),
-        supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url)').in('guild_id',
+        supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank)').in('guild_id',
           (await supabase.from('alliance_members').select('guild_id').eq('alliance_id', a.id)).data?.map((x: any) => x.guild_id) ?? []
         ).order('created_at', { ascending: false }).limit(10),
         supabase.from('events').select('*').in('guild_id',

@@ -7,11 +7,12 @@ import { useToast } from '../components/Toast';
 import { useRealtime, upsertById, removeById } from '../lib/useRealtime';
 import { Banner } from '../components/Banner';
 import { PostCard } from '../components/PostCard';
+import { RankBadge, RankProgress, RoleBadge } from '../components/RankBadge';
 import { Spinner, EmptyState } from '../components/ui';
 import { formatDate } from '../lib/format';
 import type { Profile, Post, Guild } from '../lib/types';
 
-type PostWithAuthor = Post & { author: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url'> };
+type PostWithAuthor = Post & { author: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> };
 
 export default function ProfilePage() {
   const { username } = useParams();
@@ -56,7 +57,7 @@ export default function ProfilePage() {
       setPosts((list) => removeById(list, oldRow.id));
     } else if (row?.id) {
       // Fetch the full row with author join for INSERT/UPDATE
-      supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url)').eq('id', row.id).maybeSingle()
+      supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank)').eq('id', row.id).maybeSingle()
         .then(({ data }) => { if (data) setPosts((list) => upsertById(list, data as PostWithAuthor)); });
     }
   }, []);
@@ -69,7 +70,7 @@ export default function ProfilePage() {
       if (!p) { setLoading(false); return; }
       setProfile(p as Profile);
       const [postData, guildData, fol, folg] = await Promise.all([
-        supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url)').eq('author_id', p.id).order('created_at', { ascending: false }),
+        supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank)').eq('author_id', p.id).order('created_at', { ascending: false }),
         p.guild_id ? supabase.from('guilds').select('*').eq('id', p.guild_id).maybeSingle() : Promise.resolve({ data: null }),
         supabase.from('follows').select('id', { count: 'exact', head: true }).eq('following_id', p.id),
         supabase.from('follows').select('id', { count: 'exact', head: true }).eq('follower_id', p.id),
@@ -110,7 +111,7 @@ export default function ProfilePage() {
     if (!me) return;
     const { data } = await supabase
       .from('saved_posts')
-      .select('post:posts(*, author:profiles(id, username, display_name, avatar_url))')
+      .select('post:posts(*, author:profiles(id, username, display_name, avatar_url, medieval_rank))')
       .eq('user_id', me.id);
     setSavedPosts((data ?? []).map((x: any) => x.post));
   }
@@ -152,9 +153,11 @@ export default function ProfilePage() {
       <div className="container-app mt-20">
         <div className="card p-5">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-white">{profile.display_name || profile.username}</h1>
               {profile.is_verified && <BadgeCheck className="h-5 w-5 text-gold-500" />}
+              <RankBadge rank={profile.medieval_rank} />
+              <RoleBadge role={profile.role} />
             </div>
             <p className="text-sm text-ink-500">@{profile.username}</p>
             <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-500">
@@ -165,6 +168,8 @@ export default function ProfilePage() {
           </div>
 
           {profile.bio && <p className="mt-4 text-sm text-ink-700 dark:text-ink-200">{profile.bio}</p>}
+
+          <div className="mt-4"><RankProgress points={profile.reputation_points} /></div>
 
           {guild && (
             <Link to={`/gremio/${guild.slug}`} className="mt-3 inline-flex items-center gap-2 rounded-lg bg-ink-100 px-3 py-1.5 text-sm hover:bg-ink-200 dark:bg-ink-800 dark:hover:bg-ink-700">

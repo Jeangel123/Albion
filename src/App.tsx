@@ -16,6 +16,7 @@ import NotificationsPage from './pages/Notifications';
 import PostDetailPage from './pages/PostDetail';
 import SettingsPage from './pages/Settings';
 import AdminPage from './pages/Admin';
+import ModerationQueuePage from './pages/ModerationQueue';
 import RulesPage from './pages/Rules';
 import CommunitiesPage from './pages/Communities';
 import CommunityDetailPage from './pages/CommunityDetail';
@@ -59,6 +60,7 @@ export default function App() {
                       <Route path="/notificaciones" element={<Protected><NotificationsPage /></Protected>} />
                       <Route path="/ajustes" element={<Protected><SettingsPage /></Protected>} />
                       <Route path="/admin" element={<Protected><AdminPage /></Protected>} />
+                      <Route path="/moderacion" element={<Protected><ModerationQueuePage /></Protected>} />
                       <Route path="/reglas" element={<RulesPage />} />
                       <Route path="/comunidades" element={<CommunitiesPage />} />
                       <Route path="/comunidad/crear" element={<Protected><CreateCommunityPage /></Protected>} />

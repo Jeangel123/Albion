@@ -10,7 +10,7 @@ import { useRealtime, upsertById, removeById } from '../lib/useRealtime';
 import { EVENT_TYPES, type Guild, type Post, type Profile, type AlbionEvent } from '../lib/types';
 import { formatDateTime } from '../lib/format';
 
-type PostWithAuthor = Post & { author: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url'> };
+type PostWithAuthor = Post & { author: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> };
 
 export default function HomePage() {
   const [posts, setPosts] = useState<PostWithAuthor[] | null>(null);
@@ -23,9 +23,9 @@ export default function HomePage() {
   useEffect(() => {
     (async () => {
       const [{ data: postData }, { data: guildData }, { data: newsData }, { data: eventData }] = await Promise.all([
-        supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url)').order('created_at', { ascending: false }).limit(10),
+        supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank)').order('created_at', { ascending: false }).limit(10),
         supabase.from('guilds').select('*').eq('is_featured', true).limit(4),
-        supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url)').eq('is_news', true).order('created_at', { ascending: false }).limit(3),
+        supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank)').eq('is_news', true).order('created_at', { ascending: false }).limit(3),
         supabase.from('events').select('*').gte('start_time', new Date().toISOString()).order('start_time', { ascending: true }).limit(5),
       ]);
       setPosts(postData as PostWithAuthor[] ?? []);
@@ -47,7 +47,7 @@ export default function HomePage() {
     if (eventType === 'DELETE' && oldRow?.id) {
       setPosts((list) => (list ? removeById(list, oldRow.id) : list));
     } else if (row?.id) {
-      supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url)').eq('id', row.id).maybeSingle()
+      supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank)').eq('id', row.id).maybeSingle()
         .then(({ data }) => {
           if (data) setPosts((list) => list ? upsertById(list, data as PostWithAuthor) : [data as PostWithAuthor]);
         });

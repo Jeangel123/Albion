@@ -9,11 +9,12 @@ import { useToast } from './Toast';
 import { Avatar } from './Avatar';
 import { Modal } from './Modal';
 import { timeAgo } from '../lib/format';
-import { REACTIONS, type Post, type Profile } from '../lib/types';
+import { REACTIONS, type Post, type Profile, type MedievalRank } from '../lib/types';
+import { RankBadge } from './RankBadge';
 
-type PostWithAuthor = Post & { author?: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url'> };
+type PostWithAuthor = Post & { author?: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> };
 
-export function PostCard({ post, author, onDeleted }: { post: PostWithAuthor; author?: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url'> | null; onDeleted?: (id: string) => void }) {
+export function PostCard({ post, author, onDeleted }: { post: PostWithAuthor; author?: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> | null; onDeleted?: (id: string) => void }) {
   const { profile } = useAuth();
   const { push } = useToast();
   const [reactionsOpen, setReactionsOpen] = useState(false);
@@ -115,6 +116,7 @@ export function PostCard({ post, author, onDeleted }: { post: PostWithAuthor; au
             <Link to={authorHandle ? `/perfil/${authorHandle}` : '#'} className="truncate font-semibold text-ink-900 hover:text-gold-600 dark:text-white dark:hover:text-gold-400">
               {authorName}
             </Link>
+            {author?.medieval_rank && <RankBadge rank={author.medieval_rank as MedievalRank} size="xs" />}
             <span className="text-xs text-ink-400">· {timeAgo(post.created_at)}</span>
             {post.is_news && <span className="chip bg-gold-100 text-gold-700 dark:bg-gold-950 dark:text-gold-300">Noticia</span>}
           </div>
