@@ -27,6 +27,7 @@ const RANK_GLOW: Record<MedievalRank, string> = {
 };
 
 const ROLE_STYLES: Record<string, { label: string; cls: string }> = {
+  founder: { label: 'Fundador', cls: 'bg-gradient-to-r from-amber-500 to-rose-600 text-white shadow-[0_0_8px_rgba(244,63,94,0.4)]' },
   supreme_admin: { label: 'Supremo', cls: 'bg-gradient-to-r from-amber-500 to-rose-600 text-white shadow-[0_0_8px_rgba(244,63,94,0.4)]' },
   admin: { label: 'Admin', cls: 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300' },
   moderator: { label: 'Moderador', cls: 'bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300' },
@@ -61,7 +62,7 @@ export function RankBadge({
 
 export function RoleBadge({ role, size = 'sm' }: { role: Profile['role']; size?: 'xs' | 'sm' | 'md' }) {
   const meta = ROLE_STYLES[role];
-  if (!meta.label) return null;
+  if (!meta || !meta.label) return null;
   const sizeCls = {
     xs: 'text-[10px] px-1.5 py-0.5',
     sm: 'text-xs px-2 py-0.5',
