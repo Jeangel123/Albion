@@ -91,12 +91,13 @@ export function SignupPage() {
     const { error } = await signUp(email, password, username.trim());
     setLoading(false);
     if (error) {
-      // Supabase masks trigger errors as "Database error". Surface a clearer
-      // message while still logging the raw error for debugging.
-      const msg = error.toLowerCase().includes('database error')
-        ? 'Error al crear la cuenta (base de datos). Revisa tu correo o inténtalo de nuevo.'
-        : error;
+      // Supabase masks trigger/database errors as "Database error". Log the
+      // full error object so the real cause is visible in the console, and
+      // surface a clearer message to the user.
       console.error('[signup] error:', error);
+      const msg = error.toLowerCase().includes('database error')
+        ? 'Error al crear la cuenta (base de datos). Inténtalo de nuevo o contacta soporte.'
+        : error;
       return push({ type: 'error', message: msg });
     }
     push({ type: 'success', message: 'Cuenta creada. Revisa tu correo para verificar.' });
