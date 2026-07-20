@@ -87,7 +87,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // would ungate the UI before getSession() has set the session, causing the
       // logged-out Navbar to flash (or persist) on reload.
       if (event === 'INITIAL_SESSION') return;
-      setSession(sess);
+      // Only update session when we have one — SIGNED_OUT already clears it
+      // explicitly below. Prevents race conditions where a non-SIGNED_OUT event
+      // fires with null and wipes the logged-in state from the Navbar.
+      if (sess) setSession(sess);
       if (sessionResolveRef.current) {
         sessionResolveRef.current(sess);
         sessionResolveRef.current = null;
