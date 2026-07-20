@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Save, LogOut, User as UserIcon, Image as ImageIcon } from 'lucide-react';
+import { Save, LogOut } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { useToast } from '../components/Toast';
 import { supabase } from '../lib/supabase';
 import { Spinner } from '../components/ui';
+import { ImageUpload } from '../components/ImageUpload';
 
 export default function SettingsPage() {
   const { profile, refreshProfile, signOut } = useAuth();
@@ -42,19 +43,22 @@ export default function SettingsPage() {
     <div className="container-app max-w-2xl py-6">
       <h1 className="mb-6 font-display text-2xl font-bold text-ink-900 dark:text-white">Ajustes</h1>
       <form onSubmit={save} className="card space-y-5 p-5">
-        <div className="flex items-center gap-4">
-          <div className="h-20 w-20 overflow-hidden rounded-full bg-ink-200 dark:bg-ink-800">
-            {form.avatar_url ? <img src={form.avatar_url} alt="" className="h-full w-full object-cover" /> : <UserIcon className="m-auto mt-6 h-8 w-8 text-ink-400" />}
-          </div>
-          <div className="flex-1">
-            <label className="label"><ImageIcon className="inline h-3.5 w-3.5" /> Foto de perfil (URL)</label>
-            <input className="input" value={form.avatar_url} onChange={(e) => setForm({ ...form, avatar_url: e.target.value })} placeholder="https://..." />
-          </div>
-        </div>
-        <div>
-          <label className="label">Banner (URL)</label>
-          <input className="input" value={form.banner_url} onChange={(e) => setForm({ ...form, banner_url: e.target.value })} placeholder="https://..." />
-        </div>
+        <ImageUpload
+          label="Foto de perfil"
+          variant="avatar"
+          folder="avatars"
+          ownerId={profile!.id}
+          value={form.avatar_url}
+          onChange={(url) => setForm({ ...form, avatar_url: url ?? '' })}
+        />
+        <ImageUpload
+          label="Banner"
+          variant="banner"
+          folder="banners"
+          ownerId={profile!.id}
+          value={form.banner_url}
+          onChange={(url) => setForm({ ...form, banner_url: url ?? '' })}
+        />
         <div className="grid gap-3 sm:grid-cols-2">
           <div><label className="label">Nombre de usuario</label><input className="input" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} /></div>
           <div><label className="label">Nombre visible</label><input className="input" value={form.display_name} onChange={(e) => setForm({ ...form, display_name: e.target.value })} /></div>

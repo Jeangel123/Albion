@@ -8,6 +8,7 @@ import { Banner } from '../components/Banner';
 import { GuildCard } from '../components/GuildCard';
 import { Spinner, EmptyState, SectionTitle } from '../components/ui';
 import { Modal } from '../components/Modal';
+import { ImageUpload } from '../components/ImageUpload';
 import { slugify, formatDateTime } from '../lib/format';
 import type { Alliance, Guild, Post, Profile, AlbionEvent } from '../lib/types';
 
@@ -188,10 +189,22 @@ function CreateAllianceModal({ onClose, onCreated }: { onClose: () => void; onCr
         <div><label className="label">Nombre *</label><input className="input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
         <div><label className="label">Descripción</label><textarea rows={3} className="input" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
         <div><label className="label">Discord</label><input className="input" value={form.discord_url} onChange={(e) => setForm({ ...form, discord_url: e.target.value })} /></div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div><label className="label">Avatar URL</label><input className="input" value={form.avatar_url} onChange={(e) => setForm({ ...form, avatar_url: e.target.value })} /></div>
-          <div><label className="label">Banner URL</label><input className="input" value={form.banner_url} onChange={(e) => setForm({ ...form, banner_url: e.target.value })} /></div>
-        </div>
+        <ImageUpload
+          label="Avatar"
+          variant="avatar"
+          folder="alliances"
+          ownerId={profile.id}
+          value={form.avatar_url || null}
+          onChange={(url) => setForm({ ...form, avatar_url: url ?? '' })}
+        />
+        <ImageUpload
+          label="Banner"
+          variant="banner"
+          folder="alliances"
+          ownerId={profile.id}
+          value={form.banner_url || null}
+          onChange={(url) => setForm({ ...form, banner_url: url ?? '' })}
+        />
         <div className="flex justify-end gap-2"><button type="button" onClick={onClose} className="btn-ghost">Cancelar</button><button disabled={saving} className="btn-primary">{saving ? 'Creando...' : 'Crear'}</button></div>
       </form>
     </Modal>

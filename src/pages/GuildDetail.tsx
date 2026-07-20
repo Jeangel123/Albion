@@ -13,6 +13,7 @@ import { PostCard } from '../components/PostCard';
 import { Spinner, EmptyState } from '../components/ui';
 import { Modal } from '../components/Modal';
 import { slugify } from '../lib/format';
+import { ImageUpload } from '../components/ImageUpload';
 import { ACTIVITIES, type Guild, type Post, type Profile, type GuildMember } from '../lib/types';
 
 type PostWithAuthor = Post & { author: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url'> };
@@ -284,16 +285,22 @@ export function CreateGuildPage() {
             <input className="input" value={form.apply_url} onChange={(e) => setForm({ ...form, apply_url: e.target.value })} />
           </div>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <label className="label">URL avatar</label>
-            <input className="input" value={form.avatar_url} onChange={(e) => setForm({ ...form, avatar_url: e.target.value })} />
-          </div>
-          <div>
-            <label className="label">URL banner</label>
-            <input className="input" value={form.banner_url} onChange={(e) => setForm({ ...form, banner_url: e.target.value })} />
-          </div>
-        </div>
+        <ImageUpload
+          label="Avatar"
+          variant="avatar"
+          folder="guilds"
+          ownerId={profile.id}
+          value={form.avatar_url || null}
+          onChange={(url) => setForm({ ...form, avatar_url: url ?? '' })}
+        />
+        <ImageUpload
+          label="Banner"
+          variant="banner"
+          folder="guilds"
+          ownerId={profile.id}
+          value={form.banner_url || null}
+          onChange={(url) => setForm({ ...form, banner_url: url ?? '' })}
+        />
         <button disabled={loading} className="btn-primary w-full">{loading ? 'Creando...' : 'Crear gremio'}</button>
       </form>
     </div>
@@ -357,10 +364,22 @@ function GuildEditModal({ guild, onClose, onSaved }: { guild: Guild; onClose: ()
           <div><label className="label">Discord</label><input className="input" value={form.discord_url} onChange={(e) => setForm({ ...form, discord_url: e.target.value })} /></div>
           <div><label className="label">Solicitud</label><input className="input" value={form.apply_url} onChange={(e) => setForm({ ...form, apply_url: e.target.value })} /></div>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div><label className="label">Avatar URL</label><input className="input" value={form.avatar_url} onChange={(e) => setForm({ ...form, avatar_url: e.target.value })} /></div>
-          <div><label className="label">Banner URL</label><input className="input" value={form.banner_url} onChange={(e) => setForm({ ...form, banner_url: e.target.value })} /></div>
-        </div>
+        <ImageUpload
+          label="Avatar"
+          variant="avatar"
+          folder="guilds"
+          ownerId={guild.id}
+          value={form.avatar_url || null}
+          onChange={(url) => setForm({ ...form, avatar_url: url ?? '' })}
+        />
+        <ImageUpload
+          label="Banner"
+          variant="banner"
+          folder="guilds"
+          ownerId={guild.id}
+          value={form.banner_url || null}
+          onChange={(url) => setForm({ ...form, banner_url: url ?? '' })}
+        />
         <div className="flex justify-end gap-2"><button type="button" onClick={onClose} className="btn-ghost">Cancelar</button><button disabled={saving} className="btn-primary">{saving ? 'Guardando...' : 'Guardar'}</button></div>
       </form>
     </Modal>
