@@ -76,6 +76,14 @@ export function useCommunities() {
     [profile?.id],
   );
 
+  const deleteMessage = useCallback(
+    async (messageId: string) => {
+      const { error } = await supabase.from('messages').delete().eq('id', messageId);
+      return { error: error?.message ?? null };
+    },
+    [],
+  );
+
   const leave = useCallback(
     async (communityId: string) => {
       if (!profile?.id) return { error: 'No autenticado' };
@@ -115,6 +123,7 @@ export function useCommunities() {
     join,
     leave,
     create,
+    deleteMessage,
     loading,
     refresh: load,
   };

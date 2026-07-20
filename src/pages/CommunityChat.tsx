@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Send, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Send, MessageSquare, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { useToast } from '../components/Toast';
@@ -19,7 +19,7 @@ export default function CommunityChatPage() {
   const { profile } = useAuth();
   const { push } = useToast();
   const navigate = useNavigate();
-  const { isMember } = useCommunities();
+  const { isMember, membership, deleteMessage } = useCommunities();
   const [community, setCommunity] = useState<Community | null>(null);
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState<MessageWithSender[]>([]);
@@ -67,6 +67,14 @@ export default function CommunityChatPage() {
   }, [messages.length]);
 
   const joined = community ? isMember(community.id) : false;
+  const myMembership = community ? membership(community.id) : null;
+  const isOwner = community?.owner_id === profile?.id;
+  const isAdmin = myMembership?.role === 'admin' || isOwner;
+
+  async function handleDelete(messageId: string) {
+    const { error } = await deleteMessage(messageId);
+    if (error) push({ type: 'error', message: `No se pudo eliminar: ${error}` });
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -119,8 +127,9 @@ export default function CommunityChatPage() {
             messages.map((m) => {
               const own = m.sender_id === profile?.id;
               const founder = isFounderRole(m.sender?.role);
+              const canDelete = own || isAdmin;
               return (
-                <div key={m.id} className={`flex gap-2 ${own ? 'flex-row-reverse' : ''}`}>
+                <div key={m.id} className={`group flex gap-2 ${own ? 'flex-row-reverse' : ''}`}>
                   <AvatarWithFrame src={m.sender?.avatar_url} alt={m.sender?.username ?? ''} size="sm" to={`/perfil/${m.sender?.username}`} frameRarity={(m.sender as any)?.frame?.rarity ?? null} frameIcon={(m.sender as any)?.frame?.icon ?? null} />
                   <div className={`max-w-[75%] ${own ? 'text-right' : ''}`}>
                     <div className={`mb-0.5 flex items-center gap-1.5 ${own ? 'justify-end' : ''}`}>
@@ -136,9 +145,20 @@ export default function CommunityChatPage() {
                     <div className={`inline-block rounded-2xl px-3 py-2 text-sm ${founder ? 'founder-bubble text-sky-100' : own ? 'bg-gold-500 text-ink-950' : 'bg-ink-100 text-ink-800 dark:bg-ink-800 dark:text-ink-100'}`}>
                       {m.content}
                     </div>
-                    <p className="mt-0.5 text-xs text-ink-400">
-                      {new Date(m.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
-                    </p>
+                    <div className={`mt-0.5 flex items-center gap-2 ${own ? 'justify-end' : ''}`}>
+                      <p className="text-xs text-ink-400">
+                        {new Date(m.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                      {canDelete && (
+                        <button
+                          onClick={() => handleDelete(m.id)}
+                          className="opacity-0 transition group-hover:opacity-100 text-ink-400 hover:text-red-500"
+                          title="Eliminar mensaje"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               );

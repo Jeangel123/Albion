@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
-  Users, BadgeCheck, ArrowLeft, Settings, Castle, MessageSquare, Crown,
+  Users, BadgeCheck, ArrowLeft, Settings, Castle, MessageSquare, Crown, Trash2, Send,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
@@ -10,21 +10,23 @@ import { useRealtime, upsertById, removeById } from '../lib/useRealtime';
 import { useCommunities } from '../lib/useCommunities';
 import { Banner } from '../components/Banner';
 import { AvatarWithFrame } from '../components/AvatarWithFrame';
+import { RankBadge } from '../components/RankBadge';
+import { FounderName, isFounderRole } from '../components/FounderStyle';
 import { Spinner, EmptyState } from '../components/ui';
 import { Modal } from '../components/Modal';
 import { ImageUpload } from '../components/ImageUpload';
 import { slugify } from '../lib/format';
-import type { Community, CommunityMember, Profile, Message } from '../lib/types';
+import type { Community, CommunityMember, Profile, Message, MedievalRank, FrameRarity } from '../lib/types';
 
-type MemberWithUser = CommunityMember & { user: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> };
-type MessageWithSender = Message & { sender: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url'> };
+type MemberWithUser = CommunityMember & { user: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank' | 'role'> & { frame?: { rarity: FrameRarity; icon: string | null } | null } };
+type MessageWithSender = Message & { sender: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank' | 'role'> & { frame?: { rarity: FrameRarity; icon: string | null } | null } };
 
 export default function CommunityDetailPage() {
   const { slug } = useParams();
   const { profile } = useAuth();
   const { push } = useToast();
   const navigate = useNavigate();
-  const { isMember, membership, join, leave } = useCommunities();
+  const { isMember, membership, join, leave, deleteMessage } = useCommunities();
   const [community, setCommunity] = useState<Community | null>(null);
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState<MemberWithUser[]>([]);
@@ -41,15 +43,15 @@ export default function CommunityDetailPage() {
       const [m, msg] = await Promise.all([
         supabase
           .from('community_members')
-          .select('*, user:profiles(id, username, display_name, avatar_url, medieval_rank, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
+          .select('*, user:profiles(id, username, display_name, avatar_url, medieval_rank, role, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
           .eq('community_id', c.id)
           .order('joined_at', { ascending: false }),
         supabase
           .from('messages')
-          .select('*, sender:profiles(id, username, display_name, avatar_url)')
+          .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank, role, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
           .eq('room_id', c.id)
-            .order('created_at', { ascending: true })
-          .limit(100),
+          .order('created_at', { ascending: true })
+          .limit(200),
       ]);
       setMembers((m.data ?? []) as unknown as MemberWithUser[]);
       setMessages((msg.data ?? []) as unknown as MessageWithSender[]);
@@ -72,7 +74,7 @@ export default function CommunityDetailPage() {
     } else if (row?.id) {
       supabase
         .from('messages')
-        .select('*, sender:profiles(id, username, display_name, avatar_url)')
+        .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank, role, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
         .eq('id', row.id)
         .maybeSingle()
         .then(({ data }) => { if (data) setMessages((list) => upsertById(list, data as MessageWithSender)); });
@@ -114,7 +116,13 @@ export default function CommunityDetailPage() {
     if (error) {
       console.error('[messages insert]', { roomId: community.id, senderId: profile.id, error });
       push({ type: 'error', message: `No se pudo enviar: ${error.message}` });
+      return;
     }
+  }
+
+  async function handleDeleteMessage(messageId: string) {
+    const { error } = await deleteMessage(messageId);
+    if (error) push({ type: 'error', message: `No se pudo eliminar: ${error}` });
   }
 
   if (loading) return <Spinner className="py-20" />;
@@ -173,7 +181,13 @@ export default function CommunityDetailPage() {
         <div className="mt-6">
           {tab === 'chat' && (
             joined ? (
-              <ChatPanel messages={messages} onSend={sendMessage} currentUserId={profile?.id ?? ''} />
+              <ChatPanel
+                messages={messages}
+                onSend={sendMessage}
+                onDelete={handleDeleteMessage}
+                currentUserId={profile?.id ?? ''}
+                canModerate={isAdmin}
+              />
             ) : (
               <EmptyState icon={MessageSquare} title="Únete para chatear" hint="Necesitas ser miembro para ver y enviar mensajes." action={{ to: '#', label: '' }} />
             )
@@ -222,18 +236,26 @@ export default function CommunityDetailPage() {
   );
 }
 
-function ChatPanel({ messages, onSend, currentUserId }: { messages: MessageWithSender[]; onSend: (content: string) => void; currentUserId: string }) {
+function ChatPanel({ messages, onSend, onDelete, currentUserId, canModerate }: { messages: MessageWithSender[]; onSend: (content: string) => Promise<void>; onDelete: (id: string) => Promise<void>; currentUserId: string; canModerate: boolean }) {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
+  const endRef = useRef<HTMLDivElement>(null);
 
-  function submit(e: React.FormEvent) {
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages.length]);
+
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     const content = input.trim();
     if (!content || sending) return;
     setSending(true);
-    onSend(content);
-    setInput('');
-    setSending(false);
+    try {
+      await onSend(content);
+      setInput('');
+    } finally {
+      setSending(false);
+    }
   }
 
   return (
@@ -246,24 +268,45 @@ function ChatPanel({ messages, onSend, currentUserId }: { messages: MessageWithS
         ) : (
           messages.map((m) => {
             const own = m.sender_id === currentUserId;
+            const founder = isFounderRole(m.sender?.role);
+            const canDelete = own || canModerate;
             return (
-              <div key={m.id} className={`flex gap-2 ${own ? 'flex-row-reverse' : ''}`}>
-                <AvatarWithFrame src={m.sender?.avatar_url} alt={m.sender?.username ?? ''} size="sm" />
+              <div key={m.id} className={`group flex gap-2 ${own ? 'flex-row-reverse' : ''}`}>
+                <AvatarWithFrame src={m.sender?.avatar_url} alt={m.sender?.username ?? ''} size="sm" to={`/perfil/${m.sender?.username}`} frameRarity={(m.sender as any)?.frame?.rarity ?? null} frameIcon={(m.sender as any)?.frame?.icon ?? null} />
                 <div className={`max-w-[75%] ${own ? 'text-right' : ''}`}>
-                  <p className="mb-0.5 text-xs text-ink-500">
-                    {own ? 'Tú' : m.sender?.display_name || m.sender?.username}
-                  </p>
-                  <div className={`inline-block rounded-2xl px-3 py-2 text-sm ${own ? 'bg-gold-500 text-ink-950' : 'bg-ink-100 text-ink-800 dark:bg-ink-800 dark:text-ink-100'}`}>
+                  <div className={`mb-0.5 flex items-center gap-1.5 ${own ? 'justify-end' : ''}`}>
+                    {founder ? (
+                      <FounderName name={own ? 'Tú' : m.sender?.display_name || m.sender?.username || ''} />
+                    ) : (
+                      <p className="text-xs text-ink-500">
+                        {own ? 'Tú' : m.sender?.display_name || m.sender?.username}
+                      </p>
+                    )}
+                    {m.sender?.medieval_rank && <RankBadge rank={m.sender.medieval_rank as MedievalRank} size="xs" showEmoji={false} />}
+                  </div>
+                  <div className={`inline-block rounded-2xl px-3 py-2 text-sm ${founder ? 'founder-bubble text-sky-100' : own ? 'bg-gold-500 text-ink-950' : 'bg-ink-100 text-ink-800 dark:bg-ink-800 dark:text-ink-100'}`}>
                     {m.content}
                   </div>
-                  <p className="mt-0.5 text-xs text-ink-400">
-                    {new Date(m.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
-                  </p>
+                  <div className={`mt-0.5 flex items-center gap-2 ${own ? 'justify-end' : ''}`}>
+                    <p className="text-xs text-ink-400">
+                      {new Date(m.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                    {canDelete && (
+                      <button
+                        onClick={() => onDelete(m.id)}
+                        className="opacity-0 transition group-hover:opacity-100 text-ink-400 hover:text-red-500"
+                        title="Eliminar mensaje"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             );
           })
         )}
+        <div ref={endRef} />
       </div>
       <form onSubmit={submit} className="border-t border-ink-200 p-3 dark:border-ink-800">
         <div className="flex gap-2">
@@ -275,7 +318,7 @@ function ChatPanel({ messages, onSend, currentUserId }: { messages: MessageWithS
             disabled={sending}
           />
           <button type="submit" disabled={sending || !input.trim()} className="btn-primary">
-            Enviar
+            <Send className="h-4 w-4" />
           </button>
         </div>
       </form>
