@@ -85,6 +85,7 @@ export type Post = {
   like_count: number;
   comment_count: number;
   share_count: number;
+  tags: string[];
   created_at: string;
   updated_at: string;
 };

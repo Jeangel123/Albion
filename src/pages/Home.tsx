@@ -10,11 +10,13 @@ import { useRealtime, upsertById, removeById } from '../lib/useRealtime';
 import { EVENT_TYPES, MEDIEVAL_RANKS, type Guild, type Post, type Profile, type AlbionEvent } from '../lib/types';
 import { formatDateTime } from '../lib/format';
 import { useI18n } from '../lib/i18n';
+import { useAuth } from '../lib/auth';
 
 type PostWithAuthor = Post & { author: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> };
 
 export default function HomePage() {
   const { t } = useI18n();
+  const { profile } = useAuth();
   const [posts, setPosts] = useState<PostWithAuthor[] | null>(null);
   const [guilds, setGuilds] = useState<Guild[] | null>(null);
   const [news, setNews] = useState<PostWithAuthor[] | null>(null);
@@ -85,7 +87,11 @@ export default function HomePage() {
             {t('hero.desc')}
           </p>
           <div className="mt-6 flex flex-wrap gap-3 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-            <Link to="/registro" className="btn-primary">{t('hero.cta1')}</Link>
+            {profile ? (
+              <Link to={`/perfil/${profile.username}`} className="btn-primary">Mi perfil</Link>
+            ) : (
+              <Link to="/registro" className="btn-primary">{t('hero.cta1')}</Link>
+            )}
             <Link to="/gremios" className="btn-outline border-gold-400/40 text-white hover:bg-white/10">{t('hero.cta2')}</Link>
           </div>
         </div>

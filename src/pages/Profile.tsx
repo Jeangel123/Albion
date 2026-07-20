@@ -42,7 +42,7 @@ export default function ProfilePage() {
   // Live-sync this profile when it changes (avatar, banner, bio, etc.)
   useRealtime<Profile>({
     table: 'profiles',
-    filter: `id=eq.${profile?.id ?? ''}`,
+    filter: profile?.id ? `id=eq.${profile.id}` : undefined,
     onEvent: ({ eventType, new: row }) => {
       if (eventType === 'DELETE') setProfile(null);
       else if (row) setProfile((prev) => (prev && prev.id === row.id ? { ...prev, ...row } : prev));
@@ -52,7 +52,7 @@ export default function ProfilePage() {
   // Live-sync guild info for this profile
   useRealtime<Guild>({
     table: 'guilds',
-    filter: `id=eq.${profile?.guild_id ?? ''}`,
+    filter: profile?.guild_id ? `id=eq.${profile.guild_id}` : undefined,
     onEvent: ({ eventType, new: row }) => {
       if (eventType === 'DELETE' || !row) setGuild(null);
       else if (row) setGuild((prev) => (prev && prev.id === row.id ? { ...prev, ...row } : (row as Guild)));
@@ -69,12 +69,15 @@ export default function ProfilePage() {
         .then(({ data }) => { if (data) setPosts((list) => upsertById(list, data as PostWithAuthor)); });
     }
   }, []);
-  useRealtime<Post>({ table: 'posts', filter: `author_id=eq.${profile?.id ?? ''}`, onEvent: handlePostEvent });
+  useRealtime<Post>({ table: 'posts', filter: profile?.id ? `author_id=eq.${profile.id}` : undefined, onEvent: handlePostEvent });
 
   useEffect(() => {
     if (!username) return;
+    let active = true;
+    setLoading(true);
     (async () => {
       const { data: p } = await supabase.from('profiles').select('*').eq('username', username).maybeSingle();
+      if (!active) return;
       if (!p) { setLoading(false); return; }
       setProfile(p as Profile);
       const [postData, guildData, fol, folg] = await Promise.all([
@@ -83,12 +86,14 @@ export default function ProfilePage() {
         supabase.from('follows').select('id', { count: 'exact', head: true }).eq('following_id', p.id),
         supabase.from('follows').select('id', { count: 'exact', head: true }).eq('follower_id', p.id),
       ]);
+      if (!active) return;
       setPosts((postData.data ?? []) as PostWithAuthor[]);
       setGuild((guildData.data ?? null) as Guild | null);
       setFollowers(fol.count ?? 0);
       setFollowing(folg.count ?? 0);
       if (me && me.id !== p.id) {
         const { data: f } = await supabase.from('follows').select('id').eq('follower_id', me.id).eq('following_id', p.id).maybeSingle();
+        if (!active) return;
         setIsFollowing(!!f);
       }
       const { data: uf } = await supabase
@@ -97,11 +102,13 @@ export default function ProfilePage() {
         .eq('user_id', p.id)
         .eq('is_equipped', true)
         .maybeSingle();
+      if (!active) return;
       if (uf?.frame) setFrame(uf.frame as any);
       const [achData, commCount] = await Promise.all([
         getUserAchievements(p.id),
         supabase.from('community_members').select('id', { count: 'exact', head: true }).eq('user_id', p.id),
       ]);
+      if (!active) return;
       setAchievements(achData);
       const ageMs = Date.now() - new Date(p.created_at).getTime();
       setStats({
@@ -112,7 +119,8 @@ export default function ProfilePage() {
       });
       setLoading(false);
     })();
-  }, [username, me]);
+    return () => { active = false; };
+  }, [username, me?.id]);
 
   async function toggleFollow() {
     if (!me) return navigate('/login');

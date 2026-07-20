@@ -28,6 +28,29 @@ export function PostCard({ post, author, onDeleted }: { post: PostWithAuthor; au
   const [showComments, setShowComments] = useState(false);
   const [authorFrame, setAuthorFrame] = useState<{ rarity: FrameRarity; icon: string | null } | null>(null);
 
+  // Load the current user's existing reaction and saved state for this post
+  useEffect(() => {
+    if (!profile?.id) {
+      setMyReaction(null);
+      setSaved(false);
+      return;
+    }
+    let active = true;
+    (async () => {
+      const [reactRes, saveRes, countRes] = await Promise.all([
+        supabase.from('reactions').select('type').eq('post_id', post.id).eq('user_id', profile.id).maybeSingle(),
+        supabase.from('saved_posts').select('id').eq('post_id', post.id).eq('user_id', profile.id).maybeSingle(),
+        supabase.from('reactions').select('id', { count: 'exact', head: true }).eq('post_id', post.id),
+      ]);
+      if (!active) return;
+      if (reactRes.data) setMyReaction(reactRes.data.type);
+      else setMyReaction(null);
+      setSaved(!!saveRes.data);
+      if (typeof countRes.count === 'number') setLikeCount(countRes.count);
+    })();
+    return () => { active = false; };
+  }, [profile?.id, post.id]);
+
   useEffect(() => {
     if (!author?.id) return;
     let active = true;
@@ -121,6 +144,15 @@ export function PostCard({ post, author, onDeleted }: { post: PostWithAuthor; au
             {post.is_news && <span className="chip bg-gold-100 text-gold-700 dark:bg-gold-950 dark:text-gold-300">Noticia</span>}
           </div>
           {post.content && <p className="mt-1.5 whitespace-pre-wrap text-sm text-ink-800 dark:text-ink-100">{post.content}</p>}
+          {post.tags && post.tags.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {post.tags.map((tag) => (
+                <Link key={tag} to={`/buscar?q=${encodeURIComponent('#' + tag)}`} className="chip bg-gold-50 text-xs text-gold-700 hover:bg-gold-100 dark:bg-gold-950/30 dark:text-gold-300 dark:hover:bg-gold-950/50">
+                  #{tag}
+                </Link>
+              ))}
+            </div>
+          )}
           {post.link_url && (
             <a href={post.link_url} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1.5 text-sm link-gold">
               <LinkIcon className="h-4 w-4" /> {post.link_url}

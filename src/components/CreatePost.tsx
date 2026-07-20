@@ -15,6 +15,8 @@ export function CreatePost({ onCreated, guildId }: { onCreated?: () => void; gui
   const [linkUrl, setLinkUrl] = useState('');
   const [mediaUrl, setMediaUrl] = useState('');
   const [pollOptions, setPollOptions] = useState<string[]>(['', '']);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   if (!profile) return null;
@@ -34,6 +36,7 @@ export function CreatePost({ onCreated, guildId }: { onCreated?: () => void; gui
         content: content.trim() || null,
         media_urls: media,
         link_url: type === 'link' ? linkUrl || null : null,
+        tags,
       })
       .select('id')
       .single();
@@ -52,6 +55,8 @@ export function CreatePost({ onCreated, guildId }: { onCreated?: () => void; gui
     setLinkUrl('');
     setMediaUrl('');
     setPollOptions(['', '']);
+    setTags([]);
+    setTagInput('');
     setType('text');
     setSubmitting(false);
     push({ type: 'success', message: 'Publicado' });
@@ -107,6 +112,30 @@ export function CreatePost({ onCreated, guildId }: { onCreated?: () => void; gui
               )}
             </div>
           )}
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {tags.map((tag) => (
+              <span key={tag} className="inline-flex items-center gap-1 rounded-full bg-gold-50 px-2.5 py-1 text-xs text-gold-700 dark:bg-gold-950/30 dark:text-gold-300">
+                #{tag}
+                <button type="button" onClick={() => setTags((t) => t.filter((x) => x !== tag))} className="text-gold-500 hover:text-gold-700">
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            ))}
+            <input
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value.replace(/[#,\s]/g, ''))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ',') {
+                  e.preventDefault();
+                  const v = tagInput.trim().replace(/^#/, '');
+                  if (v && !tags.includes(v) && tags.length < 8) setTags((t) => [...t, v]);
+                  setTagInput('');
+                }
+              }}
+              placeholder="Añadir etiqueta..."
+              className="flex-1 min-w-[120px] rounded-full border border-ink-200 bg-ink-50 px-3 py-1 text-xs outline-none focus:border-gold-400 dark:border-ink-700 dark:bg-ink-900"
+            />
+          </div>
           <div className="mt-3 flex items-center justify-between">
             <div className="flex gap-1">
               <TypeBtn active={type === 'text'} onClick={() => setType('text')} label="Texto" />
