@@ -117,10 +117,11 @@ export default function FrameShopPage() {
           };
 
           return (
-            <div key={frame.id} className={`card overflow-hidden border-2 ${rarityCls[frame.rarity]} p-0`}>
-              <div className="flex items-center justify-center bg-gradient-to-br from-ink-50 to-ink-100 py-8 dark:from-ink-900 dark:to-ink-950">
-                <div className={`relative flex h-20 w-20 items-center justify-center rounded-full bg-ink-200 dark:bg-ink-800 ${rarityMeta ? `ring-2 ${rarityMeta.color}` : ''}`}>
-                  <span className="text-4xl">{frame.icon ?? '🖼️'}</span>
+            <div key={frame.id} className={`card card-glow fade-in-up overflow-hidden border-2 ${rarityCls[frame.rarity]} p-0`} style={{ animationDelay: `${sorted.indexOf(frame) * 0.05}s` }}>
+              <div className="relative flex items-center justify-center bg-gradient-to-br from-ink-50 to-ink-100 py-8 dark:from-ink-900 dark:to-ink-950">
+                {frame.rarity === 'legendary' && <div className="absolute inset-0 shimmer-gold opacity-30" />}
+                <div className={`relative flex h-20 w-20 items-center justify-center rounded-full bg-ink-200 dark:bg-ink-800 ${rarityMeta ? `ring-2 ${rarityMeta.color}` : ''} ${frame.rarity === 'mythic' ? 'pulse-glow-mythic' : frame.rarity === 'legendary' ? 'pulse-glow' : ''}`}>
+                  <span className="text-4xl transition-transform hover:scale-110">{frame.icon ?? '🖼️'}</span>
                 </div>
               </div>
               <div className="p-4">

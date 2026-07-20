@@ -16,8 +16,17 @@ const RARITY_GLOW: Record<FrameRarity, string> = {
   uncommon: 'shadow-[0_0_8px_rgba(16,185,129,0.4)]',
   rare: 'shadow-[0_0_10px_rgba(14,165,233,0.4)]',
   epic: 'shadow-[0_0_12px_rgba(139,92,246,0.4)]',
-  legendary: 'shadow-[0_0_14px_rgba(245,158,11,0.5)]',
-  mythic: 'shadow-[0_0_16px_rgba(244,63,94,0.5)]',
+  legendary: 'pulse-glow',
+  mythic: 'pulse-glow-mythic',
+};
+
+const RARITY_ANIM: Record<FrameRarity, string> = {
+  common: '',
+  uncommon: '',
+  rare: '',
+  epic: '',
+  legendary: 'crown-shine',
+  mythic: 'crown-shine',
 };
 
 export function AvatarWithFrame({
@@ -56,9 +65,10 @@ export function AvatarWithFrame({
   const rarity = showFrame && frameRarity ? frameRarity : null;
   const ringCls = rarity ? RARITY_RING[rarity] : '';
   const glowCls = rarity ? RARITY_GLOW[rarity] : '';
+  const animCls = rarity ? RARITY_ANIM[rarity] : '';
   const rarityMeta = rarity ? FRAME_RARITIES.find((r) => r.key === rarity) : null;
 
-  const cls = `${dims} rounded-full overflow-hidden flex items-center justify-center bg-ink-200 dark:bg-ink-800 ${ringCls} ${glowCls} transition-all`;
+  const cls = `${dims} rounded-full overflow-hidden flex items-center justify-center bg-ink-200 dark:bg-ink-800 ${ringCls} ${glowCls} ${animCls} transition-all duration-300`;
 
   const inner = src ? (
     <img src={src} alt={alt} className="h-full w-full object-cover" />
@@ -67,11 +77,11 @@ export function AvatarWithFrame({
   );
 
   const content = (
-    <span className="relative inline-block shrink-0">
+    <span className="group relative inline-block shrink-0">
       <span className={cls}>{inner}</span>
       {rarity && frameIcon && (
         <span
-          className={`absolute -bottom-1 -right-1 flex items-center justify-center rounded-full bg-white dark:bg-ink-900 ${iconSize} ${rarityMeta?.color ?? ''}`}
+          className={`absolute -bottom-1 -right-1 flex items-center justify-center rounded-full bg-white dark:bg-ink-900 ${iconSize} ${rarityMeta?.color ?? ''} ring-1 ring-white dark:ring-ink-900 transition-transform group-hover:scale-110`}
           style={{ fontSize: 'inherit' }}
         >
           {frameIcon}

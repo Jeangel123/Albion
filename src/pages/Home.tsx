@@ -60,15 +60,18 @@ export default function HomePage() {
       {/* Hero */}
       <section className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-ink-900 via-ink-950 to-ink-900 p-8 sm:p-12">
         <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 15% 20%, rgba(196,144,42,0.5), transparent 40%), radial-gradient(circle at 85% 80%, rgba(196,144,42,0.35), transparent 45%)' }} />
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(196,144,42,0.15), transparent 60%)' }} />
+        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-gold-500/10 blur-3xl float" />
+        <div className="pointer-events-none absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-gold-600/10 blur-3xl float" style={{ animationDelay: '1s' }} />
         <div className="relative max-w-2xl">
-          <span className="chip bg-gold-500/15 text-gold-300 backdrop-blur"><Sparkles className="h-3.5 w-3.5" /> Red social de gremios</span>
-          <h1 className="mt-4 font-display text-3xl font-bold leading-tight text-white sm:text-5xl">
-            Tu gremio. Tu alianza. <span className="text-gold-400">Tu Imperio.</span>
+          <span className="chip bg-gold-500/15 text-gold-300 backdrop-blur animate-fade-in"><Sparkles className="h-3.5 w-3.5" /> Red social de gremios</span>
+          <h1 className="mt-4 font-display text-3xl font-bold leading-tight text-white animate-slide-up sm:text-5xl">
+            Tu gremio. Tu alianza. <span className="text-gradient-gold">Tu Imperio.</span>
           </h1>
-          <p className="mt-3 text-base text-ink-200 sm:text-lg">
+          <p className="mt-3 text-base text-ink-200 animate-slide-up sm:text-lg" style={{ animationDelay: '0.1s' }}>
             Conecta con la comunidad hispanohablante de Albion Online. Recluta, organiza eventos, publica tus hazañas y domina Avalon.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-6 flex flex-wrap gap-3 animate-slide-up" style={{ animationDelay: '0.2s' }}>
             <Link to="/registro" className="btn-primary">Crear cuenta</Link>
             <Link to="/gremios" className="btn-outline border-gold-400/40 text-white hover:bg-white/10">Explorar gremios</Link>
           </div>
@@ -92,14 +95,14 @@ export default function HomePage() {
 
         <aside className="space-y-6">
           {/* Featured guilds */}
-          <div className="card p-4">
+          <div className="card-medieval p-4">
             <SectionTitle title="Gremios destacados" action={{ to: '/gremios', label: 'Ver todos' }} />
             {!guilds ? <Spinner /> : guilds.length === 0 ? (
               <p className="text-sm text-ink-500">No hay gremios destacados aún.</p>
             ) : (
               <div className="space-y-3">
                 {guilds.map((g) => (
-                  <Link key={g.id} to={`/gremio/${g.slug}`} className="flex items-center gap-3 rounded-xl p-2 hover:bg-ink-100 dark:hover:bg-ink-800">
+                  <Link key={g.id} to={`/gremio/${g.slug}`} className="flex items-center gap-3 rounded-xl p-2 transition hover:bg-gold-50 dark:hover:bg-gold-950/30">
                     <div className="h-10 w-10 overflow-hidden rounded-lg bg-ink-200 dark:bg-ink-800">
                       {g.avatar_url ? <img src={g.avatar_url} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center font-display font-bold text-gold-500">{g.name[0]}</div>}
                     </div>
@@ -180,7 +183,7 @@ export default function HomePage() {
           )}
 
           {/* Quick links */}
-          <div className="card p-4">
+          <div className="card-medieval p-4">
             <div className="grid grid-cols-2 gap-2">
               <QuickLink to="/ranking" icon={Trophy} label="Rankings" />
               <QuickLink to="/alianzas" icon={Shield} label="Alianzas" />
@@ -196,8 +199,8 @@ export default function HomePage() {
 
 function QuickLink({ to, icon: Icon, label }: { to: string; icon: typeof Trophy; label: string }) {
   return (
-    <Link to={to} className="flex flex-col items-center gap-1.5 rounded-xl p-3 text-center transition hover:bg-ink-100 dark:hover:bg-ink-800">
-      <Icon className="h-5 w-5 text-gold-500" />
+    <Link to={to} className="flex flex-col items-center gap-1.5 rounded-xl p-3 text-center transition hover:bg-gold-50 hover:shadow-sm dark:hover:bg-gold-950/30">
+      <Icon className="h-5 w-5 text-gold-500 transition-transform hover:scale-110" />
       <span className="text-xs font-medium">{label}</span>
     </Link>
   );

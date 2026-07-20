@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   Search, Bell, Home, Users, Shield, Calendar, Trophy, MessageSquare, Menu, X, Sun, Moon, Plus, Settings, LogOut, User as UserIcon, Castle, ShoppingBag, Wallet as WalletIcon,
 } from 'lucide-react';
@@ -25,6 +25,7 @@ export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [q, setQ] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
 
   function submitSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -34,19 +35,22 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-ink-200/70 bg-white/80 backdrop-blur-xl dark:border-ink-800 dark:bg-ink-950/80">
+    <header className="sticky top-0 z-40 border-b border-gold-200/30 bg-white/85 backdrop-blur-xl dark:border-gold-900/30 dark:bg-ink-950/85">
       <div className="container-app flex h-16 items-center gap-3">
         <Logo />
         <nav className="ml-4 hidden items-center gap-1 lg:flex">
-          {NAV.map((n) => (
-            <Link
-              key={n.to}
-              to={n.to}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 hover:text-ink-900 dark:text-ink-300 dark:hover:bg-ink-800 dark:hover:text-white"
-            >
-              {n.label}
-            </Link>
-          ))}
+          {NAV.map((n) => {
+            const active = location.pathname === n.to || (n.to !== '/' && location.pathname.startsWith(n.to));
+            return (
+              <Link
+                key={n.to}
+                to={n.to}
+                className={`nav-link ${active ? 'nav-link-active' : ''}`}
+              >
+                {n.label}
+              </Link>
+            );
+          })}
         </nav>
         <div className="ml-auto flex items-center gap-2">
           <form onSubmit={submitSearch} className="hidden md:block">
@@ -127,16 +131,19 @@ export function Navbar() {
                 />
               </div>
             </form>
-            {NAV.map((n) => (
-              <Link
-                key={n.to}
-                to={n.to}
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink-700 hover:bg-ink-100 dark:text-ink-200 dark:hover:bg-ink-800"
-              >
-                <n.icon className="h-4 w-4" /> {n.label}
-              </Link>
-            ))}
+            {NAV.map((n) => {
+              const active = location.pathname === n.to || (n.to !== '/' && location.pathname.startsWith(n.to));
+              return (
+                <Link
+                  key={n.to}
+                  to={n.to}
+                  onClick={() => setOpen(false)}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${active ? 'bg-gold-50 text-gold-600 dark:bg-gold-950/30 dark:text-gold-300' : 'text-ink-700 hover:bg-ink-100 dark:text-ink-200 dark:hover:bg-ink-800'}`}
+                >
+                  <n.icon className="h-4 w-4" /> {n.label}
+                </Link>
+              );
+            })}
             {!profile && (
               <div className="flex gap-2 pt-2">
                 <Link to="/login" onClick={() => setOpen(false)} className="btn-outline flex-1">Iniciar sesión</Link>

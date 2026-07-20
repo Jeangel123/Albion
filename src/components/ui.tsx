@@ -3,9 +3,9 @@ import { type LucideIcon } from 'lucide-react';
 
 export function EmptyState({ icon: Icon, title, hint, action }: { icon: LucideIcon; title: string; hint?: string; action?: { to: string; label: string } }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-      <div className="rounded-2xl bg-ink-100 p-4 dark:bg-ink-800">
-        <Icon className="h-8 w-8 text-ink-400" />
+    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center animate-fade-in">
+      <div className="rounded-2xl bg-gradient-to-br from-gold-100 to-gold-50 p-4 dark:from-gold-950/50 dark:to-ink-900">
+        <Icon className="h-8 w-8 text-gold-500" />
       </div>
       <h3 className="text-base font-semibold text-ink-800 dark:text-ink-100">{title}</h3>
       {hint && <p className="max-w-sm text-sm text-ink-500 dark:text-ink-400">{hint}</p>}

@@ -9,9 +9,21 @@
   }
   body {
     @apply bg-ink-50 text-ink-900 dark:bg-ink-950 dark:text-ink-100 font-sans;
+    background-image:
+      radial-gradient(circle at 0% 0%, rgba(196,144,42,0.04), transparent 25%),
+      radial-gradient(circle at 100% 100%, rgba(196,144,42,0.03), transparent 25%);
+    background-attachment: fixed;
+  }
+  .dark body {
+    background-image:
+      radial-gradient(circle at 0% 0%, rgba(196,144,42,0.06), transparent 30%),
+      radial-gradient(circle at 100% 100%, rgba(133,87,31,0.05), transparent 30%);
   }
   ::selection {
     @apply bg-gold-300/40;
+  }
+  h1, h2, h3 {
+    @apply tracking-tight;
   }
 }
 
@@ -22,14 +34,20 @@
   .card {
     @apply rounded-2xl border border-ink-200/70 bg-white shadow-sm dark:border-ink-800 dark:bg-ink-900;
   }
+  .card-medieval {
+    @apply rounded-2xl border border-gold-200/50 bg-gradient-to-br from-white to-gold-50/30 shadow-md dark:border-gold-900/40 dark:from-ink-900 dark:to-ink-950;
+  }
   .card-hover {
-    @apply transition-all duration-300 hover:-translate-y-0.5 hover:shadow-gold hover:border-gold-300/60;
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-gold hover:border-gold-300/60;
+  }
+  .card-glow {
+    @apply transition-all duration-300 hover:shadow-[0_0_20px_rgba(196,144,42,0.3)] hover:border-gold-400/50;
   }
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-primary {
-    @apply btn bg-gold-500 text-ink-950 hover:bg-gold-400 shadow-sm hover:shadow-gold;
+    @apply btn bg-gradient-to-r from-gold-500 to-gold-600 text-ink-950 hover:from-gold-400 hover:to-gold-500 shadow-sm hover:shadow-gold;
   }
   .btn-ghost {
     @apply btn bg-transparent text-ink-700 hover:bg-ink-100 dark:text-ink-200 dark:hover:bg-ink-800;
@@ -49,6 +67,25 @@
   .link-gold {
     @apply text-gold-600 hover:text-gold-500 dark:text-gold-400 dark:hover:text-gold-300;
   }
+  .nav-link {
+    @apply relative rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 hover:text-ink-900 dark:text-ink-300 dark:hover:bg-ink-800 dark:hover:text-white;
+  }
+  .nav-link-active {
+    @apply text-gold-600 dark:text-gold-400 bg-gold-50 dark:bg-gold-950/50;
+  }
+  .text-gradient-gold {
+    @apply bg-gradient-to-r from-gold-400 via-gold-500 to-gold-600 bg-clip-text text-transparent;
+  }
+  .ornament {
+    @apply relative;
+  }
+  .ornament::before,
+  .ornament::after {
+    content: '';
+    @apply absolute top-1/2 h-px w-12 bg-gradient-to-r from-transparent via-gold-400 to-transparent;
+  }
+  .ornament::before { @apply -left-2 right-full; }
+  .ornament::after { @apply left-full -right-2; }
 }
 
 /* Scrollbar */
@@ -60,4 +97,104 @@
 .skeleton {
   background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(196,144,42,0.12) 50%, rgba(255,255,255,0) 100%);
   background-size: 200% 100%;
+}
+
+/* Medieval rank glow effects */
+.rank-glow {
+  position: relative;
+}
+.rank-glow::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.rank-glow:hover::after {
+  opacity: 1;
+}
+
+/* Shimmer animation for legendary items */
+@keyframes shimmer-gold {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.shimmer-gold {
+  background: linear-gradient(90deg, transparent 0%, rgba(255,215,100,0.3) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer-gold 2.5s linear infinite;
+}
+
+/* Pulse glow for high-rarity frames */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(245,158,11,0.4); }
+  50% { box-shadow: 0 0 20px rgba(245,158,11,0.7); }
+}
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow-mythic {
+  0%, 100% { box-shadow: 0 0 10px rgba(244,63,94,0.4); }
+  50% { box-shadow: 0 0 24px rgba(244,63,94,0.8); }
+}
+.pulse-glow-mythic {
+  animation: pulse-glow-mythic 1.8s ease-in-out infinite;
+}
+
+/* Floating animation for hero elements */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Slow rotation for decorative elements */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+/* Fade-in stagger for lists */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up {
+  animation: fade-in-up 0.4s ease-out both;
+}
+
+/* Parchment texture for special cards */
+.parchment {
+  background-image:
+    radial-gradient(ellipse at top, rgba(196,144,42,0.08), transparent 60%),
+    radial-gradient(ellipse at bottom, rgba(133,87,31,0.06), transparent 60%);
+}
+
+/* Crown shine for top ranks */
+@keyframes crown-shine {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.3); }
+}
+.crown-shine {
+  animation: crown-shine 3s ease-in-out infinite;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .float, .spin-slow, .shimmer-gold, .pulse-glow, .pulse-glow-mythic, .crown-shine {
+    animation: none !important;
+  }
 }

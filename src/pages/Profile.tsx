@@ -160,7 +160,7 @@ export default function ProfilePage() {
       </div>
 
       <div className="container-app mt-20">
-        <div className="card p-5">
+        <div className="card-medieval p-5 animate-fade-in">
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-white">{profile.display_name || profile.username}</h1>
@@ -181,7 +181,7 @@ export default function ProfilePage() {
           <div className="mt-4"><RankProgress points={profile.reputation_points} /></div>
 
           {guild && (
-            <Link to={`/gremio/${guild.slug}`} className="mt-3 inline-flex items-center gap-2 rounded-lg bg-ink-100 px-3 py-1.5 text-sm hover:bg-ink-200 dark:bg-ink-800 dark:hover:bg-ink-700">
+            <Link to={`/gremio/${guild.slug}`} className="mt-3 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-gold-100 to-gold-50 px-3 py-1.5 text-sm transition hover:shadow-sm dark:from-gold-950/40 dark:to-ink-900">
               <div className="h-5 w-5 overflow-hidden rounded bg-ink-300 dark:bg-ink-700">{guild.avatar_url && <img src={guild.avatar_url} alt="" className="h-full w-full object-cover" />}</div>
               {guild.name}
             </Link>
@@ -206,10 +206,10 @@ export default function ProfilePage() {
 
         <div className="mt-6 space-y-4">
           {tab === 'publicaciones' && (
-            posts.length === 0 ? <EmptyState icon={MessageSquare} title="Sin publicaciones" /> : posts.map((p) => <PostCard key={p.id} post={p} author={p.author} />)
+            posts.length === 0 ? <EmptyState icon={MessageSquare} title="Sin publicaciones" /> : posts.map((p, i) => <div key={p.id} className="fade-in-up" style={{ animationDelay: `${i * 0.05}s` }}><PostCard post={p} author={p.author} /></div>)
           )}
           {tab === 'guardados' && (
-            savedPosts.length === 0 ? <EmptyState icon={MessageSquare} title="Nada guardado" /> : savedPosts.map((p) => <PostCard key={p.id} post={p} author={p.author} />)
+            savedPosts.length === 0 ? <EmptyState icon={MessageSquare} title="Nada guardado" /> : savedPosts.map((p, i) => <div key={p.id} className="fade-in-up" style={{ animationDelay: `${i * 0.05}s` }}><PostCard post={p} author={p.author} /></div>)
           )}
         </div>
       </div>
