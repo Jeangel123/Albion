@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import { useRealtime } from './useRealtime';
@@ -108,10 +108,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
         return;
       }
-      if (event === 'SIGNED_IN') {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         // signIn/signUp already set the session + profile + loading directly
         // from the API response. Don't toggle loading here — that would unmount
         // the Navbar via AppGate and cause a flash back to logged-out UI.
+        // TOKEN_REFRESHED fires after SIGNED_IN and must not re-trigger loading.
         if (sess && !profile) {
           (async () => {
             await loadProfile(sess.user.id);
@@ -150,65 +151,64 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const value = useMemo<AuthCtx>(
-    () => ({
-      session,
-      profile,
-      loading,
-      refreshProfile,
-      signIn: async (email, password) => {
-        setLoading(true);
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          console.error('[auth] signIn error:', error.message);
-          setLoading(false);
-          return { error: error.message };
-        }
-        // Use the session returned directly instead of waiting for
-        // onAuthStateChange — the callback can race with INITIAL_SESSION.
-        if (data.session) {
-          setSession(data.session);
-          await loadProfile(data.session.user.id);
-        }
-        setLoading(false);
-        return { error: null };
-      },
-      signUp: async (email, password, username) => {
-        setLoading(true);
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { data: { username, display_name: username } },
-        });
-        if (error) {
-          console.error('[auth] signUp error:', JSON.stringify(error, null, 2));
-          let msg = error.message || 'Error desconocido al crear la cuenta';
-          if (msg.toLowerCase().includes('database error')) {
-            msg = 'Error de base de datos al crear la cuenta. ' +
-              'Esto puede deberse a un nombre de usuario duplicado o un problema temporal. ' +
-              'Inténtalo de nuevo o contacta soporte. ' +
-              '(Código: ' + (error.code || 'unknown') + ')';
-          }
-          setLoading(false);
-          return { error: msg, session: null };
-        }
-        // If email confirmation is disabled, signUp returns a valid session.
-        // Use it immediately so the user is logged in right away.
-        if (data.session) {
-          setSession(data.session);
-          await loadProfile(data.session.user.id);
-        }
-        setLoading(false);
-        return { error: null, session: data.session ?? null };
-      },
-      signOut: async () => {
-        await supabase.auth.signOut();
-        setProfile(null);
-        setSession(null);
-      },
-    }),
-    [session, profile, loading],
-  );
+  async function signIn(email: string, password: string) {
+    setLoading(true);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      console.error('[auth] signIn error:', error.message);
+      setLoading(false);
+      return { error: error.message };
+    }
+    if (data.session) {
+      setSession(data.session);
+      await loadProfile(data.session.user.id);
+    }
+    setLoading(false);
+    return { error: null };
+  }
+
+  async function signUp(email: string, password: string, username: string) {
+    setLoading(true);
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { username, display_name: username } },
+    });
+    if (error) {
+      console.error('[auth] signUp error:', JSON.stringify(error, null, 2));
+      let msg = error.message || 'Error desconocido al crear la cuenta';
+      if (msg.toLowerCase().includes('database error')) {
+        msg = 'Error de base de datos al crear la cuenta. ' +
+          'Esto puede deberse a un nombre de usuario duplicado o un problema temporal. ' +
+          'Inténtalo de nuevo o contacta soporte. ' +
+          '(Código: ' + (error.code || 'unknown') + ')';
+      }
+      setLoading(false);
+      return { error: msg, session: null };
+    }
+    if (data.session) {
+      setSession(data.session);
+      await loadProfile(data.session.user.id);
+    }
+    setLoading(false);
+    return { error: null, session: data.session ?? null };
+  }
+
+  async function signOut() {
+    await supabase.auth.signOut();
+    setProfile(null);
+    setSession(null);
+  }
+
+  const value: AuthCtx = {
+    session,
+    profile,
+    loading,
+    signIn,
+    signUp,
+    signOut,
+    refreshProfile,
+  };
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
