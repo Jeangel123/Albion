@@ -46,6 +46,8 @@ export default function CreateCommunityPage() {
     push({ type: 'success', message: 'Comunidad creada' });
     if (data) {
       await supabase.from('community_members').insert({ community_id: data.id, user_id: profile!.id, role: 'owner' });
+      await supabase.from('chat_rooms').insert({ id: data.id, type: 'community', name: data.name, created_by: profile!.id });
+      await supabase.from('chat_room_members').insert({ room_id: data.id, user_id: profile!.id });
       navigate(`/comunidad/${data.slug}`);
     }
   }

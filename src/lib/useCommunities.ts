@@ -68,6 +68,9 @@ export function useCommunities() {
       const { error } = await supabase
         .from('community_members')
         .insert({ community_id: communityId, user_id: profile.id, role: 'member' });
+      if (!error) {
+        await supabase.from('chat_room_members').insert({ room_id: communityId, user_id: profile.id });
+      }
       return { error: error?.message ?? null };
     },
     [profile?.id],
@@ -81,6 +84,9 @@ export function useCommunities() {
         .delete()
         .eq('community_id', communityId)
         .eq('user_id', profile.id);
+      if (!error) {
+        await supabase.from('chat_room_members').delete().eq('room_id', communityId).eq('user_id', profile.id);
+      }
       return { error: error?.message ?? null };
     },
     [profile?.id],
