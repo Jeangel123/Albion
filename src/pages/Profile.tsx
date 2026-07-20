@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MessageSquare, UserPlus, UserCheck, Share2, Twitch, Youtube, Facebook, Instagram, Link as LinkIcon, Shield, Trophy, Users as UsersIcon, Star, Clock } from 'lucide-react';
+import { Calendar, MessageSquare, UserPlus, UserCheck, Share2, Twitch, Youtube, Facebook, Instagram, Link as LinkIcon, Shield, Trophy, Users as UsersIcon, Star, Clock, Award } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { useToast } from '../components/Toast';
@@ -9,6 +9,7 @@ import { Banner } from '../components/Banner';
 import { PostCard } from '../components/PostCard';
 import { RankBadge, RankProgress, RoleBadge } from '../components/RankBadge';
 import { UserBadges } from '../components/Badges';
+import { BadgeReviewModal } from '../components/BadgeReviewModal';
 import { AvatarWithFrame } from '../components/AvatarWithFrame';
 import { Spinner, EmptyState } from '../components/ui';
 import { formatDate } from '../lib/format';
@@ -37,6 +38,7 @@ export default function ProfilePage() {
   const [frame, setFrame] = useState<{ rarity: string; icon: string | null } | null>(null);
   const [achievements, setAchievements] = useState<UserAchievement[]>([]);
   const [stats, setStats] = useState<{ posts: number; communities: number; reputation: number; ageDays: number }>({ posts: 0, communities: 0, reputation: 0, ageDays: 0 });
+  const [badgeReviewOpen, setBadgeReviewOpen] = useState(false);
 
   const isOwn = me?.id === profile?.id;
 
@@ -237,6 +239,11 @@ export default function ProfilePage() {
           </div>
 
           {/* Logros / Insignias */}
+          {isOwn && (
+            <button onClick={() => setBadgeReviewOpen(true)} className="btn-outline mt-3 text-xs">
+              <Award className="h-3.5 w-3.5" /> Solicitar insignia
+            </button>
+          )}
           {achievements.length > 0 && (
             <div className="mt-4">
               <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-ink-500"><Trophy className="h-3.5 w-3.5 text-gold-500" /> Insignias</p>
@@ -314,6 +321,7 @@ export default function ProfilePage() {
           )}
         </div>
       </div>
+      {badgeReviewOpen && isOwn && <BadgeReviewModal userId={profile.id} onClose={() => setBadgeReviewOpen(false)} />}
     </div>
   );
 }

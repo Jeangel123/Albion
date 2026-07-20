@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 import { useAuth } from './auth';
-import { MEDIEVAL_RANKS, type MedievalRank } from './types';
+import { MEDIEVAL_RANKS, type MedievalRank, BOOST_PRICES } from './types';
 
 export const REPUTATION_POINTS: Record<string, number> = {
   create_post: 10,
@@ -126,4 +126,68 @@ export async function claimFreeFrame(
 
   const { error } = await supabase.from('user_frames').insert({ user_id: userId, frame_id: frameId });
   return { error: error?.message ?? null };
+}
+
+async function spendSilver(userId: string, amount: number, reference: string, description: string): Promise<{ error: string | null }> {
+  const { data: wallet } = await supabase.from('wallets').select('balance').eq('user_id', userId).maybeSingle();
+  const balance = (wallet as any)?.balance ?? 0;
+  if (balance < amount) return { error: 'Saldo insuficiente' };
+
+  const { error: wErr } = await supabase.from('wallets').update({ balance: balance - amount, updated_at: new Date().toISOString() }).eq('user_id', userId);
+  if (wErr) return { error: wErr.message };
+
+  const { error: tErr } = await supabase.from('transactions').insert({
+    user_id: userId, amount: -amount, type: 'spend', reference, description,
+  });
+  if (tErr) return { error: tErr.message };
+
+  return { error: null };
+}
+
+export async function boostPost(userId: string, postId: string, hours: 24 | 72): Promise<{ error: string | null }> {
+  const price = hours === 24 ? BOOST_PRICES.post_24h : BOOST_PRICES.post_72h;
+  const { error } = await spendSilver(userId, price, 'boost_post', `Destacar publicacion (${hours}h)`);
+  if (error) return { error };
+
+  const until = new Date(Date.now() + hours * 3600_000).toISOString();
+  const { error: pErr } = await supabase.from('posts').update({ is_boosted: true, boosted_until: until }).eq('id', postId).eq('author_id', userId);
+  return { error: pErr?.message ?? null };
+}
+
+export async function promoteGuild(userId: string, guildId: string, hours: 24 | 72): Promise<{ error: string | null }> {
+  const price = hours === 24 ? BOOST_PRICES.guild_24h : BOOST_PRICES.guild_72h;
+  const { error } = await spendSilver(userId, price, 'promote_guild', `Promocionar gremio (${hours}h)`);
+  if (error) return { error };
+
+  const until = new Date(Date.now() + hours * 3600_000).toISOString();
+  const { error: gErr } = await supabase.from('guilds').update({ is_boosted: true, boosted_until: until }).eq('id', guildId);
+  return { error: gErr?.message ?? null };
+}
+
+export async function createPaidEvent(userId: string, payload: { title: string; description: string; start_time: string; location?: string }): Promise<{ error: string | null }> {
+  const { error } = await spendSilver(userId, BOOST_PRICES.event, 'create_event', `Crear evento: ${payload.title}`);
+  if (error) return { error };
+
+  const { error: eErr } = await supabase.from('events').insert({
+    title: payload.title,
+    description: payload.description,
+    start_time: payload.start_time,
+    location: payload.location ?? null,
+    created_by: userId,
+  });
+  return { error: eErr?.message ?? null };
+}
+
+export async function requestBadgeReview(userId: string, badgeId: string, reason: string): Promise<{ error: string | null }> {
+  const { error } = await spendSilver(userId, BOOST_PRICES.badge_review, 'badge_review', 'Solicitud de revision de insignia');
+  if (error) return { error };
+
+  const { data: existing } = await supabase.from('badge_review_requests')
+    .select('id').eq('user_id', userId).eq('badge_id', badgeId).eq('status', 'pending').maybeSingle();
+  if (existing) return { error: 'Ya tienes una solicitud pendiente para esta insignia' };
+
+  const { error: rErr } = await supabase.from('badge_review_requests').insert({
+    user_id: userId, badge_id: badgeId, reason, cost: BOOST_PRICES.badge_review,
+  });
+  return { error: rErr?.message ?? null };
 }

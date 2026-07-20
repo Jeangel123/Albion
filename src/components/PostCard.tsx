@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Flag, Link as LinkIcon, Trash2,
+  Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Flag, Link as LinkIcon, Trash2, Rocket,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
@@ -10,8 +10,9 @@ import { Avatar } from './Avatar';
 import { ReportModal } from './ReportModal';
 import { timeAgo } from '../lib/format';
 import { AvatarWithFrame } from './AvatarWithFrame';
-import { REACTIONS, type Post, type Profile, type MedievalRank, type FrameRarity } from '../lib/types';
+import { REACTIONS, type Post, type Profile, type MedievalRank, type FrameRarity, BOOST_PRICES } from '../lib/types';
 import { RankBadge } from './RankBadge';
+import { boostPost } from '../lib/economy';
 
 type PostWithAuthor = Post & { author?: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> };
 
@@ -129,6 +130,17 @@ export function PostCard({ post, author, onDeleted }: { post: PostWithAuthor; au
   }
 
   const isOwner = profile?.id === post.author_id;
+  const isBoosted = post.is_boosted && post.boosted_until && new Date(post.boosted_until) > new Date();
+  const [boosting, setBoosting] = useState(false);
+
+  async function doBoost(hours: 24 | 72) {
+    if (!profile) return;
+    setBoosting(true);
+    const { error } = await boostPost(profile.id, post.id, hours);
+    setBoosting(false);
+    if (error) push({ type: 'error', message: error });
+    else push({ type: 'success', message: `Publicación destacada ${hours}h` });
+  }
 
   return (
     <article className="card p-4 sm:p-5 animate-fade-in">
@@ -142,6 +154,7 @@ export function PostCard({ post, author, onDeleted }: { post: PostWithAuthor; au
             {author?.medieval_rank && <RankBadge rank={author.medieval_rank as MedievalRank} size="xs" />}
             <span className="text-xs text-ink-400">· {timeAgo(post.created_at)}</span>
             {post.is_news && <span className="chip bg-gold-100 text-gold-700 dark:bg-gold-950 dark:text-gold-300">Noticia</span>}
+            {isBoosted && <span className="chip bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300"><Rocket className="h-3 w-3" /> Destacada</span>}
           </div>
           {post.content && <p className="mt-1.5 whitespace-pre-wrap text-sm text-ink-800 dark:text-ink-100">{post.content}</p>}
           {post.tags && post.tags.length > 0 && (
@@ -190,6 +203,16 @@ export function PostCard({ post, author, onDeleted }: { post: PostWithAuthor; au
                 {isOwner && (
                   <button onClick={() => { del(); setMenuOpen(false); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40">
                     <Trash2 className="h-4 w-4" /> Eliminar
+                  </button>
+                )}
+                {isOwner && !isBoosted && (
+                  <button onClick={() => { doBoost(24); setMenuOpen(false); }} disabled={boosting} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40">
+                    <Rocket className="h-4 w-4" /> Destacar (24h · {BOOST_PRICES.post_24h} silver)
+                  </button>
+                )}
+                {isOwner && !isBoosted && (
+                  <button onClick={() => { doBoost(72); setMenuOpen(false); }} disabled={boosting} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40">
+                    <Rocket className="h-4 w-4" /> Destacar (72h · {BOOST_PRICES.post_72h} silver)
                   </button>
                 )}
               </div>

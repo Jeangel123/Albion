@@ -84,6 +84,8 @@ export type Post = {
   is_approved: boolean;
   is_pinned: boolean;
   is_news: boolean;
+  is_boosted: boolean;
+  boosted_until: string | null;
   like_count: number;
   comment_count: number;
   share_count: number;
@@ -228,6 +230,39 @@ export type SeasonRanking = {
   created_at: string;
   user?: Pick<Profile, 'username' | 'display_name' | 'avatar_url' | 'medieval_rank' | 'role'>;
 };
+
+export type BadgeReviewStatus = 'pending' | 'approved' | 'rejected';
+
+export type BadgeReviewRequest = {
+  id: string;
+  user_id: string;
+  badge_id: string;
+  reason: string;
+  status: BadgeReviewStatus;
+  staff_notes: string | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  cost: number;
+  created_at: string;
+  badge?: Badge;
+};
+
+export type Badge = {
+  id: string;
+  name: string;
+  description: string | null;
+  icon: string;
+  color: string;
+};
+
+export const BOOST_PRICES = {
+  post_24h: 150,
+  post_72h: 350,
+  guild_24h: 300,
+  guild_72h: 700,
+  event: 250,
+  badge_review: 500,
+} as const;
 
 export type MedievalRank =
   | 'campesino'

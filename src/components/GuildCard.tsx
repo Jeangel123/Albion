@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
-import { Users, MapPin, Globe, BadgeCheck, Crown } from 'lucide-react';
+import { Users, MapPin, Globe, BadgeCheck, Crown, Rocket } from 'lucide-react';
 import type { Guild } from '../lib/types';
 import { ACTIVITIES } from '../lib/types';
 
 export function GuildCard({ guild }: { guild: Guild }) {
+  const isBoosted = guild.is_boosted && guild.boosted_until && new Date(guild.boosted_until) > new Date();
   return (
     <Link to={`/gremio/${guild.slug}`} className="card card-hover group block overflow-hidden">
       <div className="relative h-28 overflow-hidden bg-gradient-to-br from-ink-800 via-ink-900 to-ink-950">
@@ -16,6 +17,11 @@ export function GuildCard({ guild }: { guild: Guild }) {
         {guild.is_featured && (
           <span className="absolute right-3 top-3 chip bg-gold-500/90 text-ink-950 text-[10px] font-bold backdrop-blur">
             <Crown className="h-3 w-3" /> Destacado
+          </span>
+        )}
+        {isBoosted && (
+          <span className="absolute left-3 top-3 chip bg-amber-500/90 text-ink-950 text-[10px] font-bold backdrop-blur">
+            <Rocket className="h-3 w-3" /> Promocionado
           </span>
         )}
         <div className="absolute -bottom-8 left-4">
