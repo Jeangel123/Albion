@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { useToast } from './Toast';
 import { Avatar } from './Avatar';
-import { Modal } from './Modal';
+import { ReportModal } from './ReportModal';
 import { timeAgo } from '../lib/format';
 import { AvatarWithFrame } from './AvatarWithFrame';
 import { REACTIONS, type Post, type Profile, type MedievalRank, type FrameRarity } from '../lib/types';
@@ -21,7 +21,6 @@ export function PostCard({ post, author, onDeleted }: { post: PostWithAuthor; au
   const [reactionsOpen, setReactionsOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
-  const [reportReason, setReportReason] = useState('');
   const [saved, setSaved] = useState(false);
   const [myReaction, setMyReaction] = useState<string | null>(null);
   const [likeCount, setLikeCount] = useState(post.like_count);
@@ -95,20 +94,6 @@ export function PostCard({ post, author, onDeleted }: { post: PostWithAuthor; au
     setShareCount((c) => c + 1);
     copyLink();
     push({ type: 'success', message: 'Compartido' });
-  }
-
-  async function report() {
-    if (!profile) return;
-    if (!reportReason.trim()) return push({ type: 'error', message: 'Escribe un motivo' });
-    await supabase.from('reports').insert({
-      reporter_id: profile.id,
-      target_type: 'post',
-      target_id: post.id,
-      reason: reportReason,
-    });
-    setReportOpen(false);
-    setReportReason('');
-    push({ type: 'success', message: 'Reporte enviado' });
   }
 
   async function del() {
@@ -218,13 +203,7 @@ export function PostCard({ post, author, onDeleted }: { post: PostWithAuthor; au
 
       {showComments && <CommentSection postId={post.id} />}
 
-      <Modal open={reportOpen} onClose={() => setReportOpen(false)} title="Reportar publicación">
-        <textarea value={reportReason} onChange={(e) => setReportReason(e.target.value)} rows={4} className="input" placeholder="Describe el motivo del reporte..." />
-        <div className="mt-4 flex justify-end gap-2">
-          <button onClick={() => setReportOpen(false)} className="btn-ghost">Cancelar</button>
-          <button onClick={report} className="btn-primary">Enviar reporte</button>
-        </div>
-      </Modal>
+      <ReportModal open={reportOpen} onClose={() => setReportOpen(false)} targetType="post" targetId={post.id} />
     </article>
   );
 }
