@@ -17,6 +17,7 @@ export type Profile = {
   is_suspended: boolean;
   role: 'user' | 'admin' | 'supreme_admin' | 'moderator' | 'founder';
   reputation_points: number;
+  season_points: number;
   medieval_rank: MedievalRank;
   equipped_frame_id: string | null;
   language: string | null;
@@ -202,6 +203,30 @@ export type GlobalAnnouncement = {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type SeasonStatus = 'active' | 'ended' | 'upcoming';
+
+export type Season = {
+  id: string;
+  number: number;
+  name: string;
+  status: SeasonStatus;
+  starts_at: string;
+  ends_at: string | null;
+  created_at: string;
+  created_by: string | null;
+};
+
+export type SeasonRanking = {
+  id: string;
+  season_id: string;
+  user_id: string;
+  season_points: number;
+  final_rank: MedievalRank;
+  position: number;
+  created_at: string;
+  user?: Pick<Profile, 'username' | 'display_name' | 'avatar_url' | 'medieval_rank' | 'role'>;
 };
 
 export type MedievalRank =

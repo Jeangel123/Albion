@@ -2,12 +2,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Shield, Users, Flag, Newspaper, BarChart3, Megaphone, Wrench, Check, X, Trash2, Ban,
-  Crown, Gavel, FileText, ArrowRight, Lightbulb, Coins, Settings, Search, Pin, Plus, Edit3,
+  Crown, Gavel, FileText, ArrowRight, Lightbulb, Coins, Settings, Search, Pin, Plus, Edit3, Trophy,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { useToast } from '../components/Toast';
 import { Spinner, EmptyState } from '../components/ui';
+import { SeasonsPanel } from '../components/SeasonsPanel';
 import { RankBadge, RoleBadge } from '../components/RankBadge';
 import {
   isAdmin, isSupremeAdmin, isStaff, isFounder, canSuspendUser, canManageEconomy,
@@ -16,7 +17,7 @@ import {
 import type { Profile, Post, Guild, Alliance, AppConfig, Suggestion, SuggestionStatus, GlobalAnnouncement } from '../lib/types';
 import { SUGGESTION_STATUSES, SUGGESTION_CATEGORIES } from '../lib/types';
 
-type TabKey = 'resumen' | 'estadisticas' | 'publicaciones' | 'usuarios' | 'gremios' | 'alianzas' | 'reportes' | 'consejo' | 'auditoria' | 'anuncios' | 'mantenimiento' | 'config' | 'economia';
+type TabKey = 'resumen' | 'estadisticas' | 'publicaciones' | 'usuarios' | 'gremios' | 'alianzas' | 'reportes' | 'consejo' | 'auditoria' | 'anuncios' | 'mantenimiento' | 'config' | 'economia' | 'temporadas';
 
 export default function AdminPage() {
   const { profile } = useAuth();
@@ -335,6 +336,7 @@ export default function AdminPage() {
     ['consejo', 'Consejo', Lightbulb, true],
     ['anuncios', 'Anuncios', Megaphone, true],
     ['economia', 'Economía', Coins, canManageEconomy(profile.role)],
+    ['temporadas', 'Temporadas', Trophy, isAdmin(profile.role)],
     ['config', 'Configuración', Settings, canManageConfig(profile.role)],
     ['auditoria', 'Auditoría', FileText, canViewAuditLog(profile.role)],
     ['mantenimiento', 'Mantenimiento', Wrench, canToggleMaintenance(profile.role)],
@@ -646,6 +648,11 @@ export default function AdminPage() {
                 <FrameEditor frame={editingFrame} onSave={saveFrame} onCancel={() => setEditingFrame(null)} />
               )}
             </div>
+          )}
+
+          {/* === TEMPORADAS === */}
+          {tab === 'temporadas' && isAdmin(profile.role) && profile && (
+            <SeasonsPanel adminId={profile.id} />
           )}
 
           {/* === CONFIGURACIÓN === */}
