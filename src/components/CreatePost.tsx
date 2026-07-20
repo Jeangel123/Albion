@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { useToast } from './Toast';
 import { Avatar } from './Avatar';
+import { ImageUpload } from './ImageUpload';
 import type { PostType } from '../lib/types';
 
 export function CreatePost({ onCreated, guildId }: { onCreated?: () => void; guildId?: string }) {
@@ -73,7 +74,16 @@ export function CreatePost({ onCreated, guildId }: { onCreated?: () => void; gui
             <input value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} placeholder="https://..." className="input mt-2" />
           )}
           {(type === 'image' || type === 'video') && (
-            <input value={mediaUrl} onChange={(e) => setMediaUrl(e.target.value)} placeholder="URL del archivo" className="input mt-2" />
+            <div className="mt-2">
+              <ImageUpload
+                label={type === 'image' ? 'Imagen' : 'Miniatura del video'}
+                variant="banner"
+                folder="posts"
+                ownerId={profile.id}
+                value={mediaUrl || null}
+                onChange={(url) => setMediaUrl(url ?? '')}
+              />
+            </div>
           )}
           {type === 'poll' && (
             <div className="mt-2 space-y-2">
