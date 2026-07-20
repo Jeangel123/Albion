@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
   Users, MapPin, Globe, Clock, ListChecks, MessageCircle, BadgeCheck, Images, Video as VideoIcon, ArrowLeft, Settings, ExternalLink,
@@ -6,6 +6,7 @@ import {
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { useToast } from '../components/Toast';
+import { useRealtime, upsertById, removeById } from '../lib/useRealtime';
 import { Banner } from '../components/Banner';
 import { Avatar } from '../components/Avatar';
 import { CreatePost } from '../components/CreatePost';
@@ -57,6 +58,27 @@ export default function GuildDetailPage() {
       setLoading(false);
     })();
   }, [slug, profile]);
+
+  // Live-sync this guild when it changes (name, banner, description, etc.)
+  useRealtime<Guild>({
+    table: 'guilds',
+    filter: `id=eq.${guild?.id ?? ''}`,
+    onEvent: ({ eventType, new: row }) => {
+      if (eventType === 'DELETE' || !row) setGuild(null);
+      else if (row) setGuild((prev) => (prev && prev.id === row.id ? { ...prev, ...row } : (row as Guild)));
+    },
+  });
+
+  // Live-sync posts for this guild (INSERT/UPDATE/DELETE)
+  const handlePostEvent = useCallback(({ eventType, new: row, old: oldRow }: { eventType: 'INSERT' | 'UPDATE' | 'DELETE'; new: any; old: any }) => {
+    if (eventType === 'DELETE' && oldRow?.id) {
+      setPosts((list) => removeById(list, oldRow.id));
+    } else if (row?.id) {
+      supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url)').eq('id', row.id).maybeSingle()
+        .then(({ data }) => { if (data) setPosts((list) => upsertById(list, data as PostWithAuthor)); });
+    }
+  }, []);
+  useRealtime<Post>({ table: 'posts', filter: `guild_id=eq.${guild?.id ?? ''}`, onEvent: handlePostEvent });
 
   async function join() {
     if (!profile) return navigate('/login');
@@ -145,7 +167,7 @@ export default function GuildDetailPage() {
         <div className="mt-6">
           {tab === 'publicaciones' && (
             <div className="space-y-4">
-              {isMember && profile && <CreatePost guildId={guild.id} onCreated={() => window.location.reload()} />}
+              {isMember && profile && <CreatePost guildId={guild.id} />}
               {posts.length === 0 ? <EmptyState icon={MessageCircle} title="Sin publicaciones" hint="Este gremio aún no ha publicado." /> : (
                 posts.map((p) => <PostCard key={p.id} post={p} author={p.author} />)
               )}
@@ -192,7 +214,7 @@ export default function GuildDetailPage() {
       </div>
 
       {isLeader && editOpen && (
-        <GuildEditModal guild={guild} onClose={() => setEditOpen(false)} onSaved={() => { setEditOpen(false); window.location.reload(); }} />
+        <GuildEditModal guild={guild} onClose={() => setEditOpen(false)} onSaved={() => setEditOpen(false)} />
       )}
     </div>
   );

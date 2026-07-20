@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Calendar, MessageSquare, UserPlus, UserCheck, Share2, BadgeCheck, Twitch, Youtube, Facebook, Instagram, Link as LinkIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { useToast } from '../components/Toast';
+import { useRealtime, upsertById, removeById } from '../lib/useRealtime';
 import { Banner } from '../components/Banner';
 import { PostCard } from '../components/PostCard';
 import { Spinner, EmptyState } from '../components/ui';
@@ -28,6 +29,38 @@ export default function ProfilePage() {
   const [savedPosts, setSavedPosts] = useState<PostWithAuthor[]>([]);
 
   const isOwn = me?.id === profile?.id;
+
+  // Live-sync this profile when it changes (avatar, banner, bio, etc.)
+  useRealtime<Profile>({
+    table: 'profiles',
+    filter: `id=eq.${profile?.id ?? ''}`,
+    onEvent: ({ eventType, new: row }) => {
+      if (eventType === 'DELETE') setProfile(null);
+      else if (row) setProfile((prev) => (prev && prev.id === row.id ? { ...prev, ...row } : prev));
+    },
+  });
+
+  // Live-sync guild info for this profile
+  useRealtime<Guild>({
+    table: 'guilds',
+    filter: `id=eq.${profile?.guild_id ?? ''}`,
+    onEvent: ({ eventType, new: row }) => {
+      if (eventType === 'DELETE' || !row) setGuild(null);
+      else if (row) setGuild((prev) => (prev && prev.id === row.id ? { ...prev, ...row } : (row as Guild)));
+    },
+  });
+
+  // Live-sync posts by this author (INSERT/UPDATE/DELETE)
+  const handlePostEvent = useCallback(({ eventType, new: row, old: oldRow }: { eventType: 'INSERT' | 'UPDATE' | 'DELETE'; new: any; old: any }) => {
+    if (eventType === 'DELETE' && oldRow?.id) {
+      setPosts((list) => removeById(list, oldRow.id));
+    } else if (row?.id) {
+      // Fetch the full row with author join for INSERT/UPDATE
+      supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url)').eq('id', row.id).maybeSingle()
+        .then(({ data }) => { if (data) setPosts((list) => upsertById(list, data as PostWithAuthor)); });
+    }
+  }, []);
+  useRealtime<Post>({ table: 'posts', filter: `author_id=eq.${profile?.id ?? ''}`, onEvent: handlePostEvent });
 
   useEffect(() => {
     if (!username) return;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Trophy, Calendar, Newspaper, Video, ImageIcon, Sparkles, Users, Shield } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -6,6 +6,7 @@ import { CreatePost } from '../components/CreatePost';
 import { PostCard } from '../components/PostCard';
 import { GuildCard } from '../components/GuildCard';
 import { SectionTitle, Spinner } from '../components/ui';
+import { useRealtime, upsertById, removeById } from '../lib/useRealtime';
 import { EVENT_TYPES, type Guild, type Post, type Profile, type AlbionEvent } from '../lib/types';
 import { formatDateTime } from '../lib/format';
 
@@ -41,6 +42,19 @@ export default function HomePage() {
     })();
   }, []);
 
+  // Live-sync posts feed (INSERT/UPDATE/DELETE)
+  const handlePostEvent = useCallback(({ eventType, new: row, old: oldRow }: { eventType: 'INSERT' | 'UPDATE' | 'DELETE'; new: any; old: any }) => {
+    if (eventType === 'DELETE' && oldRow?.id) {
+      setPosts((list) => (list ? removeById(list, oldRow.id) : list));
+    } else if (row?.id) {
+      supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url)').eq('id', row.id).maybeSingle()
+        .then(({ data }) => {
+          if (data) setPosts((list) => list ? upsertById(list, data as PostWithAuthor) : [data as PostWithAuthor]);
+        });
+    }
+  }, []);
+  useRealtime<Post>({ table: 'posts', onEvent: handlePostEvent });
+
   return (
     <div className="container-app py-6">
       {/* Hero */}
@@ -63,7 +77,7 @@ export default function HomePage() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-6">
-          <CreatePost onCreated={() => window.location.reload()} />
+          <CreatePost />
           <div>
             <SectionTitle title="Publicaciones recientes" />
             {!posts ? <Spinner /> : posts.length === 0 ? (

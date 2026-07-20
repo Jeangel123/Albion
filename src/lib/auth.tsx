@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from './supabase';
+import { useRealtime } from './useRealtime';
 import type { Profile } from './types';
 
 type AuthCtx = {
@@ -59,6 +60,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function refreshProfile() {
     if (session?.user.id) await loadProfile(session.user.id);
   }
+
+  // Live-sync own profile when it changes elsewhere (avatar, banner, bio, etc.)
+  useRealtime<Profile>({
+    table: 'profiles',
+    filter: `id=eq.${session?.user.id ?? ''}`,
+    onEvent: ({ eventType, new: row }) => {
+      if (eventType === 'DELETE') setProfile(null);
+      else if (row) setProfile((prev) => (prev && prev.id === row.id ? { ...prev, ...row } : prev));
+    },
+  });
 
   const value = useMemo<AuthCtx>(
     () => ({
