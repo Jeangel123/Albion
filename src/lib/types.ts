@@ -19,6 +19,7 @@ export type Profile = {
   medieval_rank: MedievalRank;
   equipped_frame_id: string | null;
   language: string | null;
+  onboarding_completed: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -378,3 +379,61 @@ export const REACTIONS: { key: ReactionType; emoji: string; label: string }[] = 
   { key: 'sad', emoji: '😢', label: 'Me entristece' },
   { key: 'angry', emoji: '😡', label: 'Me enoja' },
 ];
+
+export type Achievement = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  icon: string | null;
+  category: string;
+  points: number;
+  created_at: string;
+};
+
+export type UserAchievement = {
+  id: string;
+  user_id: string;
+  achievement_id: string;
+  earned_at: string;
+  metadata: Record<string, unknown> | null;
+  achievement?: Achievement;
+};
+
+export type UserInterest = {
+  id: string;
+  user_id: string;
+  interest: string;
+  created_at: string;
+};
+
+export type CommunityMission = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  icon: string | null;
+  target_count: number;
+  reward_coins: number;
+  reward_rep: number;
+  is_active: boolean;
+  created_at: string;
+};
+
+export type UserMission = {
+  id: string;
+  user_id: string;
+  mission_id: string;
+  progress: number;
+  completed_at: string | null;
+  created_at: string;
+  mission?: CommunityMission;
+};
+
+export const INTEREST_OPTIONS = [
+  { key: 'pvp', label: 'PvP', emoji: '⚔️', color: 'from-red-500 to-orange-500' },
+  { key: 'pve', label: 'PvE', emoji: '🛡️', color: 'from-emerald-500 to-teal-500' },
+  { key: 'avalon', label: 'Avalon', emoji: '🌌', color: 'from-violet-500 to-purple-500' },
+  { key: 'economia', label: 'Economía', emoji: '💰', color: 'from-amber-500 to-yellow-500' },
+  { key: 'social', label: 'Social', emoji: '🤝', color: 'from-sky-500 to-blue-500' },
+] as const;

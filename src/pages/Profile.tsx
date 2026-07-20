@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MessageSquare, UserPlus, UserCheck, Share2, BadgeCheck, Twitch, Youtube, Facebook, Instagram, Link as LinkIcon, Shield } from 'lucide-react';
+import { Calendar, MessageSquare, UserPlus, UserCheck, Share2, BadgeCheck, Twitch, Youtube, Facebook, Instagram, Link as LinkIcon, Shield, Trophy, Users as UsersIcon, Star, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { useToast } from '../components/Toast';
@@ -12,7 +12,9 @@ import { AvatarWithFrame } from '../components/AvatarWithFrame';
 import { Spinner, EmptyState } from '../components/ui';
 import { formatDate } from '../lib/format';
 import { getUserSanctions, SANCTION_TYPES, type Sanction } from '../lib/moderation';
-import type { Profile, Post, Guild } from '../lib/types';
+import { getUserAchievements, getRankTitle } from '../lib/gamification';
+import type { UserAchievement } from '../lib/types';
+import type { Profile, Post, Guild, Community } from '../lib/types';
 
 type PostWithAuthor = Post & { author: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> };
 
@@ -32,6 +34,8 @@ export default function ProfilePage() {
   const [savedPosts, setSavedPosts] = useState<PostWithAuthor[]>([]);
   const [sanctions, setSanctions] = useState<Sanction[]>([]);
   const [frame, setFrame] = useState<{ rarity: string; icon: string | null } | null>(null);
+  const [achievements, setAchievements] = useState<UserAchievement[]>([]);
+  const [stats, setStats] = useState<{ posts: number; communities: number; reputation: number; ageDays: number }>({ posts: 0, communities: 0, reputation: 0, ageDays: 0 });
 
   const isOwn = me?.id === profile?.id;
 
@@ -94,6 +98,18 @@ export default function ProfilePage() {
         .eq('is_equipped', true)
         .maybeSingle();
       if (uf?.frame) setFrame(uf.frame as any);
+      const [achData, commCount] = await Promise.all([
+        getUserAchievements(p.id),
+        supabase.from('community_members').select('id', { count: 'exact', head: true }).eq('user_id', p.id),
+      ]);
+      setAchievements(achData);
+      const ageMs = Date.now() - new Date(p.created_at).getTime();
+      setStats({
+        posts: postData.data?.length ?? 0,
+        communities: commCount.count ?? 0,
+        reputation: p.reputation_points ?? 0,
+        ageDays: Math.floor(ageMs / 86400000),
+      });
       setLoading(false);
     })();
   }, [username, me]);
@@ -175,6 +191,7 @@ export default function ProfilePage() {
               <RankBadge rank={profile.medieval_rank} />
               <RoleBadge role={profile.role} />
             </div>
+            <p className="text-sm font-medium text-gold-600 dark:text-gold-400">{getRankTitle(profile.medieval_rank)}</p>
             <p className="text-sm text-ink-500">@{profile.username}</p>
             <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-500">
               <span><strong className="text-ink-800 dark:text-ink-100">{followers}</strong> seguidores</span>
@@ -186,6 +203,29 @@ export default function ProfilePage() {
           {profile.bio && <p className="mt-4 text-sm text-ink-700 dark:text-ink-200">{profile.bio}</p>}
 
           <div className="mt-4"><RankProgress points={profile.reputation_points} /></div>
+
+          {/* Estadísticas */}
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <StatCard icon={MessageSquare} label="Publicaciones" value={stats.posts} />
+            <StatCard icon={UsersIcon} label="Comunidades" value={stats.communities} />
+            <StatCard icon={Star} label="Reputación" value={stats.reputation} />
+            <StatCard icon={Clock} label="Antigüedad" value={`${stats.ageDays}d`} />
+          </div>
+
+          {/* Logros / Insignias */}
+          {achievements.length > 0 && (
+            <div className="mt-4">
+              <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-ink-500"><Trophy className="h-3.5 w-3.5 text-gold-500" /> Insignias</p>
+              <div className="flex flex-wrap gap-2">
+                {achievements.map((ua) => (
+                  <div key={ua.id} title={ua.achievement?.description ?? ''} className="flex items-center gap-1.5 rounded-full bg-gold-50 px-3 py-1.5 dark:bg-gold-950/30">
+                    <span className="text-lg">{ua.achievement?.icon ?? '🏅'}</span>
+                    <span className="text-xs font-medium text-ink-700 dark:text-ink-200">{ua.achievement?.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {guild && (
             <Link to={`/gremio/${guild.slug}`} className="mt-3 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-gold-100 to-gold-50 px-3 py-1.5 text-sm transition hover:shadow-sm dark:from-gold-950/40 dark:to-ink-900">
@@ -267,5 +307,15 @@ function TabBtn({ active, onClick, children }: { active: boolean; onClick: () =>
     <button onClick={onClick} className={`px-4 py-2.5 text-sm font-medium transition ${active ? 'border-b-2 border-gold-500 text-gold-600 dark:text-gold-400' : 'text-ink-500 hover:text-ink-800 dark:hover:text-ink-200'}`}>
       {children}
     </button>
+  );
+}
+
+function StatCard({ icon: Icon, label, value }: { icon: typeof MessageSquare; label: string; value: number | string }) {
+  return (
+    <div className="rounded-xl bg-ink-50 p-3 text-center dark:bg-ink-800/50">
+      <Icon className="mx-auto h-4 w-4 text-gold-500" />
+      <p className="mt-1 font-display text-lg font-bold text-ink-900 dark:text-white">{value}</p>
+      <p className="text-[10px] uppercase tracking-wide text-ink-500">{label}</p>
+    </div>
   );
 }

@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Trophy, Calendar, Newspaper, Video, ImageIcon, Sparkles, Users, Shield } from 'lucide-react';
+import { Trophy, Calendar, Newspaper, Video, ImageIcon, Sparkles, Users, Shield, ScrollText, Crown, Swords, Landmark } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { CreatePost } from '../components/CreatePost';
 import { PostCard } from '../components/PostCard';
 import { GuildCard } from '../components/GuildCard';
 import { SectionTitle, Spinner } from '../components/ui';
 import { useRealtime, upsertById, removeById } from '../lib/useRealtime';
-import { EVENT_TYPES, type Guild, type Post, type Profile, type AlbionEvent } from '../lib/types';
+import { EVENT_TYPES, MEDIEVAL_RANKS, type Guild, type Post, type Profile, type AlbionEvent } from '../lib/types';
 import { formatDateTime } from '../lib/format';
 import { useI18n } from '../lib/i18n';
 
@@ -77,6 +77,31 @@ export default function HomePage() {
             <Link to="/registro" className="btn-primary">{t('hero.cta1')}</Link>
             <Link to="/gremios" className="btn-outline border-gold-400/40 text-white hover:bg-white/10">{t('hero.cta2')}</Link>
           </div>
+        </div>
+      </section>
+
+      {/* Secciones destacadas del Imperio */}
+      <section className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <ImperioSection to="/gremios" icon={Swords} title="Gremios" desc="Únete o funda gremios" accent="from-red-500/10 to-orange-500/10" />
+        <ImperioSection to="/comunidades" icon={Users} title="Comunidades" desc="Conecta con afines" accent="from-sky-500/10 to-blue-500/10" />
+        <ImperioSection to="/eventos" icon={Calendar} title="Eventos" desc="Organiza y participa" accent="from-emerald-500/10 to-teal-500/10" />
+        <ImperioSection to="/consejo" icon={ScrollText} title="Consejo del Reino" desc="Propón y vota ideas" accent="from-amber-500/10 to-yellow-500/10" />
+        <ImperioSection to="/ranking" icon={Crown} title="Rangos" desc="Escala la nobleza" accent="from-violet-500/10 to-purple-500/10" />
+      </section>
+
+      {/* Rangos del Reino */}
+      <section className="mb-8 card-medieval p-5">
+        <h2 className="mb-4 font-display text-lg font-semibold text-ink-900 dark:text-white">Rangos del Reino</h2>
+        <div className="flex flex-wrap gap-2">
+          {MEDIEVAL_RANKS.map((r) => (
+            <div key={r.key} className="flex items-center gap-2 rounded-full bg-ink-100 px-3 py-1.5 dark:bg-ink-800">
+              <span className="text-lg">{r.emoji}</span>
+              <div>
+                <p className="text-xs font-semibold text-ink-800 dark:text-ink-100">{r.label}</p>
+                <p className="text-[10px] text-ink-500">{r.min_points} pts</p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -204,6 +229,19 @@ function QuickLink({ to, icon: Icon, label }: { to: string; icon: typeof Trophy;
     <Link to={to} className="flex flex-col items-center gap-1.5 rounded-xl p-3 text-center transition hover:bg-gold-50 hover:shadow-sm dark:hover:bg-gold-950/30">
       <Icon className="h-5 w-5 text-gold-500 transition-transform hover:scale-110" />
       <span className="text-xs font-medium">{label}</span>
+    </Link>
+  );
+}
+
+function ImperioSection({ to, icon: Icon, title, desc, accent }: { to: string; icon: typeof Trophy; title: string; desc: string; accent: string }) {
+  return (
+    <Link to={to} className="card-medieval card-hover relative overflow-hidden p-4">
+      <div className={`absolute inset-0 bg-gradient-to-br ${accent} opacity-50`} />
+      <div className="relative">
+        <Icon className="h-6 w-6 text-gold-500" />
+        <p className="mt-2 font-display text-sm font-semibold text-ink-900 dark:text-white">{title}</p>
+        <p className="text-xs text-ink-500">{desc}</p>
+      </div>
     </Link>
   );
 }
