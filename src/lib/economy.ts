@@ -7,6 +7,9 @@ export const REPUTATION_POINTS: Record<string, number> = {
   create_community: 25,
   send_message: 2,
   receive_reaction: 5,
+  create_suggestion: 15,
+  suggestion_vote: 1,
+  suggestion_status_changed: 5,
 };
 
 export const COIN_REWARDS: Record<string, number> = {
@@ -15,6 +18,9 @@ export const COIN_REWARDS: Record<string, number> = {
   send_message: 1,
   receive_reaction: 3,
   daily_login: 10,
+  create_suggestion: 10,
+  suggestion_vote: 1,
+  suggestion_status_changed: 5,
 };
 
 export async function awardReputation(

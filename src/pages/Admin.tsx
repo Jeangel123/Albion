@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Shield, Users, Flag, Newspaper, BarChart3, Megaphone, Wrench, Check, X, Trash2, Ban,
-  Crown, Gavel, FileText, ArrowRight,
+  Crown, Gavel, FileText, ArrowRight, Lightbulb,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
@@ -10,12 +10,13 @@ import { useToast } from '../components/Toast';
 import { Spinner, EmptyState } from '../components/ui';
 import { RankBadge, RoleBadge } from '../components/RankBadge';
 import { isAdmin, isSupremeAdmin, isStaff, canSuspendUser } from '../lib/permissions';
-import type { Profile, Post, Guild, Alliance, AppConfig } from '../lib/types';
+import type { Profile, Post, Guild, Alliance, AppConfig, Suggestion, SuggestionStatus } from '../lib/types';
+import { SUGGESTION_STATUSES, SUGGESTION_CATEGORIES } from '../lib/types';
 
 export default function AdminPage() {
   const { profile } = useAuth();
   const { push } = useToast();
-  const [tab, setTab] = useState<'resumen' | 'publicaciones' | 'usuarios' | 'gremios' | 'alianzas' | 'reportes' | 'auditoria' | 'anuncios' | 'mantenimiento'>('resumen');
+  const [tab, setTab] = useState<'resumen' | 'publicaciones' | 'usuarios' | 'gremios' | 'alianzas' | 'reportes' | 'consejo' | 'auditoria' | 'anuncios' | 'mantenimiento'>('resumen');
   const [stats, setStats] = useState<{ users: number; guilds: number; posts: number; reports: number } | null>(null);
   const [posts, setPosts] = useState<(Post & { author: Pick<Profile, 'username' | 'display_name' | 'medieval_rank' | 'role'> })[]>([]);
   const [users, setUsers] = useState<Profile[]>([]);
@@ -25,6 +26,7 @@ export default function AdminPage() {
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [announcement, setAnnouncement] = useState('');
   const [maintenanceMsg, setMaintenanceMsg] = useState('');
+  const [councilItems, setCouncilItems] = useState<(Suggestion & { author: Pick<Profile, 'username' | 'display_name'> })[]>([]);
 
   useEffect(() => {
     if (!profile || !isStaff(profile.role)) return;
@@ -61,6 +63,12 @@ export default function AdminPage() {
           .limit(50);
         setAuditLogs(logs ?? []);
       }
+      const { data: sugs } = await supabase
+        .from('suggestions')
+        .select('*, author:profiles(username, display_name)')
+        .order('vote_count', { ascending: false })
+        .limit(50);
+      if (sugs) setCouncilItems(sugs as any);
     })();
   }, [profile]);
 
@@ -134,6 +142,31 @@ export default function AdminPage() {
     logAction(next ? 'enable_maintenance' : 'disable_maintenance', 'app_config');
   }
 
+  async function changeSuggestionStatus(suggestion: Suggestion & { author: Pick<Profile, 'username' | 'display_name'> }, newStatus: SuggestionStatus) {
+    if (suggestion.status === newStatus) return;
+    const { error } = await supabase.from('suggestions').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', suggestion.id);
+    if (error) return push({ type: 'error', message: error.message });
+    setCouncilItems((prev) => prev.map((s) => (s.id === suggestion.id ? { ...s, status: newStatus } : s)));
+    push({ type: 'success', message: 'Estado actualizado' });
+    logAction('update_suggestion_status', 'suggestion', suggestion.id, `${suggestion.title}: ${newStatus}`);
+    await supabase.from('notifications').insert({
+      user_id: suggestion.author_id,
+      actor_id: profile!.id,
+      type: 'suggestion_status',
+      content: `Tu sugerencia "${suggestion.title}" ahora está: ${SUGGESTION_STATUSES.find((s) => s.key === newStatus)?.label ?? newStatus}`,
+      target_type: 'suggestion',
+      target_id: suggestion.id,
+    });
+  }
+
+  async function deleteSuggestion(suggestion: Suggestion & { author: Pick<Profile, 'username' | 'display_name'> }) {
+    const { error } = await supabase.from('suggestions').delete().eq('id', suggestion.id);
+    if (error) return push({ type: 'error', message: error.message });
+    setCouncilItems((prev) => prev.filter((s) => s.id !== suggestion.id));
+    push({ type: 'success', message: 'Sugerencia eliminada' });
+    logAction('delete_suggestion', 'suggestion', suggestion.id, suggestion.title);
+  }
+
   if (!profile || !isStaff(profile.role)) {
     return <EmptyState icon={Shield} title="Acceso restringido" hint="Solo moderadores y administradores." action={{ to: '/', label: 'Inicio' }} />;
   }
@@ -145,6 +178,7 @@ export default function AdminPage() {
     ['gremios', 'Gremios', Shield, isAdmin(profile.role)],
     ['alianzas', 'Alianzas', Shield, isAdmin(profile.role)],
     ['reportes', 'Reportes', Flag, true],
+    ['consejo', 'Consejo', Lightbulb, true],
     ['auditoria', 'Auditoría', FileText, isAdmin(profile.role)],
     ['anuncios', 'Anuncios', Megaphone, isAdmin(profile.role)],
     ['mantenimiento', 'Mantenimiento', Wrench, isAdmin(profile.role)],
@@ -284,6 +318,41 @@ export default function AdminPage() {
               </div>
               <ArrowRight className="h-5 w-5 text-ink-400" />
             </Link>
+          )}
+
+          {tab === 'consejo' && (
+            <div className="card divide-y divide-ink-100 dark:divide-ink-800">
+              {councilItems.length === 0 ? <p className="p-4 text-sm text-ink-500">Sin sugerencias.</p> : councilItems.map((s) => (
+                <div key={s.id} className="p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="chip bg-ink-100 text-ink-600 dark:bg-ink-800 dark:text-ink-300 text-[10px]">
+                          {SUGGESTION_CATEGORIES.find((c) => c.key === s.category)?.emoji} {SUGGESTION_CATEGORIES.find((c) => c.key === s.category)?.label}
+                        </span>
+                        <span className={`chip ${SUGGESTION_STATUSES.find((st) => st.key === s.status)?.color} text-[10px]`}>
+                          {SUGGESTION_STATUSES.find((st) => st.key === s.status)?.emoji} {SUGGESTION_STATUSES.find((st) => st.key === s.status)?.label}
+                        </span>
+                      </div>
+                      <p className="mt-1.5 font-medium">{s.title}</p>
+                      <p className="text-xs text-ink-500">{s.author?.display_name || s.author?.username} · {s.vote_count} votos</p>
+                    </div>
+                    <button onClick={() => deleteSuggestion(s)} className="btn-ghost text-red-600"><Trash2 className="h-4 w-4" /></button>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {SUGGESTION_STATUSES.map((st) => (
+                      <button
+                        key={st.key}
+                        onClick={() => changeSuggestionStatus(s, st.key)}
+                        className={`chip text-[10px] transition ${s.status === st.key ? st.color + ' ring-1 ring-current' : 'bg-ink-100 text-ink-500 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-400'}`}
+                      >
+                        {st.emoji} {st.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
 
           {tab === 'auditoria' && isAdmin(profile.role) && (

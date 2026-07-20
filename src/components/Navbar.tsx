@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
-  Search, Bell, Home, Users, Shield, Calendar, Trophy, MessageSquare, Menu, X, Sun, Moon, Plus, Settings, LogOut, User as UserIcon, Castle, ShoppingBag, Wallet as WalletIcon,
+  Search, Bell, Home, Users, Shield, Calendar, Trophy, MessageSquare, Menu, X, Sun, Moon, Plus, Settings, LogOut, User as UserIcon, Castle, ShoppingBag, Wallet as WalletIcon, Lightbulb,
 } from 'lucide-react';
 import { useTheme } from '../lib/theme';
 import { useAuth } from '../lib/auth';
@@ -15,6 +15,7 @@ const NAV = [
   { to: '/alianzas', label: 'Alianzas', icon: Shield },
   { to: '/eventos', label: 'Eventos', icon: Calendar },
   { to: '/ranking', label: 'Ranking', icon: Trophy },
+  { to: '/consejo', label: 'Consejo', icon: Lightbulb },
   { to: '/buscar', label: 'Buscar', icon: Search },
 ];
 
@@ -91,6 +92,7 @@ export function Navbar() {
                       <MenuItem to="/crear-publicacion" icon={Plus} label="Publicar" onClick={() => setMenuOpen(false)} />
                       <MenuItem to="/tienda" icon={ShoppingBag} label="Tienda de marcos" onClick={() => setMenuOpen(false)} />
                       <MenuItem to="/monedero" icon={WalletIcon} label="Monedero" onClick={() => setMenuOpen(false)} />
+                      <MenuItem to="/consejo" icon={Lightbulb} label="Consejo del Reino" onClick={() => setMenuOpen(false)} />
                       <MenuItem to="/ajustes" icon={Settings} label="Ajustes" onClick={() => setMenuOpen(false)} />
                       {(profile.role === 'admin' || profile.role === 'supreme_admin' || profile.role === 'moderator') && (
                         <MenuItem to="/admin" icon={Shield} label="Panel admin" onClick={() => setMenuOpen(false)} />

@@ -24,6 +24,7 @@ import CommunityChatPage from './pages/CommunityChat';
 import CreateCommunityPage from './pages/CreateCommunity';
 import FrameShopPage from './pages/FrameShop';
 import WalletPage from './pages/Wallet';
+import CouncilPage from './pages/Council';
 import type { ReactNode } from 'react';
 
 function Protected({ children }: { children: ReactNode }) {
@@ -70,6 +71,7 @@ export default function App() {
                       <Route path="/comunidad/:slug/chat" element={<Protected><CommunityChatPage /></Protected>} />
                       <Route path="/tienda" element={<FrameShopPage />} />
                       <Route path="/monedero" element={<Protected><WalletPage /></Protected>} />
+                      <Route path="/consejo" element={<CouncilPage />} />
                       <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                   </Layout>

@@ -304,6 +304,45 @@ export const EVENT_TYPES = [
   { key: 'training', label: 'Entrenamientos', color: 'bg-violet-500' },
 ] as const;
 
+export type SuggestionCategory = 'nueva_funcion' | 'mejora_diseno' | 'error_tecnico' | 'idea_albion' | 'otro';
+export type SuggestionStatus = 'pendiente' | 'en_revision' | 'en_desarrollo' | 'completado' | 'rechazado';
+
+export type Suggestion = {
+  id: string;
+  author_id: string;
+  title: string;
+  description: string;
+  category: SuggestionCategory;
+  image_url: string | null;
+  status: SuggestionStatus;
+  vote_count: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type SuggestionVote = {
+  id: string;
+  suggestion_id: string;
+  user_id: string;
+  created_at: string;
+};
+
+export const SUGGESTION_CATEGORIES: { key: SuggestionCategory; label: string; emoji: string }[] = [
+  { key: 'nueva_funcion', label: 'Nueva función', emoji: '✨' },
+  { key: 'mejora_diseno', label: 'Mejora de diseño', emoji: '🎨' },
+  { key: 'error_tecnico', label: 'Error técnico', emoji: '🐛' },
+  { key: 'idea_albion', label: 'Idea para Albion', emoji: '⚔️' },
+  { key: 'otro', label: 'Otro', emoji: '📜' },
+];
+
+export const SUGGESTION_STATUSES: { key: SuggestionStatus; label: string; color: string; emoji: string }[] = [
+  { key: 'pendiente', label: 'Pendiente', color: 'bg-ink-200 text-ink-700 dark:bg-ink-700 dark:text-ink-200', emoji: '⏳' },
+  { key: 'en_revision', label: 'En revisión', color: 'bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300', emoji: '🔍' },
+  { key: 'en_desarrollo', label: 'En desarrollo', color: 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300', emoji: '🔨' },
+  { key: 'completado', label: 'Completado', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300', emoji: '✅' },
+  { key: 'rechazado', label: 'Rechazado', color: 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300', emoji: '❌' },
+];
+
 export const REACTIONS: { key: ReactionType; emoji: string; label: string }[] = [
   { key: 'like', emoji: '👍', label: 'Me gusta' },
   { key: 'love', emoji: '❤️', label: 'Me encanta' },
