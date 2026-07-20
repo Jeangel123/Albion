@@ -14,7 +14,10 @@ export type Profile = {
   twitch: string | null;
   is_verified: boolean;
   is_suspended: boolean;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'supreme_admin' | 'moderator';
+  reputation_points: number;
+  medieval_rank: MedievalRank;
+  equipped_frame_id: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -128,6 +131,147 @@ export type AppConfig = {
   announcement_active: boolean;
   community_rules: string | null;
 };
+
+export type MedievalRank =
+  | 'campesino'
+  | 'escudero'
+  | 'caballero'
+  | 'caballero_real'
+  | 'baron'
+  | 'conde'
+  | 'duque'
+  | 'lord'
+  | 'rey'
+  | 'emperador';
+
+export type FrameRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic';
+
+export type Community = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  avatar_url: string | null;
+  banner_url: string | null;
+  category: string;
+  owner_id: string;
+  member_count: number;
+  is_featured: boolean;
+  is_verified: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CommunityMemberRole = 'owner' | 'admin' | 'member';
+
+export type CommunityMember = {
+  id: string;
+  community_id: string;
+  user_id: string;
+  role: CommunityMemberRole;
+  joined_at: string;
+};
+
+export type ReputationAction =
+  | 'create_post'
+  | 'create_community'
+  | 'send_message'
+  | 'receive_reaction';
+
+export type ReputationLog = {
+  id: string;
+  user_id: string;
+  action: ReputationAction | string;
+  points: number;
+  reference_type: string | null;
+  reference_id: string | null;
+  created_at: string;
+};
+
+export type AvatarFrame = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  rarity: FrameRarity;
+  icon: string | null;
+  price: number;
+  is_free: boolean;
+  unlock_condition: string | null;
+  created_at: string;
+};
+
+export type UserFrame = {
+  id: string;
+  user_id: string;
+  frame_id: string;
+  acquired_at: string;
+  is_equipped: boolean;
+};
+
+export type Wallet = {
+  user_id: string;
+  balance: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TransactionType = 'earn' | 'spend' | 'purchase';
+
+export type Transaction = {
+  id: string;
+  user_id: string;
+  amount: number;
+  type: TransactionType | string;
+  reference: string | null;
+  description: string | null;
+  created_at: string;
+};
+
+export type ShopItem = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  price: number;
+  type: string;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+};
+
+export type UserInventory = {
+  id: string;
+  user_id: string;
+  shop_item_id: string;
+  purchased_at: string;
+  metadata: Record<string, unknown> | null;
+};
+
+export const MEDIEVAL_RANKS: { key: MedievalRank; label: string; min_points: number; emoji: string }[] = [
+  { key: 'campesino', label: 'Campesino', min_points: 0, emoji: '🌾' },
+  { key: 'escudero', label: 'Escudero', min_points: 50, emoji: '🛡️' },
+  { key: 'caballero', label: 'Caballero', min_points: 150, emoji: '⚔️' },
+  { key: 'caballero_real', label: 'Caballero Real', min_points: 350, emoji: '🏰' },
+  { key: 'baron', label: 'Barón', min_points: 700, emoji: '⚜️' },
+  { key: 'conde', label: 'Conde', min_points: 1200, emoji: '👑' },
+  { key: 'duque', label: 'Duque', min_points: 2000, emoji: '💎' },
+  { key: 'lord', label: 'Lord', min_points: 3000, emoji: '🏆' },
+  { key: 'rey', label: 'Rey', min_points: 5000, emoji: '👑' },
+  { key: 'emperador', label: 'Emperador', min_points: 10000, emoji: '🐉' },
+];
+
+export const FRAME_RARITIES: { key: FrameRarity; label: string; color: string }[] = [
+  { key: 'common', label: 'Común', color: 'text-ink-500' },
+  { key: 'uncommon', label: 'Poco común', color: 'text-emerald-500' },
+  { key: 'rare', label: 'Raro', color: 'text-sky-500' },
+  { key: 'epic', label: 'Épico', color: 'text-violet-500' },
+  { key: 'legendary', label: 'Legendario', color: 'text-amber-500' },
+  { key: 'mythic', label: 'Mítico', color: 'text-rose-500' },
+];
+
+export const COMMUNITY_CATEGORIES = [
+  'general', 'pvp', 'pve', 'avalon', 'faccion', 'recoleccion', 'economia', 'zvz', 'hce', 'crafting', 'español', 'ingles',
+] as const;
 
 export const ACTIVITIES = [
   'PvP', 'PvE', 'Avalon', 'ZvZ', 'Gankeo', 'Facción', 'Recolección', 'Economía', 'GvG', 'HCE', 'Crafting', 'Mercados',
