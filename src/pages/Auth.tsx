@@ -86,10 +86,19 @@ export function SignupPage() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (password.length < 6) return push({ type: 'error', message: 'La contraseña debe tener al menos 6 caracteres' });
+    if (username.trim().length < 3) return push({ type: 'error', message: 'El nombre de usuario debe tener al menos 3 caracteres' });
     setLoading(true);
     const { error } = await signUp(email, password, username.trim());
     setLoading(false);
-    if (error) return push({ type: 'error', message: error });
+    if (error) {
+      // Supabase masks trigger errors as "Database error". Surface a clearer
+      // message while still logging the raw error for debugging.
+      const msg = error.toLowerCase().includes('database error')
+        ? 'Error al crear la cuenta (base de datos). Revisa tu correo o inténtalo de nuevo.'
+        : error;
+      console.error('[signup] error:', error);
+      return push({ type: 'error', message: msg });
+    }
     push({ type: 'success', message: 'Cuenta creada. Revisa tu correo para verificar.' });
     navigate('/login');
   }

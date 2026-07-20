@@ -154,19 +154,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { display_name: username } },
+          options: { data: { username, display_name: username } },
         });
         if (error) {
           console.error('[auth] signUp error:', error.message);
           setLoading(false);
           return { error: error.message };
         }
-        if (data.user) {
-          await supabase
-            .from('profiles')
-            .update({ username })
-            .eq('id', data.user.id);
-        }
+        // The handle_new_user() trigger creates the profile row from user
+        // metadata (username + display_name). No client-side insert/update is
+        // needed — and none would work here anyway since there is no session
+        // yet, so RLS would silently block it.
+        void data;
         setLoading(false);
         return { error: null };
       },
