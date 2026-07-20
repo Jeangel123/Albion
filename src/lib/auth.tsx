@@ -9,7 +9,7 @@ type AuthCtx = {
   profile: Profile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (email: string, password: string, username: string) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string, username: string) => Promise<{ error: string | null; session: Session | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 };
@@ -136,16 +136,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       refreshProfile,
       signIn: async (email, password) => {
         setLoading(true);
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           console.error('[auth] signIn error:', error.message);
           setLoading(false);
           return { error: error.message };
         }
-        // onAuthStateChange('SIGNED_IN') will fire, set the session, load the
-        // profile, and clear loading. Wait for that to complete so the caller
-        // (Auth.tsx) navigates only after the session is established.
-        await waitForSession();
+        // Use the session returned directly instead of waiting for
+        // onAuthStateChange — the callback can race with INITIAL_SESSION.
+        if (data.session) {
+          setSession(data.session);
+          await loadProfile(data.session.user.id);
+        }
         setLoading(false);
         return { error: null };
       },
@@ -157,12 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           options: { data: { username, display_name: username } },
         });
         if (error) {
-          // Supabase masks trigger/database errors as "Database error" for
-          // security. Log the full error object (including status, code, name)
-          // so the real cause is visible in the browser console.
           console.error('[auth] signUp error:', JSON.stringify(error, null, 2));
-          // Try to extract a more specific message. Supabase sometimes includes
-          // the real error in error.message, sometimes in a nested structure.
           let msg = error.message || 'Error desconocido al crear la cuenta';
           if (msg.toLowerCase().includes('database error')) {
             msg = 'Error de base de datos al crear la cuenta. ' +
@@ -173,13 +170,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setLoading(false);
           return { error: msg };
         }
-        // The handle_new_user() trigger creates the profile row from user
-        // metadata (username + display_name). No client-side insert/update is
-        // needed — and none would work here anyway since there is no session
-        // yet, so RLS would silently block it.
-        void data;
+        // If email confirmation is disabled, signUp returns a valid session.
+        // Use it immediately so the user is logged in right away.
+        if (data.session) {
+          setSession(data.session);
+          await loadProfile(data.session.user.id);
+        }
         setLoading(false);
-        return { error: null };
+        return { error: null, session: data.session ?? null };
       },
       signOut: async () => {
         await supabase.auth.signOut();

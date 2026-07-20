@@ -88,16 +88,19 @@ export function SignupPage() {
     if (password.length < 6) return push({ type: 'error', message: 'La contraseña debe tener al menos 6 caracteres' });
     if (username.trim().length < 3) return push({ type: 'error', message: 'El nombre de usuario debe tener al menos 3 caracteres' });
     setLoading(true);
-    const { error } = await signUp(email, password, username.trim());
+    const { error, session } = await signUp(email, password, username.trim());
     setLoading(false);
     if (error) {
-      // The signUp function already extracted and enriched the error message.
-      // Log it for debugging and show the real Supabase error to the user.
       console.error('[signup] error:', error);
       return push({ type: 'error', message: error });
     }
-    push({ type: 'success', message: 'Cuenta creada. Revisa tu correo para verificar.' });
-    navigate('/login');
+    if (session) {
+      push({ type: 'success', message: '¡Cuenta creada! Bienvenido a Imperio.' });
+      navigate('/', { replace: true });
+    } else {
+      push({ type: 'success', message: 'Cuenta creada. Revisa tu correo para verificar.' });
+      navigate('/login');
+    }
   }
 
   return (
