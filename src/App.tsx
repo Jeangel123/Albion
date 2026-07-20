@@ -8,6 +8,14 @@ import { Layout } from './components/Layout';
 import { PageLoader } from './components/PageLoader';
 import { isStaff } from './lib/permissions';
 
+// Gate the entire app on the initial session check so the logged-out UI
+// never flashes before getSession()/onAuthStateChange resolve.
+function AppGate({ children }: { children: ReactNode }) {
+  const { loading } = useAuth();
+  if (loading) return <PageLoader full />;
+  return <>{children}</>;
+}
+
 const LoginPage = lazy(() => import('./pages/Auth'));
 const SignupPage = lazy(() => import('./pages/Auth').then((m) => ({ default: m.SignupPage })));
 const RecoverPage = lazy(() => import('./pages/Auth').then((m) => ({ default: m.RecoverPage })));
@@ -62,6 +70,7 @@ export default function App() {
         <I18nProvider>
           <ToastProvider>
             <BrowserRouter>
+              <AppGate>
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   <Route path="/login" element={<LoginPage />} />
@@ -110,6 +119,7 @@ export default function App() {
                   />
                 </Routes>
               </Suspense>
+              </AppGate>
             </BrowserRouter>
           </ToastProvider>
         </I18nProvider>

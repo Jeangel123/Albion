@@ -70,6 +70,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, sess) => {
       if (!mounted) return;
+      // INITIAL_SESSION is redundant — getSession() already handled the initial
+      // load. Processing it again causes a redundant loadProfile + loading flash.
+      if (event === 'INITIAL_SESSION') {
+        if (mounted) setLoading(false);
+        return;
+      }
       setSession(sess);
       if (sessionResolveRef.current) {
         sessionResolveRef.current(sess);
@@ -86,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await loadProfile(sess.user.id);
           if (mounted) setLoading(false);
         })();
-      } else if (event === 'INITIAL_SESSION') {
+      } else {
         setLoading(false);
       }
     });
