@@ -1,0 +1,18 @@
+export function Banner({ src, className = '' }: { src?: string | null; className?: string }) {
+  return (
+    <div className={`relative w-full overflow-hidden bg-gradient-to-br from-ink-800 via-ink-900 to-ink-950 ${className}`}>
+      {src ? (
+        <img src={src} alt="Banner" className="h-full w-full object-cover" />
+      ) : (
+        <div className="h-full w-full">
+          <div className="absolute inset-0 opacity-20"
+            style={{
+              backgroundImage:
+                'radial-gradient(circle at 20% 30%, rgba(196,144,42,0.4), transparent 40%), radial-gradient(circle at 80% 70%, rgba(196,144,42,0.25), transparent 45%)',
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}

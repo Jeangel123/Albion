@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-ink-50 text-ink-900 dark:bg-ink-950 dark:text-ink-100 font-sans;
+  }
+  ::selection {
+    @apply bg-gold-300/40;
+  }
+}
+
+@layer components {
+  .container-app {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+  .card {
+    @apply rounded-2xl border border-ink-200/70 bg-white shadow-sm dark:border-ink-800 dark:bg-ink-900;
+  }
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-0.5 hover:shadow-gold hover:border-gold-300/60;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply btn bg-gold-500 text-ink-950 hover:bg-gold-400 shadow-sm hover:shadow-gold;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-ink-700 hover:bg-ink-100 dark:text-ink-200 dark:hover:bg-ink-800;
+  }
+  .btn-outline {
+    @apply btn border border-ink-300 text-ink-800 hover:border-gold-400 hover:text-gold-600 dark:border-ink-700 dark:text-ink-100 dark:hover:border-gold-400 dark:hover:text-gold-300;
+  }
+  .input {
+    @apply w-full rounded-xl border border-ink-200 bg-white px-4 py-2.5 text-sm text-ink-900 placeholder-ink-400 outline-none transition focus:border-gold-400 focus:ring-2 focus:ring-gold-300/40 dark:border-ink-700 dark:bg-ink-900 dark:text-ink-100 dark:placeholder-ink-500;
+  }
+  .label {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium;
+  }
+  .link-gold {
+    @apply text-gold-600 hover:text-gold-500 dark:text-gold-400 dark:hover:text-gold-300;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { @apply bg-ink-300 dark:bg-ink-700 rounded-full; }
+::-webkit-scrollbar-thumb:hover { @apply bg-gold-400; }
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(196,144,42,0.12) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+}
