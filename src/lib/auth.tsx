@@ -94,6 +94,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       if (event === 'SIGNED_OUT') {
         setProfile(null);
+        setSession(null);
+        setLoading(false);
+        return;
+      }
+      if (event === 'PASSWORD_RECOVERY') {
+        // Don't auto-login on recovery — the user must set a new password first.
+        // The dedicated reset page handles the update; until then keep session null
+        // so Protected routes redirect to /login instead of flashing the app.
         setLoading(false);
         return;
       }
@@ -168,7 +176,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               '(Código: ' + (error.code || 'unknown') + ')';
           }
           setLoading(false);
-          return { error: msg };
+          return { error: msg, session: null };
         }
         // If email confirmation is disabled, signUp returns a valid session.
         // Use it immediately so the user is logged in right away.

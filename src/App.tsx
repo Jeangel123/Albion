@@ -19,6 +19,7 @@ function AppGate({ children }: { children: ReactNode }) {
 const LoginPage = lazy(() => import('./pages/Auth'));
 const SignupPage = lazy(() => import('./pages/Auth').then((m) => ({ default: m.SignupPage })));
 const RecoverPage = lazy(() => import('./pages/Auth').then((m) => ({ default: m.RecoverPage })));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPassword'));
 const HomePage = lazy(() => import('./pages/Home'));
 const GuildsPage = lazy(() => import('./pages/Guilds'));
 const GuildDetailPage = lazy(() => import('./pages/GuildDetail'));
@@ -76,6 +77,7 @@ export default function App() {
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/registro" element={<SignupPage />} />
                   <Route path="/recuperar" element={<RecoverPage />} />
+                  <Route path="/reset-password" element={<ResetPasswordPage />} />
                   <Route
                     path="/*"
                     element={

@@ -143,7 +143,9 @@ export function RecoverPage() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
     if (error) return push({ type: 'error', message: error.message });
     setSent(true);
     push({ type: 'success', message: 'Enlace de recuperación enviado' });
