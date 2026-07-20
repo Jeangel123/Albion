@@ -53,8 +53,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
+    // getSession() is the sole driver of the initial loading state. Add a
+    // timeout so a hung getSession() can't leave the app in loading forever.
+    let settled = false;
+    const sessionTimeout = setTimeout(() => {
+      if (settled || !mounted) return;
+      console.warn('[auth] getSession timed out after 8s — unblocking UI');
+      settled = true;
+      if (mounted) setLoading(false);
+    }, 8000);
+
     supabase.auth.getSession().then(({ data, error }) => {
-      if (!mounted) return;
+      if (settled || !mounted) return;
+      settled = true;
+      clearTimeout(sessionTimeout);
       if (error) {
         console.error('[auth] getSession error:', error.message);
         setLoading(false);
@@ -70,12 +82,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, sess) => {
       if (!mounted) return;
-      // INITIAL_SESSION is redundant — getSession() already handled the initial
-      // load. Processing it again causes a redundant loadProfile + loading flash.
-      if (event === 'INITIAL_SESSION') {
-        if (mounted) setLoading(false);
-        return;
-      }
+      // INITIAL_SESSION is redundant — getSession() is the sole driver of the
+      // initial session + loading state. Do NOT set loading=false here: that
+      // would ungate the UI before getSession() has set the session, causing the
+      // logged-out Navbar to flash (or persist) on reload.
+      if (event === 'INITIAL_SESSION') return;
       setSession(sess);
       if (sessionResolveRef.current) {
         sessionResolveRef.current(sess);
@@ -131,7 +142,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setLoading(false);
           return { error: error.message };
         }
+        // onAuthStateChange('SIGNED_IN') will fire, set the session, load the
+        // profile, and clear loading. Wait for that to complete so the caller
+        // (Auth.tsx) navigates only after the session is established.
         await waitForSession();
+        setLoading(false);
         return { error: null };
       },
       signUp: async (email, password, username) => {
