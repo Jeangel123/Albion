@@ -2,6 +2,8 @@ import { supabase } from './supabase';
 import { useAuth } from './auth';
 import { MEDIEVAL_RANKS, type MedievalRank, BOOST_PRICES } from './types';
 
+export { BOOST_PRICES };
+
 export const REPUTATION_POINTS: Record<string, number> = {
   create_post: 10,
   create_community: 25,

@@ -121,7 +121,9 @@ export function ChatPanel({ scope, currentUserId, canModerate, useFrames = false
       }));
     }
   }, []);
-  useRealtime<MessageReaction>({ table: 'message_reactions', filter: `message_id=in.(${messages.map((m) => m.id).join(',')})`, onEvent: handleReactionEvent });
+  const reactionIds = messages.map((m) => m.id).join(',');
+  const reactionFilter = reactionIds ? `message_id=in.(${reactionIds})` : undefined;
+  useRealtime<MessageReaction>({ table: 'message_reactions', filter: reactionFilter, onEvent: handleReactionEvent });
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });

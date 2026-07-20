@@ -28,10 +28,13 @@ export function useRealtime<T extends Row = Row>(opts: {
   const { table, filter, events = ['INSERT', 'UPDATE', 'DELETE'] } = opts;
 
   useEffect(() => {
-    // If a filter references a user id but none is available yet, skip subscribing
-    // to avoid creating an invalid filter (e.g. "user_id=eq.") that errors the channel.
-    if (filter !== undefined && filter.includes('=eq.') && !/(=eq\.)[^"'\s]+/.test(filter)) {
-      return;
+    // Skip invalid/empty filters that would error the channel:
+    //   "col=eq."      (empty eq)
+    //   "col=in.()"    (empty in-list)
+    if (filter !== undefined) {
+      const isEmptyEq = filter.includes('=eq.') && !/(=eq\.)[^"'\s]+/.test(filter);
+      const isEmptyIn = /in\.\(\s*\)/.test(filter);
+      if (isEmptyEq || isEmptyIn) return;
     }
     const channelName = `rt:${table}${filter ? `:${filter}` : ''}`;
     let channel = supabase.channel(channelName);

@@ -44,6 +44,8 @@ export type Guild = {
   apply_url: string | null;
   is_featured: boolean;
   is_verified: boolean;
+  is_boosted: boolean;
+  boosted_until: string | null;
   owner_id: string;
   created_at: string;
   updated_at: string;
