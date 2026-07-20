@@ -37,6 +37,7 @@ const HelpPage = lazy(() => import('./pages/Help'));
 const PrivacyPage = lazy(() => import('./pages/Privacy'));
 const TermsPage = lazy(() => import('./pages/Terms'));
 const ContactPage = lazy(() => import('./pages/Contact'));
+const BetaTestGuidePage = lazy(() => import('./pages/BetaTestGuide'));
 
 function Protected({ children }: { children: ReactNode }) {
   const { session, loading } = useAuth();
@@ -95,6 +96,7 @@ export default function App() {
                             <Route path="/monedero" element={<Protected><WalletPage /></Protected>} />
                             <Route path="/consejo" element={<CouncilPage />} />
                             <Route path="/ayuda" element={<HelpPage />} />
+                            <Route path="/beta" element={<BetaTestGuidePage />} />
                             <Route path="/privacidad" element={<PrivacyPage />} />
                             <Route path="/terminos" element={<TermsPage />} />
                             <Route path="/contacto" element={<ContactPage />} />

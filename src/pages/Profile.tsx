@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MessageSquare, UserPlus, UserCheck, Share2, BadgeCheck, Twitch, Youtube, Facebook, Instagram, Link as LinkIcon } from 'lucide-react';
+import { Calendar, MessageSquare, UserPlus, UserCheck, Share2, BadgeCheck, Twitch, Youtube, Facebook, Instagram, Link as LinkIcon, Shield } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { useToast } from '../components/Toast';
@@ -11,6 +11,7 @@ import { RankBadge, RankProgress, RoleBadge } from '../components/RankBadge';
 import { AvatarWithFrame } from '../components/AvatarWithFrame';
 import { Spinner, EmptyState } from '../components/ui';
 import { formatDate } from '../lib/format';
+import { getUserSanctions, SANCTION_TYPES, type Sanction } from '../lib/moderation';
 import type { Profile, Post, Guild } from '../lib/types';
 
 type PostWithAuthor = Post & { author: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> };
@@ -27,8 +28,9 @@ export default function ProfilePage() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followers, setFollowers] = useState(0);
   const [following, setFollowing] = useState(0);
-  const [tab, setTab] = useState<'publicaciones' | 'guardados'>('publicaciones');
+  const [tab, setTab] = useState<'publicaciones' | 'guardados' | 'sanciones'>('publicaciones');
   const [savedPosts, setSavedPosts] = useState<PostWithAuthor[]>([]);
+  const [sanctions, setSanctions] = useState<Sanction[]>([]);
   const [frame, setFrame] = useState<{ rarity: string; icon: string | null } | null>(null);
 
   const isOwn = me?.id === profile?.id;
@@ -125,6 +127,11 @@ export default function ProfilePage() {
     setSavedPosts((data ?? []).map((x: any) => x.post));
   }
 
+  async function loadSanctions() {
+    if (!me) return;
+    setSanctions(await getUserSanctions(me.id));
+  }
+
   if (loading) return <Spinner className="py-20" />;
   if (!profile) return <EmptyState icon={MessageSquare} title="Perfil no encontrado" action={{ to: '/', label: 'Inicio' }} />;
 
@@ -201,6 +208,7 @@ export default function ProfilePage() {
           <div className="mt-6 flex gap-1 border-b border-ink-200 dark:border-ink-800">
             <TabBtn active={tab === 'publicaciones'} onClick={() => setTab('publicaciones')}>Publicaciones</TabBtn>
             <TabBtn active={tab === 'guardados'} onClick={() => { setTab('guardados'); loadSaved(); }}>Guardados</TabBtn>
+            <TabBtn active={tab === 'sanciones'} onClick={() => { setTab('sanciones'); loadSanctions(); }}>Sanciones</TabBtn>
           </div>
         )}
 
@@ -210,6 +218,35 @@ export default function ProfilePage() {
           )}
           {tab === 'guardados' && (
             savedPosts.length === 0 ? <EmptyState icon={MessageSquare} title="Nada guardado" /> : savedPosts.map((p, i) => <div key={p.id} className="fade-in-up" style={{ animationDelay: `${i * 0.05}s` }}><PostCard post={p} author={p.author} /></div>)
+          )}
+          {tab === 'sanciones' && (
+            sanctions.length === 0 ? (
+              <EmptyState icon={Shield} title="Sin sanciones" hint="Tu historial está limpio." />
+            ) : (
+              <div className="space-y-2">
+                {sanctions.map((s) => {
+                  const stype = SANCTION_TYPES.find((t) => t.key === s.type);
+                  return (
+                    <div key={s.id} className="card-medieval p-4 flex items-start gap-3">
+                      <div className="text-xl">{stype?.emoji ?? '📋'}</div>
+                      <div className="flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {stype && <span className={`chip text-[10px] ${stype.color}`}>{stype.label}</span>}
+                          <span className={`chip text-[10px] ${s.is_active ? 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300' : 'bg-ink-100 text-ink-500 dark:bg-ink-800'}`}>
+                            {s.is_active ? 'Activa' : 'Inactiva'}
+                          </span>
+                        </div>
+                        {s.reason && <p className="mt-1 text-sm text-ink-700 dark:text-ink-200">{s.reason}</p>}
+                        <p className="mt-0.5 text-xs text-ink-400">
+                          {formatDate(s.created_at)}
+                          {s.expires_at && ` · expira ${formatDate(s.expires_at)}`}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )
           )}
         </div>
       </div>
