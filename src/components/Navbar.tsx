@@ -5,23 +5,25 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../lib/theme';
 import { useAuth } from '../lib/auth';
+import { useI18n } from '../lib/i18n';
 import { Logo } from './Logo';
 import { Avatar } from './Avatar';
 
 const NAV = [
-  { to: '/', label: 'Inicio', icon: Home },
-  { to: '/gremios', label: 'Gremios', icon: Users },
-  { to: '/comunidades', label: 'Comunidades', icon: Castle },
-  { to: '/alianzas', label: 'Alianzas', icon: Shield },
-  { to: '/eventos', label: 'Eventos', icon: Calendar },
-  { to: '/ranking', label: 'Ranking', icon: Trophy },
-  { to: '/consejo', label: 'Consejo', icon: Lightbulb },
-  { to: '/buscar', label: 'Buscar', icon: Search },
+  { to: '/', labelKey: 'nav.home', icon: Home },
+  { to: '/gremios', labelKey: 'nav.guilds', icon: Users },
+  { to: '/comunidades', labelKey: 'nav.communities', icon: Castle },
+  { to: '/alianzas', labelKey: 'nav.alliances', icon: Shield },
+  { to: '/eventos', labelKey: 'nav.events', icon: Calendar },
+  { to: '/ranking', labelKey: 'nav.rankings', icon: Trophy },
+  { to: '/consejo', labelKey: 'nav.council', icon: Lightbulb },
+  { to: '/buscar', labelKey: 'nav.search', icon: Search },
 ];
 
 export function Navbar() {
   const { theme, toggle } = useTheme();
   const { profile, signOut } = useAuth();
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [q, setQ] = useState('');
@@ -48,19 +50,18 @@ export function Navbar() {
                 to={n.to}
                 className={`nav-link ${active ? 'nav-link-active' : ''}`}
               >
-                {n.label}
+                {t(n.labelKey as any)}
               </Link>
             );
           })}
         </nav>
-        <div className="ml-auto flex items-center gap-2">
           <form onSubmit={submitSearch} className="hidden md:block">
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Buscar gremios, jugadores..."
+                placeholder={t('nav.search') + "..."}
                 className="w-56 rounded-xl border border-ink-200 bg-ink-50 py-2 pl-9 pr-3 text-sm outline-none transition focus:border-gold-400 focus:bg-white dark:border-ink-700 dark:bg-ink-900 dark:focus:bg-ink-900"
               />
             </div>
@@ -88,20 +89,20 @@ export function Navbar() {
                         <p className="truncate text-sm font-semibold">{profile.display_name || profile.username}</p>
                         <p className="truncate text-xs text-ink-500">@{profile.username}</p>
                       </div>
-                      <MenuItem to={`/perfil/${profile.username}`} icon={UserIcon} label="Mi perfil" onClick={() => setMenuOpen(false)} />
-                      <MenuItem to="/crear-publicacion" icon={Plus} label="Publicar" onClick={() => setMenuOpen(false)} />
-                      <MenuItem to="/tienda" icon={ShoppingBag} label="Tienda de marcos" onClick={() => setMenuOpen(false)} />
-                      <MenuItem to="/monedero" icon={WalletIcon} label="Monedero" onClick={() => setMenuOpen(false)} />
-                      <MenuItem to="/consejo" icon={Lightbulb} label="Consejo del Reino" onClick={() => setMenuOpen(false)} />
-                      <MenuItem to="/ajustes" icon={Settings} label="Ajustes" onClick={() => setMenuOpen(false)} />
+                      <MenuItem to={`/perfil/${profile.username}`} icon={UserIcon} label={t('nav.profile')} onClick={() => setMenuOpen(false)} />
+                      <MenuItem to="/crear-publicacion" icon={Plus} label={t('nav.post')} onClick={() => setMenuOpen(false)} />
+                      <MenuItem to="/tienda" icon={ShoppingBag} label={t('nav.shop')} onClick={() => setMenuOpen(false)} />
+                      <MenuItem to="/monedero" icon={WalletIcon} label={t('nav.wallet')} onClick={() => setMenuOpen(false)} />
+                      <MenuItem to="/consejo" icon={Lightbulb} label={t('council.title')} onClick={() => setMenuOpen(false)} />
+                      <MenuItem to="/ajustes" icon={Settings} label={t('nav.settings')} onClick={() => setMenuOpen(false)} />
                       {(profile.role === 'admin' || profile.role === 'supreme_admin' || profile.role === 'moderator') && (
-                        <MenuItem to="/admin" icon={Shield} label="Panel admin" onClick={() => setMenuOpen(false)} />
+                        <MenuItem to="/admin" icon={Shield} label={t('nav.admin')} onClick={() => setMenuOpen(false)} />
                       )}
                       <button
                         onClick={() => { signOut(); setMenuOpen(false); navigate('/'); }}
                         className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-ink-700 hover:bg-ink-100 dark:text-ink-200 dark:hover:bg-ink-800"
                       >
-                        <LogOut className="h-4 w-4" /> Cerrar sesión
+                        <LogOut className="h-4 w-4" /> {t('nav.logout')}
                       </button>
                     </div>
                   </>
@@ -110,14 +111,13 @@ export function Navbar() {
             </>
           ) : (
             <div className="hidden items-center gap-2 sm:flex">
-              <Link to="/login" className="btn-ghost">Iniciar sesión</Link>
-              <Link to="/registro" className="btn-primary">Registrarse</Link>
+              <Link to="/login" className="btn-ghost">{t('nav.login')}</Link>
+              <Link to="/registro" className="btn-primary">{t('nav.register')}</Link>
             </div>
           )}
           <button onClick={() => setOpen((p) => !p)} className="rounded-lg p-2 text-ink-600 hover:bg-ink-100 lg:hidden dark:text-ink-300 dark:hover:bg-ink-800">
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
-        </div>
       </div>
       {open && (
         <div className="border-t border-ink-200 bg-white lg:hidden dark:border-ink-800 dark:bg-ink-950">
@@ -128,7 +128,7 @@ export function Navbar() {
                 <input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder="Buscar..."
+                  placeholder={t('nav.search') + "..."}
                   className="input pl-9"
                 />
               </div>
@@ -142,14 +142,14 @@ export function Navbar() {
                   onClick={() => setOpen(false)}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${active ? 'bg-gold-50 text-gold-600 dark:bg-gold-950/30 dark:text-gold-300' : 'text-ink-700 hover:bg-ink-100 dark:text-ink-200 dark:hover:bg-ink-800'}`}
                 >
-                  <n.icon className="h-4 w-4" /> {n.label}
+                  <n.icon className="h-4 w-4" /> {t(n.labelKey as any)}
                 </Link>
               );
             })}
             {!profile && (
               <div className="flex gap-2 pt-2">
-                <Link to="/login" onClick={() => setOpen(false)} className="btn-outline flex-1">Iniciar sesión</Link>
-                <Link to="/registro" onClick={() => setOpen(false)} className="btn-primary flex-1">Registrarse</Link>
+                <Link to="/login" onClick={() => setOpen(false)} className="btn-outline flex-1">{t('nav.login')}</Link>
+                <Link to="/registro" onClick={() => setOpen(false)} className="btn-primary flex-1">{t('nav.register')}</Link>
               </div>
             )}
           </div>

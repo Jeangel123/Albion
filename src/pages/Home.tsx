@@ -9,10 +9,12 @@ import { SectionTitle, Spinner } from '../components/ui';
 import { useRealtime, upsertById, removeById } from '../lib/useRealtime';
 import { EVENT_TYPES, type Guild, type Post, type Profile, type AlbionEvent } from '../lib/types';
 import { formatDateTime } from '../lib/format';
+import { useI18n } from '../lib/i18n';
 
 type PostWithAuthor = Post & { author: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> };
 
 export default function HomePage() {
+  const { t } = useI18n();
   const [posts, setPosts] = useState<PostWithAuthor[] | null>(null);
   const [guilds, setGuilds] = useState<Guild[] | null>(null);
   const [news, setNews] = useState<PostWithAuthor[] | null>(null);
@@ -64,16 +66,16 @@ export default function HomePage() {
         <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-gold-500/10 blur-3xl float" />
         <div className="pointer-events-none absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-gold-600/10 blur-3xl float" style={{ animationDelay: '1s' }} />
         <div className="relative max-w-2xl">
-          <span className="chip bg-gold-500/15 text-gold-300 backdrop-blur animate-fade-in"><Sparkles className="h-3.5 w-3.5" /> Red social de gremios</span>
+          <span className="chip bg-gold-500/15 text-gold-300 backdrop-blur animate-fade-in"><Sparkles className="h-3.5 w-3.5" /> {t('hero.badge')}</span>
           <h1 className="mt-4 font-display text-3xl font-bold leading-tight text-white animate-slide-up sm:text-5xl">
-            Tu gremio. Tu alianza. <span className="text-gradient-gold">Tu Imperio.</span>
+            {t('hero.title1')} <span className="text-gradient-gold">{t('hero.title2')}</span>
           </h1>
           <p className="mt-3 text-base text-ink-200 animate-slide-up sm:text-lg" style={{ animationDelay: '0.1s' }}>
-            Conecta con la comunidad hispanohablante de Albion Online. Recluta, organiza eventos, publica tus hazañas y domina Avalon.
+            {t('hero.desc')}
           </p>
           <div className="mt-6 flex flex-wrap gap-3 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-            <Link to="/registro" className="btn-primary">Crear cuenta</Link>
-            <Link to="/gremios" className="btn-outline border-gold-400/40 text-white hover:bg-white/10">Explorar gremios</Link>
+            <Link to="/registro" className="btn-primary">{t('hero.cta1')}</Link>
+            <Link to="/gremios" className="btn-outline border-gold-400/40 text-white hover:bg-white/10">{t('hero.cta2')}</Link>
           </div>
         </div>
       </section>
@@ -96,9 +98,9 @@ export default function HomePage() {
         <aside className="space-y-6">
           {/* Featured guilds */}
           <div className="card-medieval p-4">
-            <SectionTitle title="Gremios destacados" action={{ to: '/gremios', label: 'Ver todos' }} />
+            <SectionTitle title={t('section.featured')} action={{ to: '/gremios', label: t('common.search') }} />
             {!guilds ? <Spinner /> : guilds.length === 0 ? (
-              <p className="text-sm text-ink-500">No hay gremios destacados aún.</p>
+              <p className="text-sm text-ink-500">{t('guilds.empty')}</p>
             ) : (
               <div className="space-y-3">
                 {guilds.map((g) => (
@@ -185,10 +187,10 @@ export default function HomePage() {
           {/* Quick links */}
           <div className="card-medieval p-4">
             <div className="grid grid-cols-2 gap-2">
-              <QuickLink to="/ranking" icon={Trophy} label="Rankings" />
-              <QuickLink to="/alianzas" icon={Shield} label="Alianzas" />
-              <QuickLink to="/eventos" icon={Calendar} label="Eventos" />
-              <QuickLink to="/buscar" icon={Users} label="Buscar" />
+              <QuickLink to="/ranking" icon={Trophy} label={t('quick.rankings')} />
+              <QuickLink to="/alianzas" icon={Shield} label={t('quick.alliances')} />
+              <QuickLink to="/eventos" icon={Calendar} label={t('quick.events')} />
+              <QuickLink to="/buscar" icon={Users} label={t('quick.search')} />
             </div>
           </div>
         </aside>

@@ -18,6 +18,7 @@ export type Profile = {
   reputation_points: number;
   medieval_rank: MedievalRank;
   equipped_frame_id: string | null;
+  language: string | null;
   created_at: string;
   updated_at: string;
 };

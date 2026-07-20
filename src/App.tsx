@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './lib/auth';
 import { ThemeProvider } from './lib/theme';
+import { I18nProvider } from './lib/i18n';
 import { ToastProvider } from './components/Toast';
 import { Layout } from './components/Layout';
 import LoginPage, { SignupPage, RecoverPage } from './pages/Auth';
@@ -38,7 +39,8 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <ToastProvider>
+        <I18nProvider>
+          <ToastProvider>
           <BrowserRouter>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
@@ -79,7 +81,8 @@ export default function App() {
               />
             </Routes>
           </BrowserRouter>
-        </ToastProvider>
+          </ToastProvider>
+        </I18nProvider>
       </AuthProvider>
     </ThemeProvider>
   );
