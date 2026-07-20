@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
-  Users, MapPin, Globe, Clock, ListChecks, MessageCircle, BadgeCheck, Images, Video as VideoIcon, ArrowLeft, Settings, ExternalLink, Send, Trash2,
+  Users, MapPin, Globe, Clock, ListChecks, MessageCircle, BadgeCheck, Images, Video as VideoIcon, ArrowLeft, Settings, ExternalLink,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
@@ -15,7 +15,8 @@ import { Spinner, EmptyState } from '../components/ui';
 import { Modal } from '../components/Modal';
 import { slugify } from '../lib/format';
 import { ImageUpload } from '../components/ImageUpload';
-import { ACTIVITIES, type Guild, type Post, type Profile, type GuildMember, type Message } from '../lib/types';
+import { ChatPanel } from '../components/ChatPanel';
+import { ACTIVITIES, type Guild, type Post, type Profile, type GuildMember } from '../lib/types';
 
 type PostWithAuthor = Post & { author: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> };
 
@@ -31,7 +32,6 @@ export default function GuildDetailPage() {
   const [gallery, setGallery] = useState<{ id: string; image_url: string; caption: string | null }[]>([]);
   const [videos, setVideos] = useState<{ id: string; video_url: string; title: string | null }[]>([]);
   const [tab, setTab] = useState<'publicaciones' | 'chat' | 'galeria' | 'videos' | 'miembros'>('publicaciones');
-  const [messages, setMessages] = useState<MessageWithSender[]>([]);
   const [editOpen, setEditOpen] = useState(false);
   const [isMember, setIsMember] = useState(false);
   const [isLeader, setIsLeader] = useState(false);
@@ -56,12 +56,6 @@ export default function GuildDetailPage() {
         setIsMember((m.data ?? []).some((x: any) => x.user_id === profile.id));
         setIsLeader(g.owner_id === profile.id || (m.data ?? []).some((x: any) => x.user_id === profile.id && x.role === 'leader'));
       }
-      const { data: msgs } = await supabase
-        .from('messages')
-        .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank, role)')
-        .eq('guild_id', g.id)
-        .order('created_at', { ascending: true });
-      setMessages((msgs ?? []) as MessageWithSender[]);
       setLoading(false);
     })();
   }, [slug, profile]);
@@ -86,32 +80,6 @@ export default function GuildDetailPage() {
     }
   }, []);
   useRealtime<Post>({ table: 'posts', filter: `guild_id=eq.${guild?.id ?? ''}`, onEvent: handlePostEvent });
-
-  // Live-sync guild chat messages
-  const handleMessageEvent = useCallback(({ eventType, new: row, old: oldRow }: { eventType: 'INSERT' | 'UPDATE' | 'DELETE'; new: any; old: any }) => {
-    if (eventType === 'DELETE' && oldRow?.id) {
-      setMessages((list) => removeById(list, oldRow.id));
-    } else if (row?.id) {
-      supabase.from('messages').select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank, role)').eq('id', row.id).maybeSingle()
-        .then(({ data }) => { if (data) setMessages((list) => upsertById(list, data as MessageWithSender)); });
-    }
-  }, []);
-  useRealtime<Message>({ table: 'messages', filter: `guild_id=eq.${guild?.id ?? ''}`, onEvent: handleMessageEvent });
-
-  async function sendMessage(content: string) {
-    if (!profile || !guild) return;
-    const { error } = await supabase.from('messages').insert({
-      guild_id: guild.id,
-      sender_id: profile.id,
-      content,
-    });
-    if (error) push({ type: 'error', message: `No se pudo enviar: ${error.message}` });
-  }
-
-  async function deleteMessage(messageId: string) {
-    const { error } = await supabase.from('messages').delete().eq('id', messageId);
-    if (error) push({ type: 'error', message: `No se pudo eliminar: ${error.message}` });
-  }
 
   async function join() {
     if (!profile) return navigate('/login');
@@ -207,13 +175,12 @@ export default function GuildDetailPage() {
             </div>
           )}
           {tab === 'chat' && (
-            isMember ? (
-              <GuildChatPanel
-                messages={messages}
-                onSend={sendMessage}
-                onDelete={deleteMessage}
+            isMember && guild ? (
+              <ChatPanel
+                scope={{ kind: 'guild', id: guild.id }}
                 currentUserId={profile?.id ?? ''}
                 canModerate={isLeader}
+                storageFolder="guilds"
               />
             ) : (
               <EmptyState icon={MessageCircle} title="Únete para chatear" hint="Necesitas ser miembro del gremio para ver y enviar mensajes." action={{ to: '#', label: '' }} />
@@ -262,78 +229,6 @@ export default function GuildDetailPage() {
       {isLeader && editOpen && (
         <GuildEditModal guild={guild} onClose={() => setEditOpen(false)} onSaved={() => setEditOpen(false)} />
       )}
-    </div>
-  );
-}
-
-type MessageWithSender = Message & { sender: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank' | 'role'> | null };
-
-function GuildChatPanel({ messages, onSend, onDelete, currentUserId, canModerate }: { messages: MessageWithSender[]; onSend: (content: string) => Promise<void>; onDelete: (id: string) => Promise<void>; currentUserId: string; canModerate: boolean }) {
-  const [input, setInput] = useState('');
-  const [sending, setSending] = useState(false);
-  const endRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages.length]);
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    const content = input.trim();
-    if (!content || sending) return;
-    setSending(true);
-    try {
-      await onSend(content);
-      setInput('');
-    } finally {
-      setSending(false);
-    }
-  }
-
-  return (
-    <div className="card flex h-[60vh] flex-col p-0">
-      <div className="flex-1 space-y-3 overflow-y-auto p-4">
-        {messages.length === 0 ? (
-          <div className="flex h-full items-center justify-center text-sm text-ink-400">
-            No hay mensajes aún. ¡Sé el primero en escribir!
-          </div>
-        ) : (
-          messages.map((m) => {
-            const own = m.sender_id === currentUserId;
-            const canDelete = own || canModerate;
-            return (
-              <div key={m.id} className={`group flex gap-2 ${own ? 'flex-row-reverse' : ''}`}>
-                <Avatar src={m.sender?.avatar_url} alt={m.sender?.username ?? ''} size="sm" to={`/perfil/${m.sender?.username}`} />
-                <div className={`max-w-[75%] ${own ? 'text-right' : ''}`}>
-                  <div className={`mb-0.5 flex items-center gap-1.5 ${own ? 'justify-end' : ''}`}>
-                    <p className="text-xs text-ink-500">{own ? 'Tú' : m.sender?.display_name || m.sender?.username}</p>
-                  </div>
-                  <div className={`inline-block rounded-2xl px-3 py-2 text-sm ${own ? 'bg-gold-500 text-ink-950' : 'bg-ink-100 text-ink-800 dark:bg-ink-800 dark:text-ink-100'}`}>
-                    {m.content}
-                  </div>
-                  <div className={`mt-0.5 flex items-center gap-2 ${own ? 'justify-end' : ''}`}>
-                    <p className="text-xs text-ink-400">
-                      {new Date(m.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                    {canDelete && (
-                      <button onClick={() => onDelete(m.id)} className="opacity-0 transition group-hover:opacity-100 text-ink-400 hover:text-red-500" title="Eliminar mensaje">
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })
-        )}
-        <div ref={endRef} />
-      </div>
-      <form onSubmit={submit} className="border-t border-ink-200 p-3 dark:border-ink-800">
-        <div className="flex gap-2">
-          <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Escribe un mensaje..." className="input flex-1" disabled={sending} />
-          <button type="submit" disabled={sending || !input.trim()} className="btn-primary"><Send className="h-4 w-4" /></button>
-        </div>
-      </form>
     </div>
   );
 }

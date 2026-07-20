@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Upload, X, Loader2 } from 'lucide-react';
+import { Upload, X, Loader2, Image as ImageIcon } from 'lucide-react';
 import { supabase, STORAGE_BUCKET } from '../lib/supabase';
 import { useToast } from './Toast';
 
@@ -7,8 +7,8 @@ type Props = {
   value: string | null;
   onChange: (url: string | null) => void;
   label: string;
-  /** 'avatar' (cuadrado/redondo) o 'banner' (panorámico) */
-  variant?: 'avatar' | 'banner';
+  /** 'avatar' (cuadrado/redondo), 'banner' (panorámico) o 'message' (botón compacto) */
+  variant?: 'avatar' | 'banner' | 'message';
   /** Carpeta dentro del bucket, ej: 'avatars', 'banners', 'guilds' */
   folder: string;
   /** Id del dueño (perfil/gremio/alianza) para aislar archivos */
@@ -78,6 +78,23 @@ export function ImageUpload({
 
   function remove() {
     onChange(null);
+  }
+
+  if (variant === 'message') {
+    return (
+      <>
+        <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} disabled={uploading} className="hidden" />
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          className="btn-ghost p-2"
+          title="Enviar imagen"
+        >
+          {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
+        </button>
+      </>
+    );
   }
 
   const isAvatar = variant === 'avatar';

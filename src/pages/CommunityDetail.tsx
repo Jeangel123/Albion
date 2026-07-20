@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
-  Users, BadgeCheck, ArrowLeft, Settings, Castle, MessageSquare, Crown, Trash2, Send,
+  Users, BadgeCheck, ArrowLeft, Settings, Castle, MessageSquare, Crown,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { useToast } from '../components/Toast';
-import { useRealtime, upsertById, removeById } from '../lib/useRealtime';
+import { useRealtime } from '../lib/useRealtime';
 import { useCommunities } from '../lib/useCommunities';
 import { Banner } from '../components/Banner';
 import { AvatarWithFrame } from '../components/AvatarWithFrame';
@@ -15,22 +15,21 @@ import { FounderName, isFounderRole } from '../components/FounderStyle';
 import { Spinner, EmptyState } from '../components/ui';
 import { Modal } from '../components/Modal';
 import { ImageUpload } from '../components/ImageUpload';
+import { ChatPanel } from '../components/ChatPanel';
 import { slugify } from '../lib/format';
-import type { Community, CommunityMember, Profile, Message, MedievalRank, FrameRarity } from '../lib/types';
+import type { Community, CommunityMember, Profile, MedievalRank, FrameRarity } from '../lib/types';
 
 type MemberWithUser = CommunityMember & { user: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank' | 'role'> & { frame?: { rarity: FrameRarity; icon: string | null } | null } };
-type MessageWithSender = Message & { sender: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank' | 'role'> & { frame?: { rarity: FrameRarity; icon: string | null } | null } };
 
 export default function CommunityDetailPage() {
   const { slug } = useParams();
   const { profile } = useAuth();
   const { push } = useToast();
   const navigate = useNavigate();
-  const { isMember, membership, join, leave, deleteMessage } = useCommunities();
+  const { isMember, membership, join, leave } = useCommunities();
   const [community, setCommunity] = useState<Community | null>(null);
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState<MemberWithUser[]>([]);
-  const [messages, setMessages] = useState<MessageWithSender[]>([]);
   const [tab, setTab] = useState<'chat' | 'miembros' | 'info'>('chat');
   const [editOpen, setEditOpen] = useState(false);
 
@@ -42,23 +41,15 @@ export default function CommunityDetailPage() {
         if (cErr) console.error('[community] load:', cErr.message);
         if (!c) { setLoading(false); return; }
         setCommunity(c as Community);
-        const [m, msg] = await Promise.all([
+        const [m] = await Promise.all([
           supabase
             .from('community_members')
             .select('*, user:profiles(id, username, display_name, avatar_url, medieval_rank, role, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
             .eq('community_id', c.id)
             .order('joined_at', { ascending: false }),
-          supabase
-            .from('messages')
-            .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank, role, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
-            .eq('room_id', c.id)
-            .order('created_at', { ascending: true })
-            .limit(200),
         ]);
         if (m.error) console.error('[community] members:', m.error.message);
-        if (msg.error) console.error('[community] messages:', msg.error.message);
         setMembers((m.data ?? []) as unknown as MemberWithUser[]);
-        setMessages((msg.data ?? []) as unknown as MessageWithSender[]);
       } catch (err) {
         console.error('[community] fatal:', err);
       } finally {
@@ -76,23 +67,8 @@ export default function CommunityDetailPage() {
     },
   });
 
-  const handleMessageEvent = useCallback(({ eventType, new: row, old: oldRow }: { eventType: 'INSERT' | 'UPDATE' | 'DELETE'; new: any; old: any }) => {
-    if (eventType === 'DELETE' && oldRow?.id) {
-      setMessages((list) => removeById(list, oldRow.id));
-    } else if (row?.id) {
-      supabase
-        .from('messages')
-        .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank, role, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
-        .eq('id', row.id)
-        .maybeSingle()
-        .then(({ data }) => { if (data) setMessages((list) => upsertById(list, data as MessageWithSender)); });
-    }
-  }, []);
-  useRealtime<Message>({
-    table: 'messages',
-    filter: `room_id=eq.${community?.id ?? ''}`,
-    onEvent: handleMessageEvent,
-  });
+  const handleMessageEvent = useCallback(() => {}, []);
+  void handleMessageEvent;
 
   const myMembership = community ? membership(community.id) : null;
   const isOwner = community?.owner_id === profile?.id;
@@ -112,25 +88,6 @@ export default function CommunityDetailPage() {
     const { error } = await leave(community.id);
     if (error) push({ type: 'error', message: error });
     else push({ type: 'success', message: 'Saliste de la comunidad' });
-  }
-
-  async function sendMessage(content: string) {
-    if (!profile || !community) return;
-    const { error } = await supabase.from('messages').insert({
-      room_id: community.id,
-      sender_id: profile.id,
-      content,
-    });
-    if (error) {
-      console.error('[messages insert]', { roomId: community.id, senderId: profile.id, error });
-      push({ type: 'error', message: `No se pudo enviar: ${error.message}` });
-      return;
-    }
-  }
-
-  async function handleDeleteMessage(messageId: string) {
-    const { error } = await deleteMessage(messageId);
-    if (error) push({ type: 'error', message: `No se pudo eliminar: ${error}` });
   }
 
   if (loading) return <Spinner className="py-20" />;
@@ -188,13 +145,13 @@ export default function CommunityDetailPage() {
 
         <div className="mt-6">
           {tab === 'chat' && (
-            joined ? (
+            joined && community ? (
               <ChatPanel
-                messages={messages}
-                onSend={sendMessage}
-                onDelete={handleDeleteMessage}
+                scope={{ kind: 'room', id: community.id }}
                 currentUserId={profile?.id ?? ''}
                 canModerate={isAdmin}
+                useFrames
+                storageFolder="communities"
               />
             ) : (
               <EmptyState icon={MessageSquare} title="Únete para chatear" hint="Necesitas ser miembro para ver y enviar mensajes." action={{ to: '#', label: '' }} />
@@ -240,96 +197,6 @@ export default function CommunityDetailPage() {
       {isAdmin && editOpen && (
         <CommunityEditModal community={community} onClose={() => setEditOpen(false)} />
       )}
-    </div>
-  );
-}
-
-function ChatPanel({ messages, onSend, onDelete, currentUserId, canModerate }: { messages: MessageWithSender[]; onSend: (content: string) => Promise<void>; onDelete: (id: string) => Promise<void>; currentUserId: string; canModerate: boolean }) {
-  const [input, setInput] = useState('');
-  const [sending, setSending] = useState(false);
-  const endRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages.length]);
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    const content = input.trim();
-    if (!content || sending) return;
-    setSending(true);
-    try {
-      await onSend(content);
-      setInput('');
-    } finally {
-      setSending(false);
-    }
-  }
-
-  return (
-    <div className="card flex h-[60vh] flex-col p-0">
-      <div className="flex-1 space-y-3 overflow-y-auto p-4">
-        {messages.length === 0 ? (
-          <div className="flex h-full items-center justify-center text-sm text-ink-400">
-            No hay mensajes aún. ¡Sé el primero en escribir!
-          </div>
-        ) : (
-          messages.map((m) => {
-            const own = m.sender_id === currentUserId;
-            const founder = isFounderRole(m.sender?.role);
-            const canDelete = own || canModerate;
-            return (
-              <div key={m.id} className={`group flex gap-2 ${own ? 'flex-row-reverse' : ''}`}>
-                <AvatarWithFrame src={m.sender?.avatar_url} alt={m.sender?.username ?? ''} size="sm" to={`/perfil/${m.sender?.username}`} frameRarity={(m.sender as any)?.frame?.rarity ?? null} frameIcon={(m.sender as any)?.frame?.icon ?? null} />
-                <div className={`max-w-[75%] ${own ? 'text-right' : ''}`}>
-                  <div className={`mb-0.5 flex items-center gap-1.5 ${own ? 'justify-end' : ''}`}>
-                    {founder ? (
-                      <FounderName name={own ? 'Tú' : m.sender?.display_name || m.sender?.username || ''} />
-                    ) : (
-                      <p className="text-xs text-ink-500">
-                        {own ? 'Tú' : m.sender?.display_name || m.sender?.username}
-                      </p>
-                    )}
-                    {m.sender?.medieval_rank && <RankBadge rank={m.sender.medieval_rank as MedievalRank} size="xs" showEmoji={false} />}
-                  </div>
-                  <div className={`inline-block rounded-2xl px-3 py-2 text-sm ${founder ? 'founder-bubble text-sky-100' : own ? 'bg-gold-500 text-ink-950' : 'bg-ink-100 text-ink-800 dark:bg-ink-800 dark:text-ink-100'}`}>
-                    {m.content}
-                  </div>
-                  <div className={`mt-0.5 flex items-center gap-2 ${own ? 'justify-end' : ''}`}>
-                    <p className="text-xs text-ink-400">
-                      {new Date(m.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                    {canDelete && (
-                      <button
-                        onClick={() => onDelete(m.id)}
-                        className="opacity-0 transition group-hover:opacity-100 text-ink-400 hover:text-red-500"
-                        title="Eliminar mensaje"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })
-        )}
-        <div ref={endRef} />
-      </div>
-      <form onSubmit={submit} className="border-t border-ink-200 p-3 dark:border-ink-800">
-        <div className="flex gap-2">
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Escribe un mensaje..."
-            className="input flex-1"
-            disabled={sending}
-          />
-          <button type="submit" disabled={sending || !input.trim()} className="btn-primary">
-            <Send className="h-4 w-4" />
-          </button>
-        </div>
-      </form>
     </div>
   );
 }

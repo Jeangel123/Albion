@@ -107,6 +107,38 @@ export type Message = {
   media_url: string | null;
   created_at: string;
   guild_id?: string | null;
+  reply_to?: string | null;
+  message_type?: 'text' | 'image' | 'audio' | 'system';
+  audio_duration_sec?: number | null;
+};
+
+export type MessageReaction = {
+  id: string;
+  message_id: string;
+  user_id: string;
+  type: ReactionType;
+  created_at: string;
+};
+
+export type MessageRead = {
+  id: string;
+  user_id: string;
+  guild_id: string | null;
+  room_id: string | null;
+  last_read_message_id: string | null;
+  last_read_at: string;
+};
+
+export type CallSession = {
+  id: string;
+  guild_id: string | null;
+  room_id: string | null;
+  initiator_id: string;
+  status: 'initiated' | 'active' | 'ended';
+  type: 'voice' | 'video';
+  started_at: string | null;
+  ended_at: string | null;
+  created_at: string;
 };
 
 export type ReactionType = 'like' | 'love' | 'haha' | 'wow' | 'sad' | 'angry';
