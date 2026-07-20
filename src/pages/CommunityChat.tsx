@@ -37,7 +37,6 @@ export default function CommunityChatPage() {
         .from('messages')
         .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank, role, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
         .eq('room_id', c.id)
-        .eq('topic', 'community_chat')
         .order('created_at', { ascending: true })
         .limit(200);
       setMessages((msg ?? []) as unknown as MessageWithSender[]);
@@ -76,12 +75,13 @@ export default function CommunityChatPage() {
     setSending(true);
     const { error } = await supabase.from('messages').insert({
       room_id: community.id,
-      topic: 'community_chat',
       sender_id: profile.id,
-      extension: 'text',
       content,
     });
-    if (error) push({ type: 'error', message: error.message });
+    if (error) {
+      console.error('[messages insert]', { roomId: community.id, senderId: profile.id, error });
+      push({ type: 'error', message: `No se pudo enviar: ${error.message}` });
+    }
     setInput('');
     setSending(false);
   }

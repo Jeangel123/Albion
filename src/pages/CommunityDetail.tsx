@@ -48,8 +48,7 @@ export default function CommunityDetailPage() {
           .from('messages')
           .select('*, sender:profiles(id, username, display_name, avatar_url)')
           .eq('room_id', c.id)
-          .eq('topic', 'community_chat')
-          .order('created_at', { ascending: true })
+            .order('created_at', { ascending: true })
           .limit(100),
       ]);
       setMembers((m.data ?? []) as unknown as MemberWithUser[]);
@@ -109,12 +108,13 @@ export default function CommunityDetailPage() {
     if (!profile || !community) return;
     const { error } = await supabase.from('messages').insert({
       room_id: community.id,
-      topic: 'community_chat',
       sender_id: profile.id,
-      extension: 'text',
       content,
     });
-    if (error) push({ type: 'error', message: error.message });
+    if (error) {
+      console.error('[messages insert]', { roomId: community.id, senderId: profile.id, error });
+      push({ type: 'error', message: `No se pudo enviar: ${error.message}` });
+    }
   }
 
   if (loading) return <Spinner className="py-20" />;
