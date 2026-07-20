@@ -32,7 +32,7 @@ export function useRealtime<T extends Row = Row>(opts: {
     let channel = supabase.channel(channelName);
 
     events.forEach((evt) => {
-      channel = channel.on('postgres_changes', { event: evt, schema: 'public', table, filter }, (payload: any) => {
+      channel = channel.on('postgres_changes' as any, { event: evt, schema: 'public', table, filter } as any, (payload: any) => {
         onEventRef.current({
           eventType: payload.eventType as EventType,
           new: (payload.new as T) ?? null,

@@ -81,6 +81,8 @@ export default function CommunityChatPage() {
     if (error) {
       console.error('[messages insert]', { roomId: community.id, senderId: profile.id, error });
       push({ type: 'error', message: `No se pudo enviar: ${error.message}` });
+      setSending(false);
+      return;
     }
     setInput('');
     setSending(false);
