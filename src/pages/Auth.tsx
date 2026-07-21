@@ -140,30 +140,60 @@ export function RecoverPage() {
   const { push } = useToast();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  async function sendReset(emailToUse: string) {
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(emailToUse, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setLoading(false);
+    if (error) {
+      const msg = error.message || '';
+      if (msg.toLowerCase().includes('rate limit') || msg.toLowerCase().includes('too many')) {
+        return push({ type: 'error', message: 'Demasiados intentos. Espera unos minutos antes de volver a intentarlo.' });
+      }
+      return push({ type: 'error', message: msg });
+    }
+    setSent(true);
+    push({ type: 'success', message: 'Enlace de recuperación enviado' });
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    if (error) return push({ type: 'error', message: error.message });
-    setSent(true);
-    push({ type: 'success', message: 'Enlace de recuperación enviado' });
+    await sendReset(email);
+  }
+
+  async function resend() {
+    await sendReset(email);
   }
 
   return (
     <AuthShell title="Recuperar contraseña" subtitle="Te enviaremos un enlace a tu correo">
       {sent ? (
-        <p className="text-sm text-ink-600 dark:text-ink-300">
-          Revisa tu correo <strong>{email}</strong> para restablecer tu contraseña.
-        </p>
+        <div className="text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-950">
+            <Mail className="h-7 w-7 text-blue-600 dark:text-blue-400" />
+          </div>
+          <p className="text-sm text-ink-600 dark:text-ink-300">
+            Revisa tu correo <strong>{email}</strong> para restablecer tu contraseña. El enlace expira en 1 hora.
+          </p>
+          <button onClick={resend} disabled={loading} className="btn-primary mt-6 w-full">
+            {loading ? 'Enviando...' : 'Reenviar enlace'}
+          </button>
+        </div>
       ) : (
         <form onSubmit={submit} className="space-y-4">
           <div>
             <label className="label">Correo electrónico</label>
-            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="input" placeholder="tu@correo.com" />
+            <div className="relative">
+              <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="input pl-10" placeholder="tu@correo.com" />
+            </div>
           </div>
-          <button className="btn-primary w-full">Enviar enlace</button>
+          <button disabled={loading} className="btn-primary w-full">
+            {loading ? 'Enviando...' : 'Enviar enlace'}
+          </button>
         </form>
       )}
       <p className="mt-5 text-center text-sm text-ink-500 dark:text-ink-400">
