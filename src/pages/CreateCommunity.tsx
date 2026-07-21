@@ -45,7 +45,7 @@ export default function CreateCommunityPage() {
     if (error) return push({ type: 'error', message: error });
     push({ type: 'success', message: 'Comunidad creada' });
     if (data) {
-      await supabase.from('community_members').insert({ community_id: data.id, user_id: profile!.id, role: 'owner' });
+      await supabase.from('community_members').upsert({ community_id: data.id, user_id: profile!.id, role: 'owner' }, { onConflict: 'community_id,user_id' });
       // The chat_room is auto-created by the create_chat_room_for_community trigger.
       // Just add the owner as a member of that room.
       await supabase.from('chat_room_members').upsert({ room_id: data.id, user_id: profile!.id }, { onConflict: 'room_id,user_id' });
