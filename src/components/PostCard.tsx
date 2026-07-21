@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Flag, Link as LinkIcon, Trash2, Rocket,
+  Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Flag, Link as LinkIcon, Trash2, Rocket, Video as VideoIcon, Image as ImageIcon, FileText, BarChart3, Swords, BookOpen,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
@@ -133,6 +133,20 @@ export function PostCard({ post, author, onDeleted }: { post: PostWithAuthor; au
   const isBoosted = post.is_boosted && post.boosted_until && new Date(post.boosted_until) > new Date();
   const [boosting, setBoosting] = useState(false);
 
+  const isGuildPost = !!post.guild_id;
+  const isGuide = post.tags?.some((tag) => /^(guia|guía|guide|tutorial|howto)$/i.test(tag));
+  const typeMeta = isGuide
+    ? { icon: BookOpen, label: 'Guía', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-950/50' }
+    : isGuildPost
+      ? { icon: Swords, label: 'Gremio', color: 'text-red-600 dark:text-red-400', bg: 'bg-red-100 dark:bg-red-950/50' }
+      : post.type === 'video'
+        ? { icon: VideoIcon, label: 'Video', color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-950/50' }
+        : post.type === 'image'
+          ? { icon: ImageIcon, label: 'Imagen', color: 'text-sky-600 dark:text-sky-400', bg: 'bg-sky-100 dark:bg-sky-950/50' }
+          : post.type === 'poll'
+            ? { icon: BarChart3, label: 'Encuesta', color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-950/50' }
+            : { icon: FileText, label: 'Texto', color: 'text-ink-500 dark:text-ink-400', bg: 'bg-ink-100 dark:bg-ink-800' };
+
   async function doBoost(hours: 24 | 72) {
     if (!profile) return;
     setBoosting(true);
@@ -143,15 +157,18 @@ export function PostCard({ post, author, onDeleted }: { post: PostWithAuthor; au
   }
 
   return (
-    <article className="card p-4 sm:p-5 animate-fade-in">
+    <article className={`card p-4 sm:p-5 animate-fade-in transition-shadow duration-300 hover:shadow-md ${isBoosted ? 'ring-1 ring-amber-300/60 dark:ring-amber-700/50' : ''}`}>
       <div className="flex items-start gap-3">
         <AvatarWithFrame src={author?.avatar_url} alt={authorName} size="md" to={authorHandle ? `/perfil/${authorHandle}` : undefined} frameRarity={authorFrame?.rarity ?? null} frameIcon={authorFrame?.icon ?? null} />
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <Link to={authorHandle ? `/perfil/${authorHandle}` : '#'} className="truncate font-semibold text-ink-900 hover:text-gold-600 dark:text-white dark:hover:text-gold-400">
               {authorName}
             </Link>
             {author?.medieval_rank && <RankBadge rank={author.medieval_rank as MedievalRank} size="xs" />}
+            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${typeMeta.bg} ${typeMeta.color}`}>
+              <typeMeta.icon className="h-3 w-3" /> {typeMeta.label}
+            </span>
             <span className="text-xs text-ink-400">· {timeAgo(post.created_at)}</span>
             {post.is_news && <span className="chip bg-gold-100 text-gold-700 dark:bg-gold-950 dark:text-gold-300">Noticia</span>}
             {isBoosted && <span className="chip bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300"><Rocket className="h-3 w-3" /> Destacada</span>}
@@ -172,12 +189,16 @@ export function PostCard({ post, author, onDeleted }: { post: PostWithAuthor; au
             </a>
           )}
           {post.media_urls?.length > 0 && (
-            <div className={`mt-3 grid gap-2 ${post.media_urls.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            <div className={`mt-3 grid gap-2 ${post.media_urls.length === 1 ? 'grid-cols-1' : post.media_urls.length === 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3'}`}>
               {post.media_urls.map((url, i) => (
                 post.type === 'video' ? (
-                  <video key={i} src={url} controls className="max-h-96 w-full rounded-xl bg-black" />
+                  <div key={i} className="group/video relative overflow-hidden rounded-xl bg-black">
+                    <video src={url} controls className="max-h-96 w-full object-cover" />
+                  </div>
                 ) : (
-                  <img key={i} src={url} alt="" className="max-h-96 w-full rounded-xl object-cover" />
+                  <div key={i} className="group/img relative aspect-square overflow-hidden rounded-xl bg-ink-100 dark:bg-ink-800 sm:aspect-auto">
+                    <img src={url} alt="" className="h-full max-h-96 w-full object-cover transition-transform duration-300 group-hover/img:scale-105" />
+                  </div>
                 )
               ))}
             </div>

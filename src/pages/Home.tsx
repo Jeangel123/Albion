@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Trophy, Calendar, Newspaper, Video, ImageIcon, Sparkles, Users, Shield, ScrollText, Crown, Swords, Landmark, Globe, MessageSquare, ArrowRight, Flame, TrendingUp, Castle } from 'lucide-react';
+import { Trophy, Calendar, Newspaper, Video, ImageIcon, Sparkles, Users, Shield, ScrollText, Crown, Swords, Landmark, Globe, MessageSquare, ArrowRight, Flame, TrendingUp, Castle, LayoutGrid, BookOpen, Flag } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { CreatePost } from '../components/CreatePost';
 import { PostCard } from '../components/PostCard';
@@ -15,6 +15,23 @@ import { RankBadge } from '../components/RankBadge';
 
 type PostWithAuthor = Post & { author: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'> };
 
+type FeedFilter = 'all' | 'videos' | 'images' | 'guilds' | 'events' | 'guides';
+
+type FeedItem =
+  | { kind: 'post'; data: PostWithAuthor; created_at: string }
+  | { kind: 'event'; data: AlbionEvent; created_at: string };
+
+const FILTERS: { key: FeedFilter; label: string; icon: typeof Trophy }[] = [
+  { key: 'all', label: 'Todo', icon: LayoutGrid },
+  { key: 'videos', label: 'Videos', icon: Video },
+  { key: 'images', label: 'Imágenes', icon: ImageIcon },
+  { key: 'guilds', label: 'Gremios', icon: Swords },
+  { key: 'events', label: 'Eventos', icon: Calendar },
+  { key: 'guides', label: 'Guías', icon: BookOpen },
+];
+
+const GUIDE_TAG_RE = /^(guia|guía|guide|tutorial|howto)$/i;
+
 export default function HomePage() {
   const { t } = useI18n();
   const { profile } = useAuth();
@@ -25,6 +42,7 @@ export default function HomePage() {
   const [images, setImages] = useState<string[]>([]);
   const [videos, setVideos] = useState<string[]>([]);
   const [feedTab, setFeedTab] = useState<'recent' | 'news'>('recent');
+  const [feedFilter, setFeedFilter] = useState<FeedFilter>('all');
   const [onlineCount, setOnlineCount] = useState<number | null>(null);
 
   useEffect(() => {
@@ -80,6 +98,34 @@ export default function HomePage() {
   useRealtime<Post>({ table: 'posts', onEvent: handlePostEvent });
 
   const displayedPosts = feedTab === 'news' ? news : posts;
+
+  // Build the unified feed: posts + events merged by date, then filtered
+  const feedItems: FeedItem[] = (() => {
+    if (!posts) return [];
+    const items: FeedItem[] = [];
+    if (feedTab === 'recent') {
+      posts.forEach((p) => items.push({ kind: 'post', data: p, created_at: p.created_at }));
+      if (events && feedFilter !== 'guides') {
+        events.forEach((ev) => items.push({ kind: 'event', data: ev, created_at: ev.start_time }));
+      }
+    } else if (news) {
+      news.forEach((p) => items.push({ kind: 'post', data: p, created_at: p.created_at }));
+    }
+    items.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+    return items.filter((item) => {
+      if (feedFilter === 'all') return true;
+      if (item.kind === 'event') return feedFilter === 'events';
+      const p = item.data;
+      switch (feedFilter) {
+        case 'videos': return p.type === 'video';
+        case 'images': return p.type === 'image';
+        case 'guilds': return !!p.guild_id;
+        case 'guides': return (p.tags ?? []).some((tag: string) => GUIDE_TAG_RE.test(tag));
+        default: return true;
+      }
+    });
+  })();
 
   return (
     <div className="container-app py-4 sm:py-6">
@@ -193,14 +239,25 @@ export default function HomePage() {
             <FeedTab active={feedTab === 'news'} onClick={() => setFeedTab('news')} icon={Newspaper} label="Noticias" />
           </div>
 
+          {/* Filter bar */}
+          <div className="flex flex-wrap items-center gap-1.5 pt-1">
+            {FILTERS.map((f) => (
+              <FilterChip key={f.key} active={feedFilter === f.key} onClick={() => setFeedFilter(f.key)} icon={f.icon} label={f.label} />
+            ))}
+          </div>
+
           {/* Feed */}
-          {!displayedPosts ? <Spinner /> : displayedPosts.length === 0 ? (
+          {posts === null ? <Spinner /> : feedItems.length === 0 ? (
             <div className="card p-8 text-center text-sm text-ink-500">
-              {feedTab === 'news' ? 'Sin noticias.' : 'Aún no hay publicaciones. ¡Sé el primero!'}
+              No hay contenido para este filtro.
             </div>
           ) : (
             <div className="space-y-3.5">
-              {displayedPosts.map((p) => <PostCard key={p.id} post={p} author={p.author} />)}
+              {feedItems.map((item) =>
+                item.kind === 'post'
+                  ? <PostCard key={`p-${item.data.id}`} post={item.data} author={item.data.author} />
+                  : <EventCard key={`e-${item.data.id}`} event={item.data} />
+              )}
             </div>
           )}
         </div>
@@ -358,6 +415,43 @@ function NavItem({ to, icon: Icon, label }: { to: string; icon: typeof Trophy; l
     <Link to={to} className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-ink-700 transition hover:bg-gold-50 hover:text-gold-600 dark:text-ink-200 dark:hover:bg-gold-950/30 dark:hover:text-gold-400">
       <Icon className="h-4 w-4 text-gold-500" />
       {label}
+    </Link>
+  );
+}
+
+function FilterChip({ active, onClick, icon: Icon, label }: { active: boolean; onClick: () => void; icon: typeof Trophy; label: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${active ? 'bg-gold-500 text-ink-950 shadow-sm' : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300 dark:hover:bg-ink-700'}`}
+    >
+      <Icon className="h-3.5 w-3.5" />
+      {label}
+    </button>
+  );
+}
+
+function EventCard({ event }: { event: AlbionEvent }) {
+  const et = EVENT_TYPES.find((x) => x.key === event.type);
+  return (
+    <Link to="/eventos" className="card card-hover block p-4 sm:p-5 animate-fade-in">
+      <div className="flex items-start gap-3">
+        <div className={`flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl text-white ${et?.color ?? 'bg-gold-500'}`}>
+          <Calendar className="h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="chip bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300"><Calendar className="h-3 w-3" /> Evento</span>
+            {et && <span className="text-xs text-ink-500">{et.label}</span>}
+          </div>
+          <h3 className="mt-1.5 font-display text-base font-semibold text-ink-900 dark:text-white">{event.title}</h3>
+          {event.description && <p className="mt-1 line-clamp-2 text-sm text-ink-600 dark:text-ink-300">{event.description}</p>}
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-500">
+            <span className="inline-flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {formatDateTime(event.start_time)}</span>
+            {event.location && <span className="inline-flex items-center gap-1"><Landmark className="h-3.5 w-3.5" /> {event.location}</span>}
+          </div>
+        </div>
+      </div>
     </Link>
   );
 }
