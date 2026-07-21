@@ -60,7 +60,7 @@ export default function CouncilPage() {
     const [{ data: sugs }, { data: votes }] = await Promise.all([
       supabase
         .from('suggestions')
-        .select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
+        .select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank, frame:user_frames!user_frames_user_id_fkey(is_equipped, frame:avatar_frames(rarity, icon)))')
         .order('vote_count', { ascending: false }),
       profile?.id
         ? supabase.from('suggestion_votes').select('suggestion_id').eq('user_id', profile.id)
@@ -84,7 +84,7 @@ export default function CouncilPage() {
       }
       supabase
         .from('suggestions')
-        .select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
+        .select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank, frame:user_frames!user_frames_user_id_fkey(is_equipped, frame:avatar_frames(rarity, icon)))')
         .eq('id', row.id)
         .maybeSingle()
         .then(({ data }) => {

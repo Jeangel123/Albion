@@ -35,7 +35,7 @@ export default function CommunityChatPage() {
       setCommunity(c as Community);
       const { data: msg } = await supabase
         .from('messages')
-        .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank, role, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
+        .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank, role, frame:user_frames!user_frames_user_id_fkey(is_equipped, frame:avatar_frames(rarity, icon)))')
         .eq('room_id', c.id)
         .order('created_at', { ascending: true })
         .limit(200);
@@ -50,7 +50,7 @@ export default function CommunityChatPage() {
     } else if (row?.id) {
       supabase
         .from('messages')
-        .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank, role, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
+        .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank, role, frame:user_frames!user_frames_user_id_fkey(is_equipped, frame:avatar_frames(rarity, icon)))')
         .eq('id', row.id)
         .maybeSingle()
         .then(({ data }) => { if (data) setMessages((list) => upsertById(list, data as MessageWithSender)); });

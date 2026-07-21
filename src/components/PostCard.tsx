@@ -83,17 +83,17 @@ export function PostCard({ post, author, onDeleted }: { post: PostWithAuthor; au
     const { error } = await supabase
       .from('reactions')
       .upsert({ post_id: post.id, user_id: profile.id, type }, { onConflict: 'post_id,user_id' });
-    if (!error) {
-      if (myReaction && myReaction !== type) {
-        // changed reaction, no count change
-        setMyReaction(type);
-      } else if (!myReaction) {
-        setMyReaction(type);
-        setLikeCount((c) => c + 1);
-      }
+    if (error) {
+      push({ type: 'error', message: `No se pudo reaccionar: ${error.message}` });
+      return;
+    }
+    if (myReaction && myReaction !== type) {
+      setMyReaction(type);
+    } else if (!myReaction) {
+      setMyReaction(type);
+      setLikeCount((c) => c + 1);
     }
   }
-
   async function toggleSave() {
     if (!profile) return push({ type: 'info', message: 'Inicia sesión para guardar' });
     if (saved) {
@@ -287,11 +287,15 @@ function CommentSection({ postId }: { postId: string }) {
     e.preventDefault();
     if (!profile) return push({ type: 'info', message: 'Inicia sesión para comentar' });
     if (!text.trim()) return;
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('comments')
       .insert({ post_id: postId, author_id: profile.id, content: text.trim() })
       .select('id, content, created_at, author:profiles(username, display_name, avatar_url)')
       .single();
+    if (error) {
+      push({ type: 'error', message: `No se pudo comentar: ${error.message}` });
+      return;
+    }
     if (data) {
       setComments((c) => [data, ...(c ?? [])]);
       setText('');

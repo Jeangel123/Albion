@@ -44,7 +44,7 @@ export default function CommunityDetailPage() {
         const [m] = await Promise.all([
           supabase
             .from('community_members')
-            .select('*, user:profiles(id, username, display_name, avatar_url, medieval_rank, role, frame:user_frames!user_frames(is_equipped, frame:avatar_frames(rarity, icon)))')
+            .select('*, user:profiles(id, username, display_name, avatar_url, medieval_rank, role, frame:user_frames!user_frames_user_id_fkey(is_equipped, frame:avatar_frames(rarity, icon)))')
             .eq('community_id', c.id)
             .order('joined_at', { ascending: false }),
         ]);
