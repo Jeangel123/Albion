@@ -76,7 +76,7 @@ export function useCommunities() {
         .from('community_members')
         .insert({ community_id: communityId, user_id: profile.id, role: 'member' });
       if (!error) {
-        await supabase.from('chat_room_members').insert({ room_id: communityId, user_id: profile.id });
+        await supabase.from('chat_room_members').upsert({ room_id: communityId, user_id: profile.id }, { onConflict: 'room_id,user_id' });
       }
       return { error: error?.message ?? null };
     },
