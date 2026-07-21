@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Trophy, Calendar, Newspaper, Video, ImageIcon, Sparkles, Users, Shield, ScrollText, Crown, Swords, Landmark, Globe, MessageSquare, ArrowRight, Flame, BookOpen } from 'lucide-react';
+import { Trophy, Calendar, Newspaper, Video, ImageIcon, Sparkles, Users, Shield, Swords, Landmark, Globe, ArrowRight, Flame, BookOpen } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { CreatePost } from '../components/CreatePost';
 import { PostCard } from '../components/PostCard';
 import { Stories } from '../components/Stories';
 import { SectionTitle, Spinner } from '../components/ui';
 import { useRealtime, upsertById, removeById } from '../lib/useRealtime';
-import { EVENT_TYPES, MEDIEVAL_RANKS, type Guild, type Post, type Profile, type AlbionEvent } from '../lib/types';
+import { EVENT_TYPES, type Guild, type Post, type Profile, type AlbionEvent } from '../lib/types';
 import { formatDateTime } from '../lib/format';
 import { useI18n } from '../lib/i18n';
 import { useAuth } from '../lib/auth';
@@ -79,8 +79,6 @@ export default function HomePage() {
   }, []);
   useRealtime<Post>({ table: 'posts', onEvent: handlePostEvent });
 
-  const displayedPosts = feedTab === 'news' ? news : posts;
-
   const feedItems: FeedItem[] = (() => {
     if (!posts) return [];
     const items: FeedItem[] = [];
@@ -110,31 +108,6 @@ export default function HomePage() {
 
   return (
     <div className="container-app py-4 sm:py-6">
-      {/* Hero — compact */}
-      <section className="relative mb-5 overflow-hidden rounded-3xl bg-gradient-to-br from-ink-900 via-ink-950 to-ink-900 p-6 sm:p-8">
-        <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 15% 20%, rgba(196,144,42,0.5), transparent 40%), radial-gradient(circle at 85% 80%, rgba(196,144,42,0.35), transparent 45%)' }} />
-        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-gold-500/10 blur-3xl float" />
-        <div className="relative flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <div className="max-w-xl">
-            <span className="chip bg-gold-500/15 text-gold-300 backdrop-blur animate-fade-in"><Sparkles className="h-3.5 w-3.5" /> {t('hero.badge')}</span>
-            <h1 className="mt-3 font-display text-2xl font-bold leading-tight text-white animate-slide-up sm:text-4xl">
-              {t('hero.title1')} <span className="text-gradient-gold">{t('hero.title2')}</span>
-            </h1>
-            <p className="mt-2 text-sm text-ink-200 animate-slide-up sm:text-base" style={{ animationDelay: '0.1s' }}>
-              {t('hero.desc')}
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2.5 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-              {profile ? (
-                <Link to={`/perfil/${profile.username}`} className="btn-primary text-sm">Mi perfil</Link>
-              ) : (
-                <Link to="/registro" className="btn-primary text-sm">{t('hero.cta1')}</Link>
-              )}
-              <Link to="/gremios" className="btn-outline border-gold-400/40 text-white hover:bg-white/10 text-sm">{t('hero.cta2')}</Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Stories bar */}
       <Stories />
 
