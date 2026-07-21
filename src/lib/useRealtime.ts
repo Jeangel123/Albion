@@ -61,10 +61,10 @@ export function useRealtime<T extends Row = Row>(opts: {
   }, [table, filter, events.join(',')]);
 }
 
-/** Upsert helper for array state: replace by id, or prepend. */
+/** Upsert helper for array state: replace by id, or append to end (chronological). */
 export function upsertById<T extends { id: string }>(list: T[], row: T): T[] {
   const idx = list.findIndex((x) => x.id === row.id);
-  if (idx === -1) return [row, ...list];
+  if (idx === -1) return [...list, row];
   const copy = [...list];
   copy[idx] = { ...copy[idx], ...row };
   return copy;

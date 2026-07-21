@@ -44,6 +44,8 @@ export function ChatPanel({ scope, currentUserId, canModerate, useFrames = false
   const filterCol = scope.kind === 'guild' ? 'guild_id' : 'room_id';
   const filter = `${filterCol}=eq.${scope.id}`;
 
+  const [loadError, setLoadError] = useState(false);
+
   const loadMessages = useCallback(async () => {
     const { data, error } = await supabase
       .from('messages')
@@ -51,7 +53,13 @@ export function ChatPanel({ scope, currentUserId, canModerate, useFrames = false
       .eq(filterCol, scope.id)
       .order('created_at', { ascending: true })
       .limit(200);
-    if (error) { console.error('[chat] load:', error.message); return; }
+    if (error) {
+      console.error('[chat] load:', error.message);
+      setLoadError(true);
+      setLoading(false);
+      return;
+    }
+    setLoadError(false);
     const msgs = (data ?? []) as unknown as ChatMessage[];
     // Load reactions for these messages
     const ids = msgs.map((m) => m.id);
@@ -79,8 +87,12 @@ export function ChatPanel({ scope, currentUserId, canModerate, useFrames = false
       last_read_message_id: lastMsg.id,
       last_read_at: new Date().toISOString(),
     };
-    await supabase.from('message_reads').upsert(readData, { onConflict: 'user_id,guild_id,room_id' });
-  }, [currentUserId, messages, scope.id, filterCol]);
+    // Use the correct partial unique index per scope:
+    // Global chat: (user_id, room_id) WHERE guild_id IS NULL
+    // Guild chat: (user_id, guild_id) WHERE room_id IS NULL
+    const onConflict = scope.kind === 'room' ? 'user_id,room_id' : 'user_id,guild_id';
+    await supabase.from('message_reads').upsert(readData, { onConflict });
+  }, [currentUserId, messages, scope.id, filterCol, scope.kind]);
 
   useEffect(() => { markRead(); }, [markRead]);
 
@@ -142,11 +154,28 @@ export function ChatPanel({ scope, currentUserId, canModerate, useFrames = false
         media_url: pendingImage,
       };
       if (replyTo) payload.reply_to = replyTo.id;
-      const { error } = await supabase.from('messages').insert(payload);
+      const { data: inserted, error } = await supabase.from('messages').insert(payload).select('id').single();
       if (error) {
         console.error('[chat] send:', error);
         push({ type: 'error', message: `No se pudo enviar: ${error.message}` });
         return;
+      }
+      // Optimistic update: add message to UI immediately with minimal sender info
+      if (inserted) {
+        const optimistic: ChatMessage = {
+          id: inserted.id,
+          sender_id: currentUserId,
+          content: content || null,
+          message_type: pendingImage ? 'image' : 'text',
+          media_url: pendingImage ?? null,
+          created_at: new Date().toISOString(),
+          room_id: scope.kind === 'room' ? scope.id : null,
+          guild_id: scope.kind === 'guild' ? scope.id : null,
+          reply_to: replyTo?.id ?? null,
+          sender: { id: currentUserId, username: '', display_name: '', avatar_url: null, medieval_rank: null, role: null },
+          reactions: [],
+        } as unknown as ChatMessage;
+        setMessages((list) => [...list, optimistic]);
       }
       setInput('');
       setPendingImage(null);
@@ -197,6 +226,11 @@ export function ChatPanel({ scope, currentUserId, canModerate, useFrames = false
       <div className="flex-1 space-y-3 overflow-y-auto p-4">
         {loading ? (
           <div className="flex h-full items-center justify-center text-sm text-ink-400">Cargando mensajes...</div>
+        ) : loadError ? (
+          <div className="flex h-full flex-col items-center justify-center gap-2 text-sm text-ink-400">
+            <p>No se pudieron cargar los mensajes.</p>
+            <button onClick={() => { setLoading(true); loadMessages(); }} className="btn-outline text-xs">Reintentar</button>
+          </div>
         ) : messages.length === 0 ? (
           <div className="flex h-full items-center justify-center text-sm text-ink-400">
             No hay mensajes aún. ¡Sé el primero en escribir!
