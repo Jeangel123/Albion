@@ -162,7 +162,7 @@ export function PostCard({ post, author, onDeleted }: { post: PostWithAuthor; au
         <AvatarWithFrame src={author?.avatar_url} alt={authorName} size="md" to={authorHandle ? `/perfil/${authorHandle}` : undefined} frameRarity={authorFrame?.rarity ?? null} frameIcon={authorFrame?.icon ?? null} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <Link to={authorHandle ? `/perfil/${authorHandle}` : '#'} className="truncate font-semibold text-ink-900 hover:text-gold-600 dark:text-white dark:hover:text-gold-400">
+            <Link to={authorHandle ? `/perfil/${authorHandle}` : '#'} className="truncate font-semibold text-ink-900 hover:text-blue-600 dark:text-white dark:hover:text-blue-400">
               {authorName}
             </Link>
             {author?.medieval_rank && <RankBadge rank={author.medieval_rank as MedievalRank} size="xs" />}
@@ -246,9 +246,9 @@ export function PostCard({ post, author, onDeleted }: { post: PostWithAuthor; au
         <div className="relative">
           <button
             onClick={() => profile && setReactionsOpen((p) => !p)}
-            className={`btn-ghost px-2.5 ${myReaction ? 'text-gold-600 dark:text-gold-400' : ''}`}
+            className={`btn-ghost px-2.5 ${myReaction ? 'text-blue-600 dark:text-blue-400' : ''}`}
           >
-            <Heart className={`h-4.5 w-4.5 ${myReaction ? 'fill-gold-500 text-gold-500' : ''}`} />
+            <Heart className={`h-4.5 w-4.5 ${myReaction ? 'fill-blue-500 text-blue-500' : ''}`} />
             <span className="text-xs">{likeCount}</span>
           </button>
           {reactionsOpen && (
@@ -273,7 +273,7 @@ export function PostCard({ post, author, onDeleted }: { post: PostWithAuthor; au
           <span className="text-xs">{shareCount}</span>
         </button>
         <button onClick={toggleSave} className="btn-ghost ml-auto px-2.5">
-          <Bookmark className={`h-4.5 w-4.5 ${saved ? 'fill-gold-500 text-gold-500' : ''}`} />
+          <Bookmark className={`h-4.5 w-4.5 ${saved ? 'fill-blue-500 text-blue-500' : ''}`} />
         </button>
       </div>
 

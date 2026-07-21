@@ -336,7 +336,7 @@ function SocialLink({ href, icon: Icon, label }: { href: string; icon: typeof Tw
 
 function TabBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button onClick={onClick} className={`px-4 py-2.5 text-sm font-medium transition ${active ? 'border-b-2 border-gold-500 text-gold-600 dark:text-gold-400' : 'text-ink-500 hover:text-ink-800 dark:hover:text-ink-200'}`}>
+    <button onClick={onClick} className={`px-4 py-2.5 text-sm font-medium transition ${active ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400' : 'text-ink-500 hover:text-ink-800 dark:hover:text-ink-200'}`}>
       {children}
     </button>
   );

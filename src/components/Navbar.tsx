@@ -80,7 +80,7 @@ export function Navbar() {
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder={t('nav.search') + "..."}
-                className="w-48 rounded-xl border border-ink-200 bg-ink-50 py-2 pl-9 pr-3 text-sm outline-none transition focus:border-gold-400 focus:bg-white dark:border-ink-700 dark:bg-ink-900 dark:focus:bg-ink-900 lg:w-56"
+                className="w-48 rounded-xl border border-ink-200 bg-ink-50 py-2 pl-9 pr-3 text-sm outline-none transition focus:border-blue-400 focus:bg-white dark:border-ink-700 dark:bg-ink-900 dark:focus:bg-ink-900 lg:w-56"
               />
             </div>
           </form>
@@ -95,7 +95,7 @@ export function Navbar() {
                   <NotificationDot />
                 </Link>
                 <div className="relative">
-                  <button onClick={() => setMenuOpen((p) => !p)} className="rounded-full ring-2 ring-transparent transition hover:ring-gold-400/50">
+                  <button onClick={() => setMenuOpen((p) => !p)} className="rounded-full ring-2 ring-transparent transition hover:ring-blue-400/50">
                     <Avatar src={profile?.avatar_url} alt={profile?.username ?? ''} size="sm" />
                   </button>
                   {menuOpen && (
@@ -159,7 +159,7 @@ export function Navbar() {
                     key={n.to}
                     to={n.to}
                     onClick={() => setOpen(false)}
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${active ? 'bg-gold-50 text-gold-600 dark:bg-gold-950/30 dark:text-gold-300' : 'text-ink-700 hover:bg-ink-100 dark:text-ink-200 dark:hover:bg-ink-800'}`}
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${active ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-300' : 'text-ink-700 hover:bg-ink-100 dark:text-ink-200 dark:hover:bg-ink-800'}`}
                   >
                     <n.icon className="h-4 w-4" /> {t(n.labelKey as any)}
                   </Link>
@@ -192,7 +192,7 @@ function QuickAccessBar({ items, session, isActive }: { items: typeof QUICK_ACCE
             <Link
               key={item.to}
               to={item.to}
-              className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${active ? 'bg-gold-500 text-ink-950 shadow-sm' : 'text-ink-600 hover:bg-gold-50 dark:text-ink-300 dark:hover:bg-gold-950/30'}`}
+              className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${active ? 'bg-blue-500 text-white shadow-sm' : 'text-ink-600 hover:bg-blue-50 dark:text-ink-300 dark:hover:bg-blue-950/30'}`}
             >
               <item.icon className="h-4 w-4" />
               {item.label}
@@ -220,7 +220,7 @@ function MobileBottomNav({ session, isActive }: { session: boolean; isActive: (t
             <Link
               key={item.to}
               to={item.to}
-              className={`flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1.5 text-[10px] font-medium transition ${active ? 'text-gold-600 dark:text-gold-400' : 'text-ink-500 dark:text-ink-400'}`}
+              className={`flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1.5 text-[10px] font-medium transition ${active ? 'text-blue-600 dark:text-blue-400' : 'text-ink-500 dark:text-ink-400'}`}
             >
               <item.icon className={`h-5 w-5 transition ${active ? 'scale-110' : ''}`} />
               {item.label}
@@ -228,7 +228,7 @@ function MobileBottomNav({ session, isActive }: { session: boolean; isActive: (t
           );
         })}
         {session ? (
-          <Link to="/notificaciones" className={`flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1.5 text-[10px] font-medium transition ${isActive('/notificaciones') ? 'text-gold-600 dark:text-gold-400' : 'text-ink-500 dark:text-ink-400'}`}>
+          <Link to="/notificaciones" className={`flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1.5 text-[10px] font-medium transition ${isActive('/notificaciones') ? 'text-blue-600 dark:text-blue-400' : 'text-ink-500 dark:text-ink-400'}`}>
             <div className="relative">
               <Bell className="h-5 w-5" />
               <NotificationDot />
@@ -236,7 +236,7 @@ function MobileBottomNav({ session, isActive }: { session: boolean; isActive: (t
             Avisos
           </Link>
         ) : (
-          <Link to="/login" className={`flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1.5 text-[10px] font-medium transition ${isActive('/login') ? 'text-gold-600 dark:text-gold-400' : 'text-ink-500 dark:text-ink-400'}`}>
+          <Link to="/login" className={`flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1.5 text-[10px] font-medium transition ${isActive('/login') ? 'text-blue-600 dark:text-blue-400' : 'text-ink-500 dark:text-ink-400'}`}>
             <UserIcon className="h-5 w-5" />
             Entrar
           </Link>

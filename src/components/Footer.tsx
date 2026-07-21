@@ -14,16 +14,16 @@ export function Footer() {
             {t('footer.tagline')}. {t('hero.desc')}
           </p>
           <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-ink-600 dark:text-ink-300">
-            <Link to="/gremios" className="hover:text-gold-600 dark:hover:text-gold-400">{t('nav.guilds')}</Link>
-            <Link to="/alianzas" className="hover:text-gold-600 dark:hover:text-gold-400">{t('nav.alliances')}</Link>
-            <Link to="/eventos" className="hover:text-gold-600 dark:hover:text-gold-400">{t('nav.events')}</Link>
-            <Link to="/ranking" className="hover:text-gold-600 dark:hover:text-gold-400">{t('nav.rankings')}</Link>
-            <Link to="/buscar" className="hover:text-gold-600 dark:hover:text-gold-400">{t('nav.search')}</Link>
-            <Link to="/reglas" className="hover:text-gold-600 dark:hover:text-gold-400">{t('nav.rules')}</Link>
-            <Link to="/ayuda" className="hover:text-gold-600 dark:hover:text-gold-400">{t('nav.help')}</Link>
-            <Link to="/privacidad" className="hover:text-gold-600 dark:hover:text-gold-400">{t('nav.privacy')}</Link>
-            <Link to="/terminos" className="hover:text-gold-600 dark:hover:text-gold-400">{t('nav.terms')}</Link>
-            <Link to="/contacto" className="hover:text-gold-600 dark:hover:text-gold-400">{t('nav.contact')}</Link>
+            <Link to="/gremios" className="hover:text-blue-600 dark:hover:text-blue-400">{t('nav.guilds')}</Link>
+            <Link to="/alianzas" className="hover:text-blue-600 dark:hover:text-blue-400">{t('nav.alliances')}</Link>
+            <Link to="/eventos" className="hover:text-blue-600 dark:hover:text-blue-400">{t('nav.events')}</Link>
+            <Link to="/ranking" className="hover:text-blue-600 dark:hover:text-blue-400">{t('nav.rankings')}</Link>
+            <Link to="/buscar" className="hover:text-blue-600 dark:hover:text-blue-400">{t('nav.search')}</Link>
+            <Link to="/reglas" className="hover:text-blue-600 dark:hover:text-blue-400">{t('nav.rules')}</Link>
+            <Link to="/ayuda" className="hover:text-blue-600 dark:hover:text-blue-400">{t('nav.help')}</Link>
+            <Link to="/privacidad" className="hover:text-blue-600 dark:hover:text-blue-400">{t('nav.privacy')}</Link>
+            <Link to="/terminos" className="hover:text-blue-600 dark:hover:text-blue-400">{t('nav.terms')}</Link>
+            <Link to="/contacto" className="hover:text-blue-600 dark:hover:text-blue-400">{t('nav.contact')}</Link>
           </nav>
           <div className="flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400">
             <Heart className="h-4 w-4 fill-gold-500 text-gold-500" />

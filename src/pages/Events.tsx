@@ -57,9 +57,9 @@ export default function EventsPage() {
       </div>
 
       <div className="mb-6 flex flex-wrap gap-1.5">
-        <button onClick={() => setFilter('all')} className={`chip ${filter === 'all' ? 'bg-gold-500 text-ink-950' : 'bg-ink-100 text-ink-600 dark:bg-ink-800 dark:text-ink-300'}`}>Todos</button>
+        <button onClick={() => setFilter('all')} className={`chip ${filter === 'all' ? 'bg-blue-500 text-white' : 'bg-ink-100 text-ink-600 dark:bg-ink-800 dark:text-ink-300'}`}>Todos</button>
         {EVENT_TYPES.map((t) => (
-          <button key={t.key} onClick={() => setFilter(t.key)} className={`chip ${filter === t.key ? 'bg-gold-500 text-ink-950' : 'bg-ink-100 text-ink-600 dark:bg-ink-800 dark:text-ink-300'}`}>
+          <button key={t.key} onClick={() => setFilter(t.key)} className={`chip ${filter === t.key ? 'bg-blue-500 text-white' : 'bg-ink-100 text-ink-600 dark:bg-ink-800 dark:text-ink-300'}`}>
             <span className={`h-2 w-2 rounded-full ${t.color}`} /> {t.label}
           </button>
         ))}

@@ -493,7 +493,7 @@ export const SUGGESTION_CATEGORIES: { key: SuggestionCategory; label: string; em
   { key: 'nueva_funcion', label: 'Nueva función', emoji: '✨' },
   { key: 'mejora_diseno', label: 'Mejora de diseño', emoji: '🎨' },
   { key: 'error_tecnico', label: 'Error técnico', emoji: '🐛' },
-  { key: 'idea_albion', label: 'Idea para Albion', emoji: '⚔️' },
+  { key: 'idea_albion', label: 'Idea para el juego', emoji: '⚔️' },
   { key: 'otro', label: 'Otro', emoji: '📜' },
 ];
 

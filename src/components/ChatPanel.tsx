@@ -328,7 +328,7 @@ export function ChatPanel({ scope, currentUserId, canModerate, useFrames = false
                       </div>
                     )}
                     {/* Bubble */}
-                    <div className={`relative inline-block rounded-2xl px-3 py-2 text-sm shadow-sm transition ${own ? 'rounded-tr-md' : 'rounded-tl-md'} ${founder ? 'founder-bubble text-sky-100' : own ? 'bg-gold-500 text-ink-950' : 'bg-ink-100 text-ink-800 dark:bg-ink-800 dark:text-ink-100'}`}>
+                    <div className={`relative inline-block rounded-2xl px-3 py-2 text-sm shadow-sm transition ${own ? 'rounded-tr-md' : 'rounded-tl-md'} ${founder ? 'founder-bubble text-sky-100' : own ? 'bg-blue-500 text-white' : 'bg-ink-100 text-ink-800 dark:bg-ink-800 dark:text-ink-100'}`}>
                       {/* Reply quote */}
                       {m.reply_to && (
                         <div className={`mb-1.5 border-l-2 pl-2 text-xs ${own ? 'border-ink-900/40 text-ink-900/70' : 'border-gold-500/60 text-ink-500 dark:text-ink-400'}`}>
@@ -418,7 +418,7 @@ export function ChatPanel({ scope, currentUserId, canModerate, useFrames = false
       {!atBottom && !loading && messages.length > 0 && (
         <button
           onClick={() => { setAtBottom(true); endRef.current?.scrollIntoView({ behavior: 'smooth' }); }}
-          className="absolute bottom-20 right-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-gold-500 text-ink-950 shadow-lg transition hover:bg-gold-400"
+          className="absolute bottom-20 right-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-blue-500 text-white shadow-lg transition hover:bg-blue-400"
           title="Ir al final"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>

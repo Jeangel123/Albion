@@ -146,8 +146,8 @@ export default function HomePage() {
               className="group relative flex items-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-r from-ink-900 to-ink-800 p-3.5 shadow-md transition hover:shadow-lg"
             >
               <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 10% 50%, rgba(196,144,42,0.4), transparent 50%)' }} />
-              <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold-500/20 ring-1 ring-gold-500/40 transition group-hover:scale-110">
-                <Globe className="h-5 w-5 text-gold-400" />
+              <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/20 ring-1 ring-blue-500/40 transition group-hover:scale-110">
+                <Globe className="h-5 w-5 text-blue-400" />
               </div>
               <div className="relative min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
@@ -158,7 +158,7 @@ export default function HomePage() {
                 </div>
                 <p className="truncate text-[11px] text-ink-300">Únete a la conversación</p>
               </div>
-              <ArrowRight className="relative h-4 w-4 shrink-0 text-gold-400 transition group-hover:translate-x-1" />
+              <ArrowRight className="relative h-4 w-4 shrink-0 text-blue-400 transition group-hover:translate-x-1" />
             </Link>
 
             {/* Featured guilds */}
@@ -169,7 +169,7 @@ export default function HomePage() {
               ) : (
                 <div className="space-y-2.5">
                   {guilds.map((g) => (
-                    <Link key={g.id} to={`/gremio/${g.slug}`} className="flex items-center gap-3 rounded-xl p-2 transition hover:bg-gold-50 dark:hover:bg-gold-950/30">
+                    <Link key={g.id} to={`/gremio/${g.slug}`} className="flex items-center gap-3 rounded-xl p-2 transition hover:bg-blue-50 dark:hover:bg-blue-950/30">
                       <div className="h-10 w-10 overflow-hidden rounded-lg bg-ink-200 dark:bg-ink-800">
                         {g.avatar_url ? <img src={g.avatar_url} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center font-display font-bold text-gold-500">{g.name[0]}</div>}
                       </div>
@@ -227,8 +227,8 @@ export default function HomePage() {
 
 function QuickLink({ to, icon: Icon, label }: { to: string; icon: typeof Trophy; label: string }) {
   return (
-    <Link to={to} className="flex flex-col items-center gap-1.5 rounded-xl p-2.5 text-center transition hover:bg-gold-50 hover:shadow-sm dark:hover:bg-gold-950/30">
-      <Icon className="h-5 w-5 text-gold-500 transition-transform hover:scale-110" />
+    <Link to={to} className="flex flex-col items-center gap-1.5 rounded-xl p-2.5 text-center transition hover:bg-blue-50 hover:shadow-sm dark:hover:bg-blue-950/30">
+      <Icon className="h-5 w-5 text-blue-500 transition-transform hover:scale-110" />
       <span className="text-xs font-medium">{label}</span>
     </Link>
   );
@@ -238,7 +238,7 @@ function FilterChip({ active, onClick, icon: Icon, label }: { active: boolean; o
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${active ? 'bg-gold-500 text-ink-950 shadow-sm' : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300 dark:hover:bg-ink-700'}`}
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${active ? 'bg-blue-500 text-white shadow-sm' : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300 dark:hover:bg-ink-700'}`}
     >
       <Icon className="h-3.5 w-3.5" />
       {label}
@@ -250,7 +250,7 @@ function FeedTab({ active, onClick, icon: Icon, label }: { active: boolean; onCl
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-semibold transition border-b-2 ${active ? 'border-gold-500 text-gold-600 dark:text-gold-400' : 'border-transparent text-ink-500 hover:text-ink-800 dark:hover:text-ink-200'}`}
+      className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-semibold transition border-b-2 ${active ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-ink-500 hover:text-ink-800 dark:hover:text-ink-200'}`}
     >
       <Icon className="h-4 w-4" />
       {label}

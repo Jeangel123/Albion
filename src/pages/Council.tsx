@@ -194,7 +194,7 @@ export default function CouncilPage() {
             <button
               key={c.key}
               onClick={() => setCategoryFilter(c.key)}
-              className={`chip transition ${categoryFilter === c.key ? 'bg-gold-500 text-ink-950 shadow-sm' : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300 dark:hover:bg-ink-700'}`}
+              className={`chip transition ${categoryFilter === c.key ? 'bg-blue-500 text-white shadow-sm' : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300 dark:hover:bg-ink-700'}`}
             >
               <span>{c.emoji}</span> {c.label}
             </button>
@@ -206,7 +206,7 @@ export default function CouncilPage() {
             <button
               key={s.key}
               onClick={() => setStatusFilter(s.key)}
-              className={`chip transition ${statusFilter === s.key ? 'bg-gold-500 text-ink-950 shadow-sm' : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300 dark:hover:bg-ink-700'}`}
+              className={`chip transition ${statusFilter === s.key ? 'bg-blue-500 text-white shadow-sm' : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300 dark:hover:bg-ink-700'}`}
             >
               <span>{s.emoji}</span> {s.label}
             </button>
@@ -215,13 +215,13 @@ export default function CouncilPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setSortBy('votos')}
-            className={`chip transition ${sortBy === 'votos' ? 'bg-gold-500 text-ink-950' : 'bg-ink-100 text-ink-600 dark:bg-ink-800 dark:text-ink-300'}`}
+            className={`chip transition ${sortBy === 'votos' ? 'bg-blue-500 text-white' : 'bg-ink-100 text-ink-600 dark:bg-ink-800 dark:text-ink-300'}`}
           >
             <TrendingUp className="h-3.5 w-3.5" /> Más votadas
           </button>
           <button
             onClick={() => setSortBy('recientes')}
-            className={`chip transition ${sortBy === 'recientes' ? 'bg-gold-500 text-ink-950' : 'bg-ink-100 text-ink-600 dark:bg-ink-800 dark:text-ink-300'}`}
+            className={`chip transition ${sortBy === 'recientes' ? 'bg-blue-500 text-white' : 'bg-ink-100 text-ink-600 dark:bg-ink-800 dark:text-ink-300'}`}
           >
             <Clock className="h-3.5 w-3.5" /> Recientes
           </button>
@@ -273,7 +273,7 @@ export default function CouncilPage() {
                   <button
                     onClick={() => toggleVote(s.id, s.author_id)}
                     disabled={voting === s.id}
-                    className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-semibold transition ${hasVoted ? 'bg-gold-500 text-ink-950 shadow-sm' : 'bg-ink-100 text-ink-600 hover:bg-gold-100 dark:bg-ink-800 dark:text-ink-300 dark:hover:bg-gold-950/40'}`}
+                    className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-semibold transition ${hasVoted ? 'bg-blue-500 text-white shadow-sm' : 'bg-ink-100 text-ink-600 hover:bg-blue-100 dark:bg-ink-800 dark:text-ink-300 dark:hover:bg-blue-950/40'}`}
                   >
                     {hasVoted ? <ChevronUp className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
                     {s.vote_count}
@@ -315,7 +315,7 @@ export default function CouncilPage() {
                       key={c.key}
                       type="button"
                       onClick={() => setCategory(c.key)}
-                      className={`chip transition ${category === c.key ? 'bg-gold-500 text-ink-950 shadow-sm' : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300'}`}
+                      className={`chip transition ${category === c.key ? 'bg-blue-500 text-white shadow-sm' : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300'}`}
                     >
                       {c.emoji} {c.label}
                     </button>

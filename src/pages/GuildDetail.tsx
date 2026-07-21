@@ -166,7 +166,7 @@ export default function GuildDetailPage() {
 
         <div className="mt-6 flex gap-1 border-b border-ink-200 dark:border-ink-800">
           {(['publicaciones', 'chat', 'galeria', 'videos', 'miembros'] as const).map((t) => (
-            <button key={t} onClick={() => setTab(t)} className={`px-4 py-2.5 text-sm font-medium capitalize transition ${tab === t ? 'border-b-2 border-gold-500 text-gold-600 dark:text-gold-400' : 'text-ink-500 hover:text-ink-800 dark:hover:text-ink-200'}`}>
+            <button key={t} onClick={() => setTab(t)} className={`px-4 py-2.5 text-sm font-medium capitalize transition ${tab === t ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400' : 'text-ink-500 hover:text-ink-800 dark:hover:text-ink-200'}`}>
               {t}
             </button>
           ))}
@@ -354,7 +354,7 @@ function ActivityFilterInline({ selected, onChange }: { selected: string[]; onCh
     <div className="flex flex-wrap gap-1.5">
       {ACTIVITIES.map((a) => (
         <button type="button" key={a} onClick={() => onChange(selected.includes(a) ? selected.filter((x) => x !== a) : [...selected, a])}
-          className={`chip transition ${selected.includes(a) ? 'bg-gold-500 text-ink-950' : 'bg-ink-100 text-ink-600 dark:bg-ink-800 dark:text-ink-300'}`}>
+          className={`chip transition ${selected.includes(a) ? 'bg-blue-500 text-white' : 'bg-ink-100 text-ink-600 dark:bg-ink-800 dark:text-ink-300'}`}>
           {a}
         </button>
       ))}
@@ -398,7 +398,7 @@ function GuildEditModal({ guild, onClose, onSaved }: { guild: Guild; onClose: ()
           <div className="flex flex-wrap gap-1.5">
             {ACTIVITIES.map((a) => (
               <button type="button" key={a} onClick={() => setActivities(activities.includes(a) ? activities.filter((x) => x !== a) : [...activities, a])}
-                className={`chip ${activities.includes(a) ? 'bg-gold-500 text-ink-950' : 'bg-ink-100 text-ink-600 dark:bg-ink-800 dark:text-ink-300'}`}>{a}</button>
+                className={`chip ${activities.includes(a) ? 'bg-blue-500 text-white' : 'bg-ink-100 text-ink-600 dark:bg-ink-800 dark:text-ink-300'}`}>{a}</button>
             ))}
           </div>
         </div>

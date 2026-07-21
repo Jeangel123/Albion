@@ -134,7 +134,7 @@ export function ImageUpload({
             accept="image/*"
             onChange={handleFile}
             disabled={uploading}
-            className="block w-full text-sm text-ink-500 file:mr-3 file:rounded-lg file:border-0 file:bg-gold-500 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white hover:file:bg-gold-600"
+            className="block w-full text-sm text-ink-500 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-500 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white hover:file:bg-blue-600"
           />
           <p className="mt-1 text-xs text-ink-400">PNG, JPG o WEBP — máx. 4MB</p>
         </div>

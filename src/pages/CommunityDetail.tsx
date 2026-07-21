@@ -137,7 +137,7 @@ export default function CommunityDetailPage() {
 
         <div className="mt-6 flex gap-1 border-b border-ink-200 dark:border-ink-800">
           {(['chat', 'miembros', 'info'] as const).map((t) => (
-            <button key={t} onClick={() => setTab(t)} className={`px-4 py-2.5 text-sm font-medium capitalize transition ${tab === t ? 'border-b-2 border-gold-500 text-gold-600 dark:text-gold-400' : 'text-ink-500 hover:text-ink-800 dark:hover:text-ink-200'}`}>
+            <button key={t} onClick={() => setTab(t)} className={`px-4 py-2.5 text-sm font-medium capitalize transition ${tab === t ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400' : 'text-ink-500 hover:text-ink-800 dark:hover:text-ink-200'}`}>
               {t === 'chat' ? 'Chat' : t === 'miembros' ? 'Miembros' : 'Info'}
             </button>
           ))}

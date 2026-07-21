@@ -18,6 +18,19 @@ export default {
           900: '#5d3c1f',
           950: '#36200d',
         },
+        blue: {
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
+          800: '#1e40af',
+          900: '#1e3a8a',
+          950: '#172554',
+        },
         ink: {
           50: '#f6f6f7',
           100: '#e2e2e6',
@@ -38,6 +51,7 @@ export default {
       },
       boxShadow: {
         gold: '0 0 0 1px rgba(196,144,42,0.35), 0 8px 30px -12px rgba(196,144,42,0.25)',
+        blue: '0 0 0 1px rgba(59,130,246,0.35), 0 8px 30px -12px rgba(59,130,246,0.25)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',

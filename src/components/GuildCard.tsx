@@ -67,7 +67,7 @@ export function ActivityFilter({ selected, onChange }: { selected: string[]; onC
         <button
           key={a}
           onClick={() => toggle(a)}
-          className={`chip transition ${selected.includes(a) ? 'bg-gold-500 text-ink-950 shadow-sm' : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300 dark:hover:bg-ink-700'}`}
+          className={`chip transition ${selected.includes(a) ? 'bg-blue-500 text-white shadow-sm' : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300 dark:hover:bg-ink-700'}`}
         >
           {a}
         </button>

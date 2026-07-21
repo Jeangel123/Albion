@@ -89,7 +89,7 @@ export default function SettingsPage() {
                 key={l.key}
                 type="button"
                 onClick={() => setForm({ ...form, language: l.key })}
-                className={`chip transition ${form.language === l.key ? 'bg-gold-500 text-ink-950 shadow-sm' : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300'}`}
+                className={`chip transition ${form.language === l.key ? 'bg-blue-500 text-white shadow-sm' : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300'}`}
               >
                 <span className="text-base">{l.flag}</span> {l.label}
               </button>

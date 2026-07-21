@@ -38,7 +38,7 @@ export default function CommunitiesPage() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-white">Comunidades</h1>
-          <p className="text-sm text-ink-500 dark:text-ink-400">Únete a comunidades de Albion por interés</p>
+          <p className="text-sm text-ink-500 dark:text-ink-400">Únete a comunidades por interés</p>
         </div>
         {profile && (
           <Link to="/comunidad/crear" className="btn-primary">
@@ -60,7 +60,7 @@ export default function CommunitiesPage() {
         <div className="flex flex-wrap gap-1.5">
           <button
             onClick={() => setCategory('')}
-            className={`chip transition ${category === '' ? 'bg-gold-500 text-ink-950' : 'bg-ink-100 text-ink-600 dark:bg-ink-800 dark:text-ink-300'}`}
+            className={`chip transition ${category === '' ? 'bg-blue-500 text-white' : 'bg-ink-100 text-ink-600 dark:bg-ink-800 dark:text-ink-300'}`}
           >
             Todas
           </button>
@@ -70,7 +70,7 @@ export default function CommunitiesPage() {
               <button
                 key={cat}
                 onClick={() => setCategory(category === cat ? '' : cat)}
-                className={`chip transition ${category === cat ? 'bg-gold-500 text-ink-950' : 'bg-ink-100 text-ink-600 dark:bg-ink-800 dark:text-ink-300'}`}
+                className={`chip transition ${category === cat ? 'bg-blue-500 text-white' : 'bg-ink-100 text-ink-600 dark:bg-ink-800 dark:text-ink-300'}`}
               >
                 {meta && <meta.icon className="mr-1 inline h-3 w-3" />}
                 {meta?.label ?? cat}

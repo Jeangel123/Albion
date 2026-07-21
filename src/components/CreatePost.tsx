@@ -71,7 +71,7 @@ export function CreatePost({ onCreated, guildId }: { onCreated?: () => void; gui
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="¿Qué estás haciendo en Albion?"
+            placeholder="¿Qué estás haciendo hoy?"
             rows={3}
             className="input resize-none"
           />

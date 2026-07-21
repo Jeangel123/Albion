@@ -2,7 +2,7 @@ import { ScrollText, Check, X } from 'lucide-react';
 import { Spinner } from '../components/ui';
 
 const ALLOWED = [
-  'Contenido relacionado con Albion Online y videojuegos',
+  'Contenido relacionado con videojuegos y la comunidad',
   'Arte, ilustraciones y creatividad de la comunidad',
   'Anime, fantasía y temática medieval',
   'Guías, tutoriales y debates constructivos',
@@ -17,7 +17,7 @@ const FORBIDDEN = [
   { label: 'Spam y publicidad no autorizada', emoji: '📨' },
   { label: 'Estafas o intentos de engaño', emoji: '🎭' },
   { label: 'Suplantación de identidad', emoji: '👤' },
-  { label: 'Contenido que viole los términos de Albion Online', emoji: '📋' },
+  { label: 'Contenido que viole los términos del juego', emoji: '📋' },
 ];
 
 const SANCTIONS_INFO = [
