@@ -364,7 +364,7 @@ export function ChatPanel({ scope, currentUserId, canModerate, useFrames = false
                             <button
                               key={type}
                               onClick={() => toggleReaction(m.id, type as ReactionType)}
-                              className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs transition ${mine ? 'bg-gold-100 text-gold-700 ring-1 ring-gold-400 dark:bg-gold-900/50 dark:text-gold-300 dark:ring-gold-700' : 'bg-ink-100 text-ink-600 dark:bg-ink-800 dark:text-ink-300'}`}
+                              className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs transition ${mine ? 'bg-blue-100 text-blue-700 ring-1 ring-blue-400 dark:bg-blue-900/50 dark:text-blue-300 dark:ring-blue-700' : 'bg-ink-100 text-ink-600 dark:bg-ink-800 dark:text-ink-300'}`}
                             >
                               <span className="text-sm">{emoji}</span>
                               <span className="font-medium">{reacts.length}</span>
@@ -375,7 +375,7 @@ export function ChatPanel({ scope, currentUserId, canModerate, useFrames = false
                     )}
                     {/* Action row */}
                     <div className={`mt-0.5 flex items-center gap-1 ${own ? 'justify-end' : ''} opacity-0 transition group-hover:opacity-100`}>
-                      <button onClick={() => startReply(m)} className="rounded p-1 text-ink-400 hover:bg-ink-100 hover:text-gold-500 dark:hover:bg-ink-800" title="Responder">
+                      <button onClick={() => startReply(m)} className="rounded p-1 text-ink-400 hover:bg-ink-100 hover:text-blue-500 dark:hover:bg-ink-800" title="Responder">
                         <Reply className="h-3 w-3" />
                       </button>
                       {canDelete && (
@@ -395,7 +395,7 @@ export function ChatPanel({ scope, currentUserId, canModerate, useFrames = false
                               <button
                                 key={r.key}
                                 onClick={() => toggleReaction(m.id, r.key)}
-                                className={`rounded-full p-1 text-xl transition hover:scale-125 ${mine ? 'ring-2 ring-gold-400' : ''}`}
+                                className={`rounded-full p-1 text-xl transition hover:scale-125 ${mine ? 'ring-2 ring-blue-400' : ''}`}
                                 title={r.label}
                               >
                                 {r.emoji}

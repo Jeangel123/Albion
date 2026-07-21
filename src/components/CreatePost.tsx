@@ -114,9 +114,9 @@ export function CreatePost({ onCreated, guildId }: { onCreated?: () => void; gui
           )}
           <div className="mt-2 flex flex-wrap gap-1.5">
             {tags.map((tag) => (
-              <span key={tag} className="inline-flex items-center gap-1 rounded-full bg-gold-50 px-2.5 py-1 text-xs text-gold-700 dark:bg-gold-950/30 dark:text-gold-300">
+              <span key={tag} className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs text-blue-700 dark:bg-blue-950/30 dark:text-blue-300">
                 #{tag}
-                <button type="button" onClick={() => setTags((t) => t.filter((x) => x !== tag))} className="text-gold-500 hover:text-gold-700">
+                <button type="button" onClick={() => setTags((t) => t.filter((x) => x !== tag))} className="text-blue-500 hover:text-blue-700">
                   <X className="h-3 w-3" />
                 </button>
               </span>
@@ -133,7 +133,7 @@ export function CreatePost({ onCreated, guildId }: { onCreated?: () => void; gui
                 }
               }}
               placeholder="Añadir etiqueta..."
-              className="flex-1 min-w-[120px] rounded-full border border-ink-200 bg-ink-50 px-3 py-1 text-xs outline-none focus:border-gold-400 dark:border-ink-700 dark:bg-ink-900"
+              className="flex-1 min-w-[120px] rounded-full border border-ink-200 bg-ink-50 px-3 py-1 text-xs outline-none focus:border-blue-400 dark:border-ink-700 dark:bg-ink-900"
             />
           </div>
           <div className="mt-3 flex items-center justify-between">
@@ -156,7 +156,7 @@ export function CreatePost({ onCreated, guildId }: { onCreated?: () => void; gui
 
 function TypeBtn({ active, onClick, icon: Icon, label }: { active: boolean; onClick: () => void; icon?: typeof Video; label?: string }) {
   return (
-    <button type="button" onClick={onClick} className={`rounded-lg p-2 transition ${active ? 'bg-gold-100 text-gold-700 dark:bg-gold-950 dark:text-gold-300' : 'text-ink-500 hover:bg-ink-100 dark:hover:bg-ink-800'}`}>
+    <button type="button" onClick={onClick} className={`rounded-lg p-2 transition ${active ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300' : 'text-ink-500 hover:bg-ink-100 dark:hover:bg-ink-800'}`}>
       {Icon ? <Icon className="h-4.5 w-4.5" /> : <span className="text-sm font-medium">{label}</span>}
     </button>
   );

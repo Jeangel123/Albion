@@ -27,7 +27,7 @@ export default function PostDetailPage() {
 
   return (
     <div className="container-app max-w-2xl py-6">
-      <Link to="/" className="mb-4 inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-gold-600"><ArrowLeft className="h-4 w-4" /> Volver</Link>
+      <Link to="/" className="mb-4 inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-blue-600"><ArrowLeft className="h-4 w-4" /> Volver</Link>
       <PostCard post={post} author={post.author} />
     </div>
   );

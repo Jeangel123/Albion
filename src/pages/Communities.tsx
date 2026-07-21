@@ -157,7 +157,7 @@ function CommunityCard({
       </div>
       <div className="p-4 pt-8">
         <Link to={`/comunidad/${community.slug}`}>
-          <h3 className="font-display text-lg font-semibold text-ink-900 hover:text-gold-600 dark:text-white">
+          <h3 className="font-display text-lg font-semibold text-ink-900 hover:text-blue-600 dark:text-white">
             {community.name}
           </h3>
         </Link>

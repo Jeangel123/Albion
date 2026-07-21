@@ -1,0 +1,1 @@
+import{j as r}from"./index-7TZxvuMl.js";import{C as s}from"./crown-Rd7sCWrb.js";function t({name:e,className:n=""}){return r.jsxs("span",{className:`founder-name inline-flex items-center gap-1 ${n}`,children:[r.jsx(s,{className:"h-3.5 w-3.5 text-sky-400 drop-shadow-[0_0_4px_rgba(0,200,255,0.8)]"}),e]})}function i(e){return e==="founder"}export{t as F,i};

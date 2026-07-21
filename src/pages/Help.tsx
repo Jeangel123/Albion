@@ -61,7 +61,7 @@ export default function HelpPage() {
               className="flex w-full items-center justify-between gap-3 p-4 text-left"
             >
               <span className="text-sm font-medium text-ink-900 dark:text-white">{item.q}</span>
-              <ChevronDown className={`h-4 w-4 shrink-0 text-gold-500 transition-transform ${open === i ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`h-4 w-4 shrink-0 text-blue-500 transition-transform ${open === i ? 'rotate-180' : ''}`} />
             </button>
             {open === i && (
               <div className="animate-fade-in px-4 pb-4 text-sm text-ink-600 dark:text-ink-300">

@@ -489,7 +489,7 @@ export default function AdminPage() {
                     )}
                     {canManageEconomy(profile.role) && (
                       <div className="flex gap-1">
-                        <button onClick={() => adjustUserCurrency(u, 'coins', 100)} className="btn-ghost text-xs text-gold-600" title="+100 monedas">+100🪙</button>
+                        <button onClick={() => adjustUserCurrency(u, 'coins', 100)} className="btn-ghost text-xs text-blue-600" title="+100 monedas">+100🪙</button>
                         <button onClick={() => adjustUserCurrency(u, 'coins', -100)} className="btn-ghost text-xs text-red-600" title="-100 monedas">-100🪙</button>
                         <button onClick={() => adjustUserCurrency(u, 'reputation', 50)} className="btn-ghost text-xs text-emerald-600" title="+50 rep">+50⚡</button>
                       </div>

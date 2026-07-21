@@ -131,7 +131,7 @@ export default function HomePage() {
               <div className="card-medieval p-4">
                 <div className="flex flex-col items-center text-center">
                   <Avatar src={profile.avatar_url} alt={profile.username} size="lg" to={`/perfil/${profile.username}`} />
-                  <Link to={`/perfil/${profile.username}`} className="mt-2 font-display text-sm font-semibold text-ink-900 hover:text-gold-600 dark:text-white dark:hover:text-gold-400">
+                  <Link to={`/perfil/${profile.username}`} className="mt-2 font-display text-sm font-semibold text-ink-900 hover:text-blue-600 dark:text-white dark:hover:text-blue-400">
                     {profile.display_name || profile.username}
                   </Link>
                   <p className="text-xs text-ink-500">@{profile.username}</p>

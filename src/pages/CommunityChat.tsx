@@ -107,7 +107,7 @@ export default function CommunityChatPage() {
   if (!joined) {
     return (
       <div className="container-app py-6">
-        <Link to={`/comunidad/${community.slug}`} className="mb-4 inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-gold-600">
+        <Link to={`/comunidad/${community.slug}`} className="mb-4 inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-blue-600">
           <ArrowLeft className="h-4 w-4" /> Volver a la comunidad
         </Link>
         <EmptyState icon={MessageSquare} title="Únete para chatear" hint="Necesitas ser miembro para ver y enviar mensajes." />
@@ -117,7 +117,7 @@ export default function CommunityChatPage() {
 
   return (
     <div className="container-app py-6">
-      <Link to={`/comunidad/${community.slug}`} className="mb-4 inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-gold-600">
+      <Link to={`/comunidad/${community.slug}`} className="mb-4 inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-blue-600">
         <ArrowLeft className="h-4 w-4" /> {community.name}
       </Link>
       <h1 className="mb-4 font-display text-2xl font-bold text-ink-900 dark:text-white">Chat de {community.name}</h1>

@@ -122,7 +122,7 @@ export function Stories() {
             <h2 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-ink-500">
               {t('stories.title')}
             </h2>
-            {uploading && <Loader2 className="h-3.5 w-3.5 animate-spin text-gold-500" />}
+            {uploading && <Loader2 className="h-3.5 w-3.5 animate-spin text-blue-500" />}
           </div>
           <div className="flex gap-3 overflow-x-auto pb-1.5 scrollbar-thin">
             {profile && (
@@ -130,10 +130,10 @@ export function Stories() {
                 <button
                   onClick={() => fileImgRef.current?.click()}
                   disabled={uploading}
-                  className="relative flex h-16 w-16 items-center justify-center rounded-full border-2 border-dashed border-gold-400 bg-gold-50 transition hover:bg-gold-100 disabled:opacity-50 dark:bg-gold-950/30 dark:hover:bg-gold-950/50"
+                  className="relative flex h-16 w-16 items-center justify-center rounded-full border-2 border-dashed border-blue-400 bg-blue-50 transition hover:bg-blue-100 disabled:opacity-50 dark:bg-blue-950/30 dark:hover:bg-blue-950/50"
                   title={t('stories.add')}
                 >
-                  {uploading ? <Loader2 className="h-5 w-5 animate-spin text-gold-500" /> : <Plus className="h-5 w-5 text-gold-500" />}
+                  {uploading ? <Loader2 className="h-5 w-5 animate-spin text-blue-500" /> : <Plus className="h-5 w-5 text-blue-500" />}
                 </button>
                 <span className="text-[10px] font-medium text-ink-600 dark:text-ink-300">{t('stories.yourStory')}</span>
               </div>

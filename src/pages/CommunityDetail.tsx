@@ -97,7 +97,7 @@ export default function CommunityDetailPage() {
     <div>
       <Banner src={community.banner_url} className="h-48 sm:h-64" />
       <div className="container-app -mt-16">
-        <Link to="/comunidades" className="mb-3 inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-gold-600">
+        <Link to="/comunidades" className="mb-3 inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-blue-600">
           <ArrowLeft className="h-4 w-4" /> Comunidades
         </Link>
         <div className="card p-5">

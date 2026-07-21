@@ -259,7 +259,7 @@ export default function ProfilePage() {
           )}
 
           {guild && (
-            <Link to={`/gremio/${guild.slug}`} className="mt-3 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-gold-100 to-gold-50 px-3 py-1.5 text-sm transition hover:shadow-sm dark:from-gold-950/40 dark:to-ink-900">
+            <Link to={`/gremio/${guild.slug}`} className="mt-3 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-100 to-blue-50 px-3 py-1.5 text-sm transition hover:shadow-sm dark:from-blue-950/40 dark:to-ink-900">
               <div className="h-5 w-5 overflow-hidden rounded bg-ink-300 dark:bg-ink-700">{guild.avatar_url && <img src={guild.avatar_url} alt="" className="h-full w-full object-cover" />}</div>
               {guild.name}
             </Link>
@@ -328,7 +328,7 @@ export default function ProfilePage() {
 
 function SocialLink({ href, icon: Icon, label }: { href: string; icon: typeof Twitch; label: string }) {
   return (
-    <a href={href} target="_blank" rel="noreferrer" className="chip bg-ink-100 text-ink-600 hover:bg-gold-100 hover:text-gold-700 dark:bg-ink-800 dark:text-ink-300 dark:hover:bg-gold-950 dark:hover:text-gold-300">
+    <a href={href} target="_blank" rel="noreferrer" className="chip bg-ink-100 text-ink-600 hover:bg-blue-100 hover:text-blue-700 dark:bg-ink-800 dark:text-ink-300 dark:hover:bg-blue-950 dark:hover:text-blue-300">
       <Icon className="h-3.5 w-3.5" /> {label}
     </a>
   );

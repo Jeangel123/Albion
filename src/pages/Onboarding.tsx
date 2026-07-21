@@ -51,8 +51,8 @@ export default function OnboardingPage() {
               onClick={() => toggle(opt.key)}
               className={`relative overflow-hidden rounded-2xl border-2 p-5 text-left transition-all ${
                 active
-                  ? 'border-gold-500 bg-gold-50 dark:bg-gold-950/30'
-                  : 'border-ink-200 hover:border-gold-300 dark:border-ink-700 dark:hover:border-gold-700'
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30'
+                  : 'border-ink-200 hover:border-blue-300 dark:border-ink-700 dark:hover:border-blue-700'
               }`}
             >
               <div className={`absolute inset-0 bg-gradient-to-br ${opt.color} opacity-5`} />
@@ -61,7 +61,7 @@ export default function OnboardingPage() {
                 <div className="flex-1">
                   <p className="font-display font-semibold text-ink-900 dark:text-white">{opt.label}</p>
                 </div>
-                {active && <Check className="h-5 w-5 text-gold-500" />}
+                {active && <Check className="h-5 w-5 text-blue-500" />}
               </div>
             </button>
           );

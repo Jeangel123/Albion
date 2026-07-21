@@ -27,7 +27,7 @@ export function SectionTitle({ title, action }: { title: string; action?: { to: 
     <div className="mb-4 flex items-center justify-between">
       <h2 className="font-display text-xl font-semibold text-ink-900 dark:text-white">{title}</h2>
       {action && (
-        <Link to={action.to} className="text-sm font-medium text-gold-600 hover:text-gold-500 dark:text-gold-400">
+        <Link to={action.to} className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400">
           {action.label} →
         </Link>
       )}

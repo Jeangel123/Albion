@@ -46,7 +46,7 @@ export function ReportModal({
                 key={c.key}
                 type="button"
                 onClick={() => setCategory(c.key)}
-                className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-2 text-xs font-medium transition ${category === c.key ? 'border-gold-500 bg-gold-50 text-gold-700 dark:bg-gold-950 dark:text-gold-300' : 'border-ink-200 text-ink-600 hover:border-ink-300 dark:border-ink-700 dark:text-ink-300'}`}
+                className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-2 text-xs font-medium transition ${category === c.key ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300' : 'border-ink-200 text-ink-600 hover:border-ink-300 dark:border-ink-700 dark:text-ink-300'}`}
               >
                 <span>{c.emoji}</span> {c.label}
               </button>
