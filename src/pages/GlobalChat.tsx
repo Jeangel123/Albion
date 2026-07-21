@@ -29,7 +29,7 @@ export default function GlobalChatPage() {
       if (mounted) setReady(true);
     })();
     return () => { mounted = false; };
-  }, [profile]);
+  }, [profile?.id]);
 
   const loadParticipants = useCallback(async () => {
     const { data } = await supabase

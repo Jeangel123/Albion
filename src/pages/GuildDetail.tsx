@@ -85,10 +85,13 @@ export default function GuildDetailPage() {
   async function join() {
     if (!profile) return navigate('/login');
     if (!guild) return;
-    await supabase.from('guild_members').insert({ guild_id: guild.id, user_id: profile.id, role: 'member' });
+    const { error } = await supabase.from('guild_members')
+      .upsert({ guild_id: guild.id, user_id: profile.id, role: 'member' }, { onConflict: 'guild_id,user_id' });
+    if (error) return push({ type: 'error', message: `No se pudo unir: ${error.message}` });
     await supabase.from('guilds').update({ member_count: guild.member_count + 1 }).eq('id', guild.id);
     await supabase.from('profiles').update({ guild_id: guild.id }).eq('id', profile.id);
     setIsMember(true);
+    setMembers((prev) => [...prev, { id: crypto.randomUUID(), guild_id: guild.id, user_id: profile.id, role: 'member', joined_at: new Date().toISOString(), user: profile } as any]);
     push({ type: 'success', message: 'Te uniste al gremio' });
   }
 
@@ -135,9 +138,12 @@ export default function GuildDetailPage() {
               {isMember ? (
                 <button onClick={leave} className="btn-outline">Salir</button>
               ) : (
-                (guild.apply_url || guild.discord_url) && (
-                  <a href={guild.apply_url || guild.discord_url || '#'} target="_blank" rel="noreferrer" className="btn-primary px-6 text-base"><ExternalLink className="h-4 w-4" /> Unirme</a>
-                )
+                <>
+                  <button onClick={join} className="btn-primary px-6 text-base">Unirme</button>
+                  {guild.apply_url && (
+                    <a href={guild.apply_url} target="_blank" rel="noreferrer" className="btn-outline"><ExternalLink className="h-4 w-4" /> Postular</a>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -272,7 +278,7 @@ export function CreateGuildPage() {
     }).select('id, slug').single();
     setLoading(false);
     if (error) return push({ type: 'error', message: error.message });
-    await supabase.from('guild_members').insert({ guild_id: data!.id, user_id: profile!.id, role: 'leader' });
+    await supabase.from('guild_members').upsert({ guild_id: data!.id, user_id: profile!.id, role: 'leader' }, { onConflict: 'guild_id,user_id' });
     push({ type: 'success', message: 'Gremio creado' });
     navigate(`/gremio/${data!.slug}`);
   }

@@ -160,22 +160,16 @@ export function ChatPanel({ scope, currentUserId, canModerate, useFrames = false
         push({ type: 'error', message: `No se pudo enviar: ${error.message}` });
         return;
       }
-      // Optimistic update: add message to UI immediately with minimal sender info
+      // Fetch the full message with sender info so it renders correctly immediately
       if (inserted) {
-        const optimistic: ChatMessage = {
-          id: inserted.id,
-          sender_id: currentUserId,
-          content: content || null,
-          message_type: pendingImage ? 'image' : 'text',
-          media_url: pendingImage ?? null,
-          created_at: new Date().toISOString(),
-          room_id: scope.kind === 'room' ? scope.id : null,
-          guild_id: scope.kind === 'guild' ? scope.id : null,
-          reply_to: replyTo?.id ?? null,
-          sender: { id: currentUserId, username: '', display_name: '', avatar_url: null, medieval_rank: null, role: null },
-          reactions: [],
-        } as unknown as ChatMessage;
-        setMessages((list) => [...list, optimistic]);
+        supabase
+          .from('messages')
+          .select('*, sender:profiles(id, username, display_name, avatar_url, medieval_rank, role, frame:user_frames!user_frames_user_id_fkey(is_equipped, frame:avatar_frames(rarity, icon)))')
+          .eq('id', inserted.id)
+          .maybeSingle()
+          .then(({ data: full }) => {
+            if (full) setMessages((list) => upsertById(list, full as ChatMessage));
+          });
       }
       setInput('');
       setPendingImage(null);
