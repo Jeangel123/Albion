@@ -305,6 +305,25 @@ export type MedievalRank =
 
 export type FrameRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic';
 
+export type StoryMediaType = 'image' | 'video';
+
+export type Story = {
+  id: string;
+  author_id: string;
+  community_id: string | null;
+  media_url: string;
+  media_type: StoryMediaType;
+  caption: string | null;
+  view_count: number;
+  expires_at: string;
+  created_at: string;
+};
+
+export type StoryWithAuthor = Story & {
+  author: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank'>;
+  community?: Pick<Community, 'id' | 'name' | 'slug' | 'avatar_url'> | null;
+};
+
 export type Community = {
   id: string;
   name: string;

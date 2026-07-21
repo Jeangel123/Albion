@@ -51,7 +51,10 @@ export type TranslationKey =
   | 'nav.chat' | 'nav.whispers' | 'nav.help' | 'nav.privacy' | 'nav.terms' | 'nav.contact'
   | 'chat.global.title' | 'chat.global.subtitle' | 'chat.global.participants'
   | 'chat.global.online' | 'chat.global.empty' | 'chat.global.loading'
-  | 'footer.tagline' | 'footer.rights';
+  | 'footer.tagline' | 'footer.rights'
+  | 'stories.title' | 'stories.add' | 'stories.upload' | 'stories.uploadImage' | 'stories.uploadVideo'
+  | 'stories.viewAll' | 'stories.empty' | 'stories.expired' | 'stories.yourStory'
+  | 'stories.community' | 'stories.close' | 'stories.views' | 'stories.delete';
 
 type Translations = Record<TranslationKey, string>;
 
@@ -237,6 +240,19 @@ export const es: Translations = {
   'nav.contact': 'Contacto',
   'footer.tagline': 'La red social de Albion Online',
   'footer.rights': 'Todos los derechos reservados',
+  'stories.title': 'Historias',
+  'stories.add': 'Añadir historia',
+  'stories.upload': 'Subir historia',
+  'stories.uploadImage': 'Subir imagen',
+  'stories.uploadVideo': 'Subir video',
+  'stories.viewAll': 'Ver todas',
+  'stories.empty': 'No hay historias activas',
+  'stories.expired': 'Historia expirada',
+  'stories.yourStory': 'Tu historia',
+  'stories.community': 'Comunidad',
+  'stories.close': 'Cerrar',
+  'stories.views': 'vistas',
+  'stories.delete': 'Eliminar historia',
 };
 
 export const en: Translations = {
@@ -421,6 +437,19 @@ export const en: Translations = {
   'nav.contact': 'Contact',
   'footer.tagline': 'The Albion Online social network',
   'footer.rights': 'All rights reserved',
+  'stories.title': 'Stories',
+  'stories.add': 'Add story',
+  'stories.upload': 'Upload story',
+  'stories.uploadImage': 'Upload image',
+  'stories.uploadVideo': 'Upload video',
+  'stories.viewAll': 'View all',
+  'stories.empty': 'No active stories',
+  'stories.expired': 'Story expired',
+  'stories.yourStory': 'Your story',
+  'stories.community': 'Community',
+  'stories.close': 'Close',
+  'stories.views': 'views',
+  'stories.delete': 'Delete story',
 };
 
 export const pt: Translations = {
@@ -605,6 +634,19 @@ export const pt: Translations = {
   'nav.contact': 'Contato',
   'footer.tagline': 'A rede social de Albion Online',
   'footer.rights': 'Todos os direitos reservados',
+  'stories.title': 'Histórias',
+  'stories.add': 'Adicionar história',
+  'stories.upload': 'Enviar história',
+  'stories.uploadImage': 'Enviar imagem',
+  'stories.uploadVideo': 'Enviar vídeo',
+  'stories.viewAll': 'Ver todas',
+  'stories.empty': 'Sem histórias ativas',
+  'stories.expired': 'História expirada',
+  'stories.yourStory': 'Sua história',
+  'stories.community': 'Comunidade',
+  'stories.close': 'Fechar',
+  'stories.views': 'visualizações',
+  'stories.delete': 'Excluir história',
 };
 
 export const translations: Record<Locale, Translations> = { es, en, pt };

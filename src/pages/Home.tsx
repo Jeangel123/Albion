@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Trophy, Calendar, Newspaper, Video, ImageIcon, Sparkles, Users, Shield, ScrollText, Crown, Swords, Landmark, Globe, MessageSquare, ArrowRight, Flame, TrendingUp, Castle, LayoutGrid, BookOpen, Flag } from 'lucide-react';
+import { Trophy, Calendar, Newspaper, Video, ImageIcon, Sparkles, Users, Shield, ScrollText, Crown, Swords, Landmark, Globe, MessageSquare, ArrowRight, Flame, BookOpen } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { CreatePost } from '../components/CreatePost';
 import { PostCard } from '../components/PostCard';
+import { Stories } from '../components/Stories';
 import { SectionTitle, Spinner } from '../components/ui';
 import { useRealtime, upsertById, removeById } from '../lib/useRealtime';
 import { EVENT_TYPES, MEDIEVAL_RANKS, type Guild, type Post, type Profile, type AlbionEvent } from '../lib/types';
@@ -22,7 +23,7 @@ type FeedItem =
   | { kind: 'event'; data: AlbionEvent; created_at: string };
 
 const FILTERS: { key: FeedFilter; label: string; icon: typeof Trophy }[] = [
-  { key: 'all', label: 'Todo', icon: LayoutGrid },
+  { key: 'all', label: 'Todo', icon: Sparkles },
   { key: 'videos', label: 'Videos', icon: Video },
   { key: 'images', label: 'Imágenes', icon: ImageIcon },
   { key: 'guilds', label: 'Gremios', icon: Swords },
@@ -39,20 +40,17 @@ export default function HomePage() {
   const [guilds, setGuilds] = useState<Guild[] | null>(null);
   const [news, setNews] = useState<PostWithAuthor[] | null>(null);
   const [events, setEvents] = useState<AlbionEvent[] | null>(null);
-  const [images, setImages] = useState<string[]>([]);
-  const [videos, setVideos] = useState<string[]>([]);
   const [feedTab, setFeedTab] = useState<'recent' | 'news'>('recent');
   const [feedFilter, setFeedFilter] = useState<FeedFilter>('all');
-  const [onlineCount, setOnlineCount] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
         const [postsRes, guildsRes, newsRes, eventsRes] = await Promise.all([
-          supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank)').order('created_at', { ascending: false }).limit(10),
-          supabase.from('guilds').select('*').eq('is_featured', true).limit(4),
+          supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank)').order('created_at', { ascending: false }).limit(15),
+          supabase.from('guilds').select('*').eq('is_featured', true).limit(3),
           supabase.from('posts').select('*, author:profiles(id, username, display_name, avatar_url, medieval_rank)').eq('is_news', true).order('created_at', { ascending: false }).limit(3),
-          supabase.from('events').select('*').gte('start_time', new Date().toISOString()).order('start_time', { ascending: true }).limit(5),
+          supabase.from('events').select('*').gte('start_time', new Date().toISOString()).order('start_time', { ascending: true }).limit(4),
         ]);
         if (postsRes.error) console.error('[home] posts:', postsRes.error.message);
         if (guildsRes.error) console.error('[home] guilds:', guildsRes.error.message);
@@ -62,15 +60,6 @@ export default function HomePage() {
         setGuilds(guildsRes.data ?? []);
         setNews(newsRes.data as PostWithAuthor[] ?? []);
         setEvents(eventsRes.data ?? []);
-
-        const [imgRes, vidRes] = await Promise.all([
-          supabase.from('posts').select('media_urls').eq('type', 'image').order('created_at', { ascending: false }).limit(8),
-          supabase.from('posts').select('media_urls').eq('type', 'video').order('created_at', { ascending: false }).limit(6),
-        ]);
-        if (imgRes.error) console.error('[home] images:', imgRes.error.message);
-        if (vidRes.error) console.error('[home] videos:', vidRes.error.message);
-        setImages((imgRes.data ?? []).flatMap((p: any) => p.media_urls ?? []));
-        setVideos((vidRes.data ?? []).flatMap((p: any) => p.media_urls ?? []));
       } catch (err) {
         console.error('[home] fatal:', err);
         setPosts([]); setGuilds([]); setNews([]); setEvents([]);
@@ -78,13 +67,6 @@ export default function HomePage() {
     })();
   }, []);
 
-  useEffect(() => {
-    supabase.from('profiles').select('id', { count: 'exact', head: true }).then(({ count }) => {
-      if (typeof count === 'number') setOnlineCount(count);
-    });
-  }, []);
-
-  // Live-sync posts feed (INSERT/UPDATE/DELETE)
   const handlePostEvent = useCallback(({ eventType, new: row, old: oldRow }: { eventType: 'INSERT' | 'UPDATE' | 'DELETE'; new: any; old: any }) => {
     if (eventType === 'DELETE' && oldRow?.id) {
       setPosts((list) => (list ? removeById(list, oldRow.id) : list));
@@ -99,7 +81,6 @@ export default function HomePage() {
 
   const displayedPosts = feedTab === 'news' ? news : posts;
 
-  // Build the unified feed: posts + events merged by date, then filtered
   const feedItems: FeedItem[] = (() => {
     if (!posts) return [];
     const items: FeedItem[] = [];
@@ -129,7 +110,7 @@ export default function HomePage() {
 
   return (
     <div className="container-app py-4 sm:py-6">
-      {/* Hero — compact, modern */}
+      {/* Hero — compact */}
       <section className="relative mb-5 overflow-hidden rounded-3xl bg-gradient-to-br from-ink-900 via-ink-950 to-ink-900 p-6 sm:p-8">
         <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 15% 20%, rgba(196,144,42,0.5), transparent 40%), radial-gradient(circle at 85% 80%, rgba(196,144,42,0.35), transparent 45%)' }} />
         <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-gold-500/10 blur-3xl float" />
@@ -151,85 +132,15 @@ export default function HomePage() {
               <Link to="/gremios" className="btn-outline border-gold-400/40 text-white hover:bg-white/10 text-sm">{t('hero.cta2')}</Link>
             </div>
           </div>
-          {/* Stats badges */}
-          {onlineCount !== null && (
-            <div className="hidden shrink-0 flex-col gap-2 sm:flex">
-              <div className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2.5 backdrop-blur">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20">
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-white">{onlineCount.toLocaleString('es')}</p>
-                  <p className="text-[10px] text-ink-300">miembros</p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </section>
 
-      {/* Quick access strip — chat, whispers, and key sections in a compact horizontal row */}
-      <section className="mb-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-6">
-        <QuickAccess to="/mensajes" icon={Globe} label="Chat Global" accent="text-gold-500" bg="bg-gold-500/10" />
-        {profile && <QuickAccess to="/whispers" icon={MessageSquare} label="Whispers" accent="text-purple-500" bg="bg-purple-500/10" />}
-        <QuickAccess to="/gremios" icon={Swords} label="Gremios" accent="text-red-500" bg="bg-red-500/10" />
-        <QuickAccess to="/alianzas" icon={Shield} label="Alianzas" accent="text-sky-500" bg="bg-sky-500/10" />
-        <QuickAccess to="/comunidades" icon={Castle} label="Comunidades" accent="text-blue-500" bg="bg-blue-500/10" />
-        <QuickAccess to="/eventos" icon={Calendar} label="Eventos" accent="text-emerald-500" bg="bg-emerald-500/10" />
-      </section>
+      {/* Stories bar */}
+      <Stories />
 
-      {/* Main content — 3-column modern social layout */}
-      <div className="grid gap-5 lg:grid-cols-[220px_1fr_320px]">
-        {/* Left rail — navigation + user card + rangos (desktop only) */}
-        <aside className="hidden lg:block">
-          <div className="sticky top-20 space-y-4">
-            {/* User mini-card */}
-            {profile && (
-              <div className="card-medieval p-4">
-                <div className="flex flex-col items-center text-center">
-                  <Avatar src={profile.avatar_url} alt={profile.username} size="lg" to={`/perfil/${profile.username}`} />
-                  <Link to={`/perfil/${profile.username}`} className="mt-2 font-display text-sm font-semibold text-ink-900 hover:text-gold-600 dark:text-white dark:hover:text-gold-400">
-                    {profile.display_name || profile.username}
-                  </Link>
-                  <p className="text-xs text-ink-500">@{profile.username}</p>
-                  {profile.medieval_rank && <div className="mt-1.5"><RankBadge rank={profile.medieval_rank as any} size="sm" /></div>}
-                </div>
-              </div>
-            )}
-
-            {/* Navigation shortcuts */}
-            <nav className="card p-2">
-              <NavItem to="/gremios" icon={Swords} label="Gremios" />
-              <NavItem to="/comunidades" icon={Castle} label="Comunidades" />
-              <NavItem to="/alianzas" icon={Shield} label="Alianzas" />
-              <NavItem to="/eventos" icon={Calendar} label="Eventos" />
-              <NavItem to="/ranking" icon={Crown} label="Ranking" />
-              <NavItem to="/consejo" icon={ScrollText} label="Consejo" />
-              {profile && <NavItem to="/mensajes" icon={Globe} label="Chat Global" />}
-              {profile && <NavItem to="/whispers" icon={MessageSquare} label="Whispers" />}
-            </nav>
-
-            {/* Rangos compacto */}
-            <div className="card p-3">
-              <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-ink-500">
-                <Trophy className="h-3.5 w-3.5 text-gold-500" /> Rangos
-              </p>
-              <div className="space-y-1.5">
-                {MEDIEVAL_RANKS.slice().reverse().slice(0, 5).map((r) => (
-                  <div key={r.key} className="flex items-center gap-2 rounded-lg px-2 py-1 transition hover:bg-gold-50 dark:hover:bg-gold-950/30">
-                    <span className="text-base">{r.emoji}</span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs font-medium text-ink-800 dark:text-ink-100">{r.label}</p>
-                      <p className="text-[10px] text-ink-400">{r.min_points} pts</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        {/* Center — Feed (the star) */}
+      {/* Main content — feed-centric layout */}
+      <div className="grid gap-5 lg:grid-cols-[1fr_300px]">
+        {/* Center — Feed (the protagonist) */}
         <div className="min-w-0 space-y-4">
           <CreatePost />
 
@@ -262,10 +173,24 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* Right rail — widgets */}
+        {/* Right rail — compact widgets */}
         <aside className="space-y-4">
-          <div className="sticky top-20 space-y-4">
-            {/* Chat Global CTA — compact */}
+          <div className="sticky top-32 space-y-4 lg:top-36">
+            {/* User mini-card */}
+            {profile && (
+              <div className="card-medieval p-4">
+                <div className="flex flex-col items-center text-center">
+                  <Avatar src={profile.avatar_url} alt={profile.username} size="lg" to={`/perfil/${profile.username}`} />
+                  <Link to={`/perfil/${profile.username}`} className="mt-2 font-display text-sm font-semibold text-ink-900 hover:text-gold-600 dark:text-white dark:hover:text-gold-400">
+                    {profile.display_name || profile.username}
+                  </Link>
+                  <p className="text-xs text-ink-500">@{profile.username}</p>
+                  {profile.medieval_rank && <div className="mt-1.5"><RankBadge rank={profile.medieval_rank as any} size="sm" /></div>}
+                </div>
+              </div>
+            )}
+
+            {/* Chat Global CTA */}
             <Link
               to="/mensajes"
               className="group relative flex items-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-r from-ink-900 to-ink-800 p-3.5 shadow-md transition hover:shadow-lg"
@@ -308,23 +233,6 @@ export default function HomePage() {
               )}
             </div>
 
-            {/* News */}
-            <div className="card p-4">
-              <SectionTitle title="Noticias" />
-              {!news ? <Spinner /> : news.length === 0 ? (
-                <p className="text-sm text-ink-500">Sin noticias.</p>
-              ) : (
-                <div className="space-y-2.5">
-                  {news.map((n) => (
-                    <Link key={n.id} to={`/publicacion/${n.id}`} className="block rounded-xl p-2 transition hover:bg-ink-100 dark:hover:bg-ink-800">
-                      <div className="flex items-center gap-1.5 text-xs text-gold-600 dark:text-gold-400"><Newspaper className="h-3.5 w-3.5" /> Noticia</div>
-                      <p className="mt-1 line-clamp-2 text-sm font-medium">{n.content}</p>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-
             {/* Events */}
             <div className="card p-4">
               <SectionTitle title="Próximos eventos" action={{ to: '/eventos', label: 'Calendario' }} />
@@ -348,32 +256,6 @@ export default function HomePage() {
               )}
             </div>
 
-            {/* Images */}
-            {images.length > 0 && (
-              <div className="card p-4">
-                <SectionTitle title="Imágenes" />
-                <div className="grid grid-cols-3 gap-1.5">
-                  {images.slice(0, 6).map((url, i) => (
-                    <div key={i} className="aspect-square overflow-hidden rounded-lg bg-ink-100 dark:bg-ink-800">
-                      <img src={url} alt="" className="h-full w-full object-cover transition hover:scale-110" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Videos */}
-            {videos.length > 0 && (
-              <div className="card p-4">
-                <SectionTitle title="Videos" />
-                <div className="space-y-2">
-                  {videos.slice(0, 3).map((url, i) => (
-                    <video key={i} src={url} controls className="w-full rounded-lg bg-black" />
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Quick links */}
             <div className="card-medieval p-3">
               <div className="grid grid-cols-2 gap-1.5">
@@ -386,6 +268,9 @@ export default function HomePage() {
           </div>
         </aside>
       </div>
+
+      {/* Bottom padding for mobile nav */}
+      <div className="h-16 lg:hidden" />
     </div>
   );
 }
@@ -395,26 +280,6 @@ function QuickLink({ to, icon: Icon, label }: { to: string; icon: typeof Trophy;
     <Link to={to} className="flex flex-col items-center gap-1.5 rounded-xl p-2.5 text-center transition hover:bg-gold-50 hover:shadow-sm dark:hover:bg-gold-950/30">
       <Icon className="h-5 w-5 text-gold-500 transition-transform hover:scale-110" />
       <span className="text-xs font-medium">{label}</span>
-    </Link>
-  );
-}
-
-function QuickAccess({ to, icon: Icon, label, accent, bg }: { to: string; icon: typeof Trophy; label: string; accent: string; bg: string }) {
-  return (
-    <Link to={to} className="card card-hover group flex flex-col items-center gap-1.5 p-3 text-center">
-      <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${bg} transition group-hover:scale-110`}>
-        <Icon className={`h-5 w-5 ${accent}`} />
-      </div>
-      <span className="text-xs font-semibold text-ink-800 dark:text-ink-100">{label}</span>
-    </Link>
-  );
-}
-
-function NavItem({ to, icon: Icon, label }: { to: string; icon: typeof Trophy; label: string }) {
-  return (
-    <Link to={to} className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-ink-700 transition hover:bg-gold-50 hover:text-gold-600 dark:text-ink-200 dark:hover:bg-gold-950/30 dark:hover:text-gold-400">
-      <Icon className="h-4 w-4 text-gold-500" />
-      {label}
     </Link>
   );
 }
