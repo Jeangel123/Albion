@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bell, Heart, MessageCircle, Share2, UserPlus, Calendar, CheckCheck } from 'lucide-react';
+import { Bell, Heart, MessageCircle, Share2, UserPlus, Calendar, CheckCheck, MessageSquare } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { useToast } from '../components/Toast';
@@ -12,7 +12,7 @@ import type { Notification, Profile } from '../lib/types';
 type NotifWithActor = Notification & { actor: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url'> | null };
 
 const ICONS: Record<string, typeof Bell> = {
-  comment: MessageCircle, reaction: Heart, share: Share2, follow: UserPlus, event: Calendar, message: MessageCircle, guild_invite: UserPlus,
+  comment: MessageCircle, reaction: Heart, share: Share2, follow: UserPlus, event: Calendar, message: MessageCircle, guild_invite: UserPlus, whisper: MessageSquare,
 };
 
 export default function NotificationsPage() {
@@ -59,11 +59,12 @@ export default function NotificationsPage() {
         <div className="card divide-y divide-ink-100 dark:divide-ink-800">
           {notifs.map((n) => {
             const Icon = ICONS[n.type] ?? Bell;
+            const linkTo = n.type === 'whisper' ? `/whispers/${n.target_id}` : n.target_type === 'post' ? `/publicacion/${n.target_id}` : n.target_type === 'profile' ? `/perfil/${n.actor?.username ?? ''}` : '/';
             return (
-              <Link key={n.id} to={n.target_type === 'post' ? `/publicacion/${n.target_id}` : n.target_type === 'profile' ? `/perfil/${n.actor?.username ?? ''}` : '/'} className={`flex items-center gap-3 p-4 hover:bg-ink-50 dark:hover:bg-ink-800/50 ${!n.is_read ? 'bg-gold-50 dark:bg-gold-950/20' : ''}`}>
+              <Link key={n.id} to={linkTo} className={`flex items-center gap-3 p-4 hover:bg-ink-50 dark:hover:bg-ink-800/50 ${!n.is_read ? (n.type === 'whisper' ? 'bg-purple-50 dark:bg-purple-950/20' : 'bg-gold-50 dark:bg-gold-950/20') : ''}`}>
                 <div className="relative">
                   <Avatar src={n.actor?.avatar_url} alt={n.actor?.username ?? ''} size="md" />
-                  <span className="absolute -bottom-1 -right-1 rounded-full bg-gold-500 p-1 text-ink-950"><Icon className="h-3 w-3" /></span>
+                  <span className={`absolute -bottom-1 -right-1 rounded-full p-1 text-ink-950 ${n.type === 'whisper' ? 'bg-purple-500' : 'bg-gold-500'}`}><Icon className="h-3 w-3" /></span>
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm text-ink-800 dark:text-ink-100">

@@ -18,6 +18,7 @@ const NAV = [
   { to: '/ranking', labelKey: 'nav.rankings', icon: Trophy },
   { to: '/consejo', labelKey: 'nav.council', icon: Lightbulb },
   { to: '/mensajes', labelKey: 'nav.chat', icon: Globe, authOnly: true },
+  { to: '/whispers', labelKey: 'nav.whispers', icon: MessageSquare, authOnly: true },
   { to: '/buscar', labelKey: 'nav.search', icon: Search },
 ];
 
@@ -75,8 +76,11 @@ export function Navbar() {
               <Link to="/notificaciones" className="relative rounded-lg p-2 text-ink-600 hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800">
                 <Bell className="h-5 w-5" />
               </Link>
-              <Link to="/mensajes" className="rounded-lg p-2 text-ink-600 hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800">
+              <Link to="/whispers" className="relative rounded-lg p-2 text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-950/30">
                 <MessageSquare className="h-5 w-5" />
+              </Link>
+              <Link to="/mensajes" className="rounded-lg p-2 text-ink-600 hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800">
+                <Globe className="h-5 w-5" />
               </Link>
               <div className="relative">
                 <button onClick={() => setMenuOpen((p) => !p)} className="rounded-full">

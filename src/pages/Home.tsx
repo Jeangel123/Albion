@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Trophy, Calendar, Newspaper, Video, ImageIcon, Sparkles, Users, Shield, ScrollText, Crown, Swords, Landmark } from 'lucide-react';
+import { Trophy, Calendar, Newspaper, Video, ImageIcon, Sparkles, Users, Shield, ScrollText, Crown, Swords, Landmark, Globe, MessageSquare, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { CreatePost } from '../components/CreatePost';
 import { PostCard } from '../components/PostCard';
@@ -95,6 +95,53 @@ export default function HomePage() {
             <Link to="/gremios" className="btn-outline border-gold-400/40 text-white hover:bg-white/10">{t('hero.cta2')}</Link>
           </div>
         </div>
+      </section>
+
+      {/* Chat Global CTA — visible bar, not hidden in hamburger */}
+      <section className="mb-6">
+        <Link
+          to="/mensajes"
+          className="group relative flex items-center gap-4 overflow-hidden rounded-2xl bg-gradient-to-r from-ink-900 via-ink-800 to-ink-900 p-4 shadow-lg transition hover:shadow-xl sm:p-5"
+        >
+          <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 10% 50%, rgba(196,144,42,0.4), transparent 50%)' }} />
+          <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gold-500/20 ring-1 ring-gold-500/40 transition group-hover:scale-110">
+            <Globe className="h-6 w-6 text-gold-400" />
+          </div>
+          <div className="relative min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <h2 className="font-display text-base font-bold text-white sm:text-lg">Chat Global</h2>
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" /> En vivo
+              </span>
+            </div>
+            <p className="truncate text-xs text-ink-300 sm:text-sm">Únete a la conversación del reino. Sé respetuoso y sigue las reglas.</p>
+          </div>
+          <ArrowRight className="relative h-5 w-5 shrink-0 text-gold-400 transition group-hover:translate-x-1" />
+        </Link>
+      </section>
+
+      {/* Quick chat actions — whispers + global, always visible */}
+      <section className="mb-8 grid gap-3 sm:grid-cols-2">
+        <Link to="/mensajes" className="card-medieval card-hover flex items-center gap-3 p-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gold-500/15">
+            <Globe className="h-5 w-5 text-gold-500" />
+          </div>
+          <div className="flex-1">
+            <p className="font-display text-sm font-semibold text-ink-900 dark:text-white">Chat Global</p>
+            <p className="text-xs text-ink-500">Conversación general del reino</p>
+          </div>
+        </Link>
+        {profile && (
+          <Link to="/whispers" className="card flex items-center gap-3 p-4" style={{ borderColor: 'rgb(217 181 229)', borderWidth: '1px' }}>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/15">
+              <MessageSquare className="h-5 w-5 text-purple-500" />
+            </div>
+            <div className="flex-1">
+              <p className="font-display text-sm font-semibold text-ink-900 dark:text-white">Whispers</p>
+              <p className="text-xs text-ink-500">Mensajes privados</p>
+            </div>
+          </Link>
+        )}
       </section>
 
       {/* Secciones destacadas del Imperio */}

@@ -49,6 +49,7 @@ const TermsPage = lazy(() => import('./pages/Terms'));
 const ContactPage = lazy(() => import('./pages/Contact'));
 const BetaTestGuidePage = lazy(() => import('./pages/BetaTestGuide'));
 const OnboardingPage = lazy(() => import('./pages/Onboarding'));
+const WhispersPage = lazy(() => import('./pages/Whispers'));
 
 function Protected({ children }: { children: ReactNode }) {
   const { session, loading } = useAuth();
@@ -106,6 +107,8 @@ export default function App() {
                             <Route path="/comunidad/:slug" element={<CommunityDetailPage />} />
                             <Route path="/comunidad/:slug/chat" element={<Protected><CommunityChatPage /></Protected>} />
                             <Route path="/mensajes" element={<Protected><GlobalChatPage /></Protected>} />
+                            <Route path="/whispers" element={<Protected><WhispersPage /></Protected>} />
+                            <Route path="/whispers/:username" element={<Protected><WhispersPage /></Protected>} />
                             <Route path="/tienda" element={<FrameShopPage />} />
                             <Route path="/monedero" element={<Protected><WalletPage /></Protected>} />
                             <Route path="/consejo" element={<CouncilPage />} />

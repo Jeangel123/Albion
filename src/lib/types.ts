@@ -149,6 +149,31 @@ export type CallSession = {
 
 export type ReactionType = 'like' | 'love' | 'haha' | 'wow' | 'sad' | 'angry';
 
+export type Whisper = {
+  id: string;
+  sender_id: string;
+  recipient_id: string;
+  content: string | null;
+  media_url: string | null;
+  reply_to: string | null;
+  read_at: string | null;
+  created_at: string;
+};
+
+export type WhisperReaction = {
+  id: string;
+  whisper_id: string;
+  user_id: string;
+  type: ReactionType;
+  created_at: string;
+};
+
+export type WhisperThread = {
+  partner: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'medieval_rank' | 'role'>;
+  lastMessage: Pick<Whisper, 'id' | 'content' | 'media_url' | 'created_at' | 'sender_id' | 'read_at'>;
+  unreadCount: number;
+};
+
 export type AlbionEvent = {
   id: string;
   guild_id: string | null;

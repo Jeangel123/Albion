@@ -48,7 +48,7 @@ export type TranslationKey =
   | 'toast.profileUpdated' | 'toast.suggestionCreated' | 'toast.voteAdded' | 'toast.voteRemoved'
   | 'toast.frameBought' | 'toast.frameClaimed' | 'toast.frameEquipped' | 'toast.frameUnequipped'
   | 'toast.insufficientBalance' | 'toast.alreadyOwned' | 'toast.error' | 'toast.success'
-  | 'nav.chat' | 'nav.help' | 'nav.privacy' | 'nav.terms' | 'nav.contact'
+  | 'nav.chat' | 'nav.whispers' | 'nav.help' | 'nav.privacy' | 'nav.terms' | 'nav.contact'
   | 'chat.global.title' | 'chat.global.subtitle' | 'chat.global.participants'
   | 'chat.global.online' | 'chat.global.empty' | 'chat.global.loading'
   | 'footer.tagline' | 'footer.rights';
@@ -224,6 +224,7 @@ export const es: Translations = {
   'toast.error': 'Error',
   'toast.success': 'Éxito',
   'nav.chat': 'Chat Global',
+  'nav.whispers': 'Whispers',
   'chat.global.title': 'Chat Global',
   'chat.global.subtitle': 'Comunidad general. Sé respetuoso y sigue las reglas de la plataforma.',
   'chat.global.participants': 'Participantes',
@@ -407,6 +408,7 @@ export const en: Translations = {
   'toast.error': 'Error',
   'toast.success': 'Success',
   'nav.chat': 'Global Chat',
+  'nav.whispers': 'Whispers',
   'chat.global.title': 'Global Chat',
   'chat.global.subtitle': 'General community. Be respectful and follow the platform rules.',
   'chat.global.participants': 'Participants',
@@ -590,6 +592,7 @@ export const pt: Translations = {
   'toast.error': 'Erro',
   'toast.success': 'Sucesso',
   'nav.chat': 'Chat Global',
+  'nav.whispers': 'Whispers',
   'chat.global.title': 'Chat Global',
   'chat.global.subtitle': 'Comunidade geral. Seja respeitoso e siga as regras da plataforma.',
   'chat.global.participants': 'Participantes',
